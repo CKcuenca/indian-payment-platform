@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { mgAuthMiddleware, successResponse, errorResponse } = require('../middleware/mgAuth');
 const SignatureUtil = require('../utils/signature');
-const Order = require('../models/Order');
-const Transaction = require('../models/Transaction');
+const Order = require('../models/order');
+const Transaction = require('../models/transaction');
 const { PaymentManager } = require('../services/payment-manager');
 
 /**

@@ -1,5 +1,5 @@
 const SignatureUtil = require('../utils/signature');
-const Merchant = require('../models/Merchant');
+const Merchant = require('../models/merchant');
 
 /**
  * MG支付标准认证中间件
