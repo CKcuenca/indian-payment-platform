@@ -1,0 +1,815 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box,
+  Typography,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  CircularProgress,
+  Alert,
+  Avatar,
+  Tooltip,
+  TextField,
+} from '@mui/material';
+import {
+  Visibility as VisibilityIcon,
+  AccountBalance as AccountBalanceIcon,
+  Business as BusinessIcon,
+  TrendingUp as TrendingUpIcon,
+  TrendingDown as TrendingDownIcon,
+  FileDownload as FileDownloadIcon,
+} from '@mui/icons-material';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { Transaction } from '../types';
+import { merchantService } from '../services/merchantService';
+import { formatAmount, formatDate as formatDateUtil } from '../utils/formatters';
+
+function Transactions() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [filters, setFilters] = useState<{ 
+    type: string; 
+    status: string; 
+    merchantId: string; 
+    providerName: string;
+    startDate: string;
+    endDate: string;
+    transactionId: string;
+  }>({
+    type: '',
+    status: '',
+    merchantId: '',
+    providerName: '',
+    startDate: '',
+    endDate: '',
+    transactionId: '',
+  });
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
+  const [merchants, setMerchants] = useState<Array<{ merchantId: string; name: string }>>([]);
+  const [providers, setProviders] = useState<Array<{ name: string; displayName: string }>>([]);
+
+  const fetchTransactions = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params: any = {
+        page: page + 1,
+        limit: rowsPerPage,
+      };
+      if (filters.type) params.type = filters.type;
+      if (filters.status) params.status = filters.status;
+      if (filters.merchantId) params.merchantId = filters.merchantId;
+      if (filters.providerName) params.providerName = filters.providerName;
+      if (filters.startDate) params.startDate = filters.startDate;
+      if (filters.endDate) params.endDate = filters.endDate;
+      if (filters.transactionId) params.transactionId = filters.transactionId;
+
+      const response = await merchantService.getTransactions(params);
+      setTransactions(response.data?.data || []);
+      setTotalPages(response.data?.pagination?.pages || 0);
+      setError(null);
+    } catch (err) {
+      setError('获取交易记录失败');
+      console.error('Error fetching transactions:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, rowsPerPage, filters]);
+
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
+
+  // 获取商户列表
+  const fetchMerchants = useCallback(async () => {
+    try {
+      // 模拟商户数据，实际应该从API获取
+      const merchantList = [
+        { merchantId: 'MERCH001', name: '游戏公司A' },
+        { merchantId: 'MERCH002', name: '游戏公司B' },
+        { merchantId: 'MERCH003', name: '游戏公司C' },
+        { merchantId: 'MERCH004', name: '游戏公司D' },
+        { merchantId: 'MERCH005', name: '游戏公司E' },
+      ];
+      setMerchants(merchantList);
+    } catch (err) {
+      console.error('获取商户列表失败:', err);
+    }
+  }, []);
+
+  // 获取支付商列表
+  const fetchProviders = useCallback(async () => {
+    try {
+      // 模拟支付商数据，实际应该从API获取
+      const providerList = [
+        { name: 'airpay', displayName: 'AirPay' },
+        { name: 'cashfree', displayName: 'Cashfree' },
+        { name: 'razorpay', displayName: 'Razorpay' },
+        { name: 'paytm', displayName: 'Paytm' },
+      ];
+      setProviders(providerList);
+    } catch (err) {
+      console.error('获取支付商列表失败:', err);
+    }
+  }, []);
+
+  // 初始化数据
+  useEffect(() => {
+    fetchMerchants();
+    fetchProviders();
+  }, [fetchMerchants, fetchProviders]);
+
+  const handlePageChange = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // 重置到第一页
+  };
+
+  const handleFilterChange = (field: string, value: string) => {
+    setFilters(prev => ({ ...prev, [field]: value }));
+    setPage(0);
+  };
+
+  const handleViewTransaction = (transaction: Transaction) => {
+    try {
+      console.log('Opening transaction details:', transaction);
+      setSelectedTransaction(transaction);
+      setDialogOpen(true);
+    } catch (error) {
+      console.error('Error opening transaction details:', error);
+      setError('打开详情失败');
+    }
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setSelectedTransaction(null);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'warning';
+      case 'SUCCESS': return 'success';
+      case 'FAILED': return 'error';
+      default: return 'default';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'PENDING': return '处理中';
+      case 'SUCCESS': return '成功';
+      case 'FAILED': return '失败';
+      default: return status;
+    }
+  };
+
+  const getOrderStatusText = (status: string) => {
+    switch (status) {
+      case 'PENDING': return '待支付';
+      case 'PROCESSING': return '处理中';
+      case 'SUCCESS': return '支付成功';
+      case 'FAILED': return '支付失败';
+      case 'CANCELLED': return '已取消';
+      default: return status;
+    }
+  };
+
+  const getOrderStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'warning';
+      case 'PROCESSING': return 'info';
+      case 'SUCCESS': return 'success';
+      case 'FAILED': return 'error';
+      case 'CANCELLED': return 'default';
+      default: return 'default';
+    }
+  };
+
+  const getTypeText = (type: string) => {
+    switch (type) {
+      case 'DEPOSIT': return '代收';
+      case 'WITHDRAWAL': return '代付';
+      case 'REFUND': return '退款';
+      case 'ADJUSTMENT': return '调整';
+      default: return type;
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'DEPOSIT': return <TrendingUpIcon color="success" />;
+      case 'WITHDRAWAL': return <TrendingDownIcon color="error" />;
+      case 'REFUND': return <TrendingUpIcon color="warning" />;
+      case 'ADJUSTMENT': return <TrendingUpIcon color="info" />;
+      default: return <TrendingUpIcon />;
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return formatAmount(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return formatDateUtil(dateString);
+  };
+
+  // 导出Excel功能
+  const handleExportExcel = async () => {
+    setExportLoading(true);
+    try {
+      // 获取所有交易数据（不分页）
+      const params: any = {
+        page: 1,
+        limit: 10000, // 获取大量数据
+      };
+      if (filters.type) params.type = filters.type;
+      if (filters.status) params.status = filters.status;
+      if (filters.merchantId) params.merchantId = filters.merchantId;
+      if (filters.providerName) params.providerName = filters.providerName;
+      if (filters.startDate) params.startDate = filters.startDate;
+      if (filters.endDate) params.endDate = filters.endDate;
+      if (filters.transactionId) params.transactionId = filters.transactionId;
+
+      const response = await merchantService.getTransactions(params);
+      const allTransactions = response.data?.data || [];
+
+      // 准备导出数据
+      const exportData = allTransactions.map((transaction: Transaction) => ({
+        '交易ID': transaction.transactionId,
+        '订单ID': transaction.orderId || '',
+        '商户ID': transaction.merchantId,
+        '交易类型': getTypeText(transaction.type),
+        '交易金额': transaction.amount,
+        '手续费': transaction.fee,
+        '净额': transaction.netAmount,
+        '货币': transaction.currency,
+        '余额变化': transaction.balanceChange,
+        '交易前余额': transaction.balanceSnapshot.before,
+        '交易后余额': transaction.balanceSnapshot.after,
+        '交易状态': getStatusText(transaction.status),
+        '支付商': transaction.provider?.name || '',
+        '支付商参考ID': transaction.provider?.refId || '',
+        'UPI ID': transaction.upiPayment?.upiId || '',
+        '手机号': transaction.upiPayment?.phoneNumber || '',
+        '账户名称': transaction.upiPayment?.accountName || '',
+        '银行名称': transaction.upiPayment?.bankName || '',
+        'IFSC代码': transaction.upiPayment?.ifscCode || '',
+        '账户号码': transaction.upiPayment?.accountNumber || '',
+        '收款账户': transaction.beneficiaryAccount || '',
+        '收款人姓名': transaction.beneficiaryName || '',
+        '创建时间': formatDate(transaction.createdAt),
+        '更新时间': formatDate(transaction.updatedAt),
+      }));
+
+      // 创建工作簿
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+      // 设置列宽
+      const columnWidths = [
+        { wch: 20 }, // 交易ID
+        { wch: 20 }, // 订单ID
+        { wch: 15 }, // 商户ID
+        { wch: 12 }, // 交易类型
+        { wch: 12 }, // 交易金额
+        { wch: 10 }, // 手续费
+        { wch: 12 }, // 净额
+        { wch: 8 },  // 货币
+        { wch: 12 }, // 余额变化
+        { wch: 12 }, // 交易前余额
+        { wch: 12 }, // 交易后余额
+        { wch: 12 }, // 交易状态
+        { wch: 12 }, // 支付商
+        { wch: 20 }, // 支付商参考ID
+        { wch: 20 }, // UPI ID
+        { wch: 15 }, // 手机号
+        { wch: 15 }, // 账户名称
+        { wch: 15 }, // 银行名称
+        { wch: 15 }, // IFSC代码
+        { wch: 15 }, // 账户号码
+        { wch: 20 }, // 收款账户
+        { wch: 15 }, // 收款人姓名
+        { wch: 20 }, // 创建时间
+        { wch: 20 }, // 更新时间
+      ];
+      worksheet['!cols'] = columnWidths;
+
+      // 添加工作表到工作簿
+      XLSX.utils.book_append_sheet(workbook, worksheet, '交易数据');
+
+      // 生成文件名
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      const fileName = `交易数据_${timestamp}.xlsx`;
+
+      // 导出文件
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, fileName);
+
+    } catch (err) {
+      console.error('导出失败:', err);
+      setError('导出失败，请重试');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  if (loading && transactions.length === 0) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <Typography 
+        variant="h4" 
+        gutterBottom
+        sx={{ 
+          color: 'primary.main',
+          fontWeight: 'bold',
+          mb: 3
+        }}
+      >
+        交易记录
+      </Typography>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
+      {/* 筛选器和导出按钮 */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        mb: 3
+      }}>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+        <TextField
+          label="交易ID搜索"
+          value={filters.transactionId}
+          onChange={(e) => handleFilterChange('transactionId', e.target.value)}
+          placeholder="输入交易ID"
+          size="small"
+          sx={{ 
+            minWidth: 200,
+            '& .MuiInputLabel-root': { fontSize: '0.875rem' },
+            '& .MuiInputBase-input': { fontSize: '0.875rem' }
+          }}
+        />
+        <FormControl sx={{ minWidth: 120 }}>
+          <InputLabel sx={{ fontSize: '0.875rem' }}>交易类型</InputLabel>
+          <Select
+            value={filters.type}
+            label="交易类型"
+            onChange={(e) => handleFilterChange('type', e.target.value)}
+            sx={{ 
+              '& .MuiSelect-select': { fontSize: '0.875rem' },
+              '& .MuiMenuItem-root': { fontSize: '0.875rem' }
+            }}
+          >
+            <MenuItem value="">全部</MenuItem>
+            <MenuItem value="DEPOSIT">代收</MenuItem>
+            <MenuItem value="WITHDRAWAL">代付</MenuItem>
+            <MenuItem value="REFUND">退款</MenuItem>
+            <MenuItem value="ADJUSTMENT">调整</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl sx={{ minWidth: 120 }}>
+          <InputLabel sx={{ fontSize: '0.875rem' }}>状态</InputLabel>
+          <Select
+            value={filters.status}
+            label="状态"
+            onChange={(e) => handleFilterChange('status', e.target.value)}
+            sx={{ 
+              '& .MuiSelect-select': { fontSize: '0.875rem' },
+              '& .MuiMenuItem-root': { fontSize: '0.875rem' }
+            }}
+          >
+            <MenuItem value="">全部</MenuItem>
+            <MenuItem value="PENDING">待支付</MenuItem>
+            <MenuItem value="PROCESSING">处理中</MenuItem>
+            <MenuItem value="SUCCESS">支付成功</MenuItem>
+            <MenuItem value="FAILED">支付失败</MenuItem>
+            <MenuItem value="CANCELLED">已取消</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl sx={{ minWidth: 150 }}>
+          <InputLabel sx={{ fontSize: '0.875rem' }}>选择商户</InputLabel>
+          <Select
+            value={filters.merchantId}
+            label="选择商户"
+            onChange={(e) => handleFilterChange('merchantId', e.target.value)}
+            sx={{ 
+              '& .MuiSelect-select': { fontSize: '0.875rem' },
+              '& .MuiMenuItem-root': { fontSize: '0.875rem' }
+            }}
+          >
+            <MenuItem value="">全部商户</MenuItem>
+            {merchants.map((merchant) => (
+              <MenuItem key={merchant.merchantId} value={merchant.merchantId}>
+                {merchant.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <FormControl sx={{ minWidth: 150 }}>
+          <InputLabel sx={{ fontSize: '0.875rem' }}>选择支付商</InputLabel>
+          <Select
+            value={filters.providerName}
+            label="选择支付商"
+            onChange={(e) => handleFilterChange('providerName', e.target.value)}
+            sx={{ 
+              '& .MuiSelect-select': { fontSize: '0.875rem' },
+              '& .MuiMenuItem-root': { fontSize: '0.875rem' }
+            }}
+          >
+            <MenuItem value="">全部支付商</MenuItem>
+            {providers.map((provider) => (
+              <MenuItem key={provider.name} value={provider.name}>
+                {provider.displayName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <TextField
+          label="开始日期"
+          type="date"
+          value={filters.startDate}
+          onChange={(e) => handleFilterChange('startDate', e.target.value)}
+          InputLabelProps={{
+            shrink: true,
+            sx: { fontSize: '0.875rem' }
+          }}
+          inputProps={{
+            sx: { fontSize: '0.875rem' }
+          }}
+          sx={{ minWidth: 150 }}
+        />
+
+        <TextField
+          label="结束日期"
+          type="date"
+          value={filters.endDate}
+          onChange={(e) => handleFilterChange('endDate', e.target.value)}
+          InputLabelProps={{
+            shrink: true,
+            sx: { fontSize: '0.875rem' }
+          }}
+          inputProps={{
+            sx: { fontSize: '0.875rem' }
+          }}
+          sx={{ minWidth: 150 }}
+        />
+        </Box>
+
+        <Button
+          variant="outlined"
+          startIcon={exportLoading ? <CircularProgress size={16} /> : <FileDownloadIcon />}
+          onClick={handleExportExcel}
+          disabled={exportLoading || transactions.length === 0}
+          sx={{ 
+            fontSize: '0.875rem',
+            '& .MuiButton-startIcon': { fontSize: '0.875rem' }
+          }}
+        >
+          {exportLoading ? '导出中...' : '导出'}
+        </Button>
+      </Box>
+
+      {/* 交易记录列表 */}
+      <TableContainer 
+        component={Paper} 
+        sx={{ 
+          borderRadius: 2,
+          overflow: 'hidden'
+        }}
+      >
+        <Table sx={{ minWidth: 650 }}>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: 'grey.100' }}>
+              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>交易ID</TableCell>
+              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>商户信息</TableCell>
+              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>支付账户</TableCell>
+              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>交易类型</TableCell>
+              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>金额</TableCell>
+              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>手续费</TableCell>
+              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>净额</TableCell>
+              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>余额变化</TableCell>
+              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>状态</TableCell>
+              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>创建时间</TableCell>
+              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>操作</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {transactions.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={11} align="center" sx={{ py: 4 }}>
+                  <Typography variant="body1" color="text.secondary">
+                    暂无记录
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              transactions.map((transaction) => (
+                <TableRow 
+                  key={transaction.transactionId}
+                  sx={{ 
+                    '&:hover': { 
+                      backgroundColor: 'action.hover',
+                      cursor: 'pointer'
+                    }
+                  }}
+                >
+                <TableCell>
+                  <Typography variant="body2" fontFamily="monospace">
+                    {transaction.transactionId}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.main' }}>
+                      <BusinessIcon sx={{ fontSize: 14 }} />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" fontWeight="medium">
+                        {transaction.merchantId}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        商户ID
+                      </Typography>
+                    </Box>
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Avatar sx={{ width: 24, height: 24, bgcolor: 'success.main' }}>
+                      <AccountBalanceIcon sx={{ fontSize: 14 }} />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" fontWeight="medium">
+                        {transaction.provider?.name || 'N/A'}
+                      </Typography>
+                      {transaction.provider?.refId && (
+                        <Typography variant="caption" color="text.secondary">
+                          {transaction.provider.refId}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {getTypeIcon(transaction.type)}
+                    <Chip
+                      label={getTypeText(transaction.type)}
+                      color={transaction.type === 'DEPOSIT' ? 'primary' : 'secondary'}
+                      size="small"
+                    />
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" fontWeight="medium">
+                    {formatCurrency(transaction.amount)}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="text.secondary">
+                    {formatCurrency(transaction.fee)}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" fontWeight="medium">
+                    {formatCurrency(transaction.netAmount)}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography 
+                    variant="body2" 
+                    fontWeight="medium"
+                    color={transaction.balanceChange >= 0 ? 'success.main' : 'error.main'}
+                  >
+                    {transaction.balanceChange >= 0 ? '+' : ''}{formatCurrency(transaction.balanceChange)}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    label={transaction.orderStatus ? getOrderStatusText(transaction.orderStatus) : getStatusText(transaction.status)}
+                    color={(transaction.orderStatus ? getOrderStatusColor(transaction.orderStatus) : getStatusColor(transaction.status)) as any}
+                    size="small"
+                  />
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2">
+                    {new Date(transaction.createdAt).toLocaleString('zh-CN')}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Tooltip title="查看详情">
+                    <Button
+                      size="small"
+                      startIcon={<VisibilityIcon />}
+                      onClick={() => handleViewTransaction(transaction)}
+                    >
+                      详情
+                    </Button>
+                  </Tooltip>
+                </TableCell>
+              </TableRow>
+            ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* 分页 */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        mt: 2,
+        p: 2,
+        backgroundColor: 'background.paper',
+        borderRadius: 1
+      }}>
+        <TablePagination
+          component="div"
+          count={totalPages * rowsPerPage}
+          page={page}
+          onPageChange={handlePageChange}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          rowsPerPageOptions={[10, 20, 50, 100]}
+          labelDisplayedRows={({ from, to, count }) => 
+            `${from}-${to} / ${count !== -1 ? count : `超过 ${to}`}`
+          }
+          labelRowsPerPage="每页行数:"
+          sx={{
+            '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+              fontSize: '0.875rem'
+            }
+          }}
+        />
+      </Box>
+
+      {/* 交易详情对话框 */}
+      <Dialog 
+        open={dialogOpen} 
+        onClose={handleCloseDialog} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            display: 'flex',
+            flexDirection: 'column',
+            maxHeight: '90vh',
+            overflow: 'hidden'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          borderBottom: 1,
+          borderColor: 'divider',
+          pb: 2,
+          flexShrink: 0,
+          backgroundColor: 'background.paper',
+          position: 'sticky',
+          top: 0,
+          zIndex: 1
+        }}>
+          <Typography variant="h6" component="div">
+            交易详情
+          </Typography>
+          <Button 
+            onClick={handleCloseDialog}
+            variant="outlined"
+            size="small"
+          >
+            关闭
+          </Button>
+        </DialogTitle>
+        <DialogContent sx={{ flex: 1, overflow: 'auto', p: 3 }}>
+          {selectedTransaction ? (
+            <Box sx={{ mt: 2 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
+                <Box>
+                  <Typography variant="h6" gutterBottom>基本信息</Typography>
+                  <Typography variant="body2"><strong>交易ID:</strong> {selectedTransaction.transactionId}</Typography>
+                  {selectedTransaction.orderId && (
+                    <Typography variant="body2"><strong>订单ID:</strong> {selectedTransaction.orderId}</Typography>
+                  )}
+                  <Typography variant="body2"><strong>商户ID:</strong> {selectedTransaction.merchantId}</Typography>
+                  <Typography variant="body2"><strong>交易类型:</strong> {getTypeText(selectedTransaction.type)}</Typography>
+                  <Typography variant="body2"><strong>状态:</strong> {selectedTransaction.orderStatus ? getOrderStatusText(selectedTransaction.orderStatus) : getStatusText(selectedTransaction.status)}</Typography>
+                  <Typography variant="body2"><strong>创建时间:</strong> {new Date(selectedTransaction.createdAt).toLocaleString('zh-CN')}</Typography>
+                </Box>
+                
+                <Box>
+                  <Typography variant="h6" gutterBottom>金额信息</Typography>
+                  <Typography variant="body2"><strong>交易金额:</strong> {formatCurrency(selectedTransaction.amount)}</Typography>
+                  <Typography variant="body2"><strong>手续费:</strong> {formatCurrency(selectedTransaction.fee)}</Typography>
+                  <Typography variant="body2"><strong>净额:</strong> {formatCurrency(selectedTransaction.netAmount)}</Typography>
+                  <Typography variant="body2"><strong>余额变化:</strong> 
+                    <span style={{ color: selectedTransaction.balanceChange >= 0 ? 'green' : 'red' }}>
+                      {selectedTransaction.balanceChange >= 0 ? '+' : ''}{formatCurrency(selectedTransaction.balanceChange)}
+                    </span>
+                  </Typography>
+                  <Typography variant="body2"><strong>货币:</strong> {selectedTransaction.currency}</Typography>
+                </Box>
+
+                <Box sx={{ gridColumn: '1 / -1' }}>
+                  <Typography variant="h6" gutterBottom>余额快照</Typography>
+                  <Typography variant="body2"><strong>交易前余额:</strong> {formatCurrency(selectedTransaction.balanceSnapshot.before)}</Typography>
+                  <Typography variant="body2"><strong>交易后余额:</strong> {formatCurrency(selectedTransaction.balanceSnapshot.after)}</Typography>
+                </Box>
+
+                {selectedTransaction.provider && (
+                  <Box sx={{ gridColumn: '1 / -1' }}>
+                    <Typography variant="h6" gutterBottom>支付信息</Typography>
+                    <Typography variant="body2"><strong>支付商:</strong> {selectedTransaction.provider.name}</Typography>
+                    {selectedTransaction.provider.refId && (
+                      <Typography variant="body2"><strong>支付商参考ID:</strong> {selectedTransaction.provider.refId}</Typography>
+                    )}
+                  </Box>
+                )}
+
+                {selectedTransaction.beneficiaryAccount && (
+                  <Box sx={{ gridColumn: '1 / -1' }}>
+                    <Typography variant="h6" gutterBottom>收款方信息</Typography>
+                    <Typography variant="body2"><strong>收款账户:</strong> {selectedTransaction.beneficiaryAccount}</Typography>
+                    {selectedTransaction.beneficiaryName && (
+                      <Typography variant="body2"><strong>收款人姓名:</strong> {selectedTransaction.beneficiaryName}</Typography>
+                    )}
+                  </Box>
+                )}
+
+                {selectedTransaction.upiPayment && (
+                  <Box sx={{ gridColumn: '1 / -1' }}>
+                    <Typography variant="h6" gutterBottom>UPI支付信息</Typography>
+                    <Typography variant="body2"><strong>UPI ID:</strong> {selectedTransaction.upiPayment.upiId}</Typography>
+                    <Typography variant="body2"><strong>手机号:</strong> {selectedTransaction.upiPayment.phoneNumber}</Typography>
+                    {selectedTransaction.upiPayment.accountName && (
+                      <Typography variant="body2"><strong>账户名称:</strong> {selectedTransaction.upiPayment.accountName}</Typography>
+                    )}
+                    {selectedTransaction.upiPayment.bankName && (
+                      <Typography variant="body2"><strong>银行名称:</strong> {selectedTransaction.upiPayment.bankName}</Typography>
+                    )}
+                    {selectedTransaction.upiPayment.ifscCode && (
+                      <Typography variant="body2"><strong>IFSC代码:</strong> {selectedTransaction.upiPayment.ifscCode}</Typography>
+                    )}
+                    {selectedTransaction.upiPayment.accountNumber && (
+                      <Typography variant="body2"><strong>账户号码:</strong> {selectedTransaction.upiPayment.accountNumber}</Typography>
+                    )}
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          ) : (
+            <Box sx={{ mt: 2, textAlign: 'center' }}>
+              <Typography variant="body1" color="text.secondary">
+                加载中...
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+      </Dialog>
+    </Box>
+  );
+}
+
+export default Transactions;

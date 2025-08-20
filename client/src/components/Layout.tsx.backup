@@ -1,0 +1,281 @@
+import React, { useState } from 'react';
+import {
+  AppBar,
+  Box,
+  CssBaseline,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  Typography,
+  Menu,
+  MenuItem,
+  Divider,
+  Chip,
+} from '@mui/material';
+import {
+  Menu as MenuIcon,
+  Dashboard,
+  People,
+  Receipt,
+  AccountBalance,
+  Settings,
+  Payment,
+  Monitor,
+  AccountCircle,
+  Logout,
+} from '@mui/icons-material';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { authService } from '../services/authService';
+import { PermissionGuard } from './PermissionGuard';
+import { Permission } from '../types';
+
+const drawerWidth = 240;
+
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const menuItems = [
+  {
+    text: '仪表板',
+    icon: <Dashboard />,
+    path: '/',
+    permissions: [] // 所有用户都可以访问
+  },
+  {
+    text: '商户管理',
+    icon: <People />,
+    path: '/merchants',
+    permissions: [Permission.VIEW_ALL_MERCHANTS]
+  },
+  {
+    text: '订单管理',
+    icon: <Receipt />,
+    path: '/orders',
+    permissions: [Permission.VIEW_ALL_ORDERS, Permission.VIEW_OWN_ORDERS]
+  },
+  {
+    text: '交易记录',
+    icon: <AccountBalance />,
+    path: '/transactions',
+    permissions: [Permission.VIEW_ALL_TRANSACTIONS, Permission.VIEW_OWN_TRANSACTIONS]
+  },
+  {
+    text: '支付配置',
+    icon: <Payment />,
+    path: '/payment-config',
+    permissions: [Permission.VIEW_PAYMENT_CONFIG]
+  },
+  {
+    text: '用户管理',
+    icon: <Settings />,
+    path: '/users',
+    permissions: [Permission.MANAGE_USERS]
+  },
+  {
+    text: '系统监控',
+  {
+    text: 'CashGit支付测试',
+    icon: <Api />,
+    path: '/cashgit-payment-test',
+    permissions: [Permission.SYSTEM_MONITORING]
+  },    icon: <Monitor />,
+    path: '/monitoring',
+    permissions: [Permission.SYSTEM_MONITORING]
+  }
+];
+
+export default function Layout({ children }: LayoutProps) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const currentUser = authService.getCurrentUser();
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
+
+  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleProfileMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    navigate('/login');
+    handleProfileMenuClose();
+  };
+
+  const handleProfile = () => {
+    navigate('/profile');
+    handleProfileMenuClose();
+  };
+
+  const drawer = (
+    <div>
+      <Toolbar>
+        <Typography variant="h6" noWrap component="div">
+          CashGit
+        </Typography>
+      </Toolbar>
+      <Divider />
+      <List>
+        {menuItems.map((item) => (
+          <PermissionGuard
+            key={item.path}
+            anyPermission={item.permissions}
+            fallback={null}
+          >
+            <ListItem disablePadding>
+              <ListItemButton
+                selected={location.pathname === item.path}
+                onClick={() => {
+                  navigate(item.path);
+                  setMobileOpen(false);
+                }}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText 
+                  primary={item.text} 
+                  sx={{ 
+                    '& .MuiListItemText-primary': {
+                      fontSize: '0.875rem' // 减小2号字体，从默认的1rem减小到0.875rem
+                    }
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </PermissionGuard>
+        ))}
+      </List>
+    </div>
+  );
+
+  return (
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
+      <AppBar
+        position="fixed"
+        sx={{
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          ml: { sm: `${drawerWidth}px` },
+        }}
+      >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { sm: 'none' } }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+            CashGit - Indian Payment Platform
+          </Typography>
+          
+          {currentUser && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Chip
+                label={authService.getRoleDisplayName()}
+                color="secondary"
+                size="small"
+              />
+              <Typography variant="body2" sx={{ color: 'white' }}>
+                {currentUser.username}
+              </Typography>
+              <IconButton
+                size="large"
+                edge="end"
+                aria-label="account of current user"
+                aria-controls="primary-search-account-menu"
+                aria-haspopup="true"
+                onClick={handleProfileMenuOpen}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+            </Box>
+          )}
+        </Toolbar>
+      </AppBar>
+
+      <Box
+        component="nav"
+        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        aria-label="mailbox folders"
+      >
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: 'block', sm: 'none' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          }}
+        >
+          {drawer}
+        </Drawer>
+        <Drawer
+          variant="permanent"
+          sx={{
+            display: { xs: 'none', sm: 'block' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          }}
+          open
+        >
+          {drawer}
+        </Drawer>
+      </Box>
+
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          p: 3,
+          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          mt: 8,
+        }}
+      >
+        {children}
+      </Box>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleProfileMenuClose}
+        onClick={handleProfileMenuClose}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        <MenuItem onClick={handleProfile}>
+          <ListItemIcon>
+            <AccountCircle fontSize="small" />
+          </ListItemIcon>
+          个人资料
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleLogout}>
+          <ListItemIcon>
+            <Logout fontSize="small" />
+          </ListItemIcon>
+          退出登录
+        </MenuItem>
+      </Menu>
+    </Box>
+  );
+}

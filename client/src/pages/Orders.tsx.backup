@@ -1,0 +1,717 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box,
+  Typography,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  CircularProgress,
+  Alert,
+  Avatar,
+  Tooltip,
+  Divider,
+} from '@mui/material';
+import {
+  Visibility as VisibilityIcon,
+  AccountBalance as AccountBalanceIcon,
+  Business as BusinessIcon,
+  Phone as PhoneIcon,
+  Payment as PaymentIcon,
+  SportsEsports as GameIcon,
+  FileDownload as FileDownloadIcon,
+} from '@mui/icons-material';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { Order } from '../types';
+import { merchantService } from '../services/merchantService';
+
+function Orders() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [filters, setFilters] = useState<{ type: string; status: string }>({
+    type: '',
+    status: '',
+  });
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [exportLoading, setExportLoading] = useState(false);
+
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params: any = {
+        page: page + 1,
+        limit: 10,
+      };
+      if (filters.type) params.type = filters.type;
+      if (filters.status) params.status = filters.status;
+
+      const response = await merchantService.getOrders(params);
+      setOrders(response.data?.data || []);
+      setTotalPages(response.data?.pagination?.pages || 0);
+      setError(null);
+    } catch (err) {
+      setError('获取订单列表失败');
+      console.error('Error fetching orders:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, filters]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  const handlePageChange = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleFilterChange = (field: string, value: string) => {
+    setFilters(prev => ({ ...prev, [field]: value }));
+    setPage(0);
+  };
+
+  const handleViewOrder = (order: Order) => {
+    setSelectedOrder(order);
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setSelectedOrder(null);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'warning';
+      case 'SUCCESS': return 'success';
+      case 'FAILED': return 'error';
+      case 'CANCELLED': return 'default';
+      default: return 'default';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'PENDING': return '待支付';
+      case 'SUCCESS': return '支付成功';
+      case 'FAILED': return '支付失败';
+      case 'CANCELLED': return '已取消';
+      default: return status;
+    }
+  };
+
+  const getTypeText = (type: string) => {
+    switch (type) {
+      case 'DEPOSIT': return '充值';
+      case 'WITHDRAWAL': return '提现';
+      default: return type;
+    }
+  };
+
+  const getGameTypeText = (gameType: string) => {
+    switch (gameType) {
+      case 'RUMMY': return 'Rummy';
+      case 'TEEN_PATTI': return 'Teen Patti';
+      case 'OTHER': return '其他';
+      default: return gameType;
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('zh-CN');
+  };
+
+  // 导出Excel功能
+  const handleExportExcel = async () => {
+    setExportLoading(true);
+    try {
+      // 获取所有订单数据（不分页）
+      const params: any = {
+        page: 1,
+        limit: 10000, // 获取大量数据
+      };
+      if (filters.type) params.type = filters.type;
+      if (filters.status) params.status = filters.status;
+
+      const response = await merchantService.getOrders(params);
+      const allOrders = response.data?.data || [];
+
+      // 准备导出数据
+      const exportData = allOrders.map((order: Order) => ({
+        '订单ID': order.orderId,
+        '商户ID': order.merchantId,
+        '订单类型': getTypeText(order.type),
+        '订单金额': order.amount,
+        '手续费': order.fee,
+        '净额': order.netAmount,
+        '货币': order.currency,
+        '订单状态': getStatusText(order.status),
+        '支付商': order.provider.name,
+        '支付商参考ID': order.provider.refId || '',
+        'UPI ID': order.upiPayment?.upiId || '',
+        '手机号': order.upiPayment?.phoneNumber || '',
+        '账户名称': order.upiPayment?.accountName || '',
+        '银行名称': order.upiPayment?.bankName || '',
+        'IFSC代码': order.upiPayment?.ifscCode || '',
+        '账户号码': order.upiPayment?.accountNumber || '',
+        '游戏订单ID': order.gameOrder?.gameOrderId || '',
+        '游戏名称': order.gameOrder?.gameName || '',
+        '游戏类型': order.gameOrder ? getGameTypeText(order.gameOrder.gameType) : '',
+        '玩家ID': order.gameOrder?.playerId || '',
+        '玩家名称': order.gameOrder?.playerName || '',
+        '牌桌ID': order.gameOrder?.tableId || '',
+        '房间ID': order.gameOrder?.roomId || '',
+        '下注金额': order.gameOrder?.betAmount || '',
+        '赢得金额': order.gameOrder?.winAmount || '',
+        '客户姓名': order.customer?.name || '',
+        '客户邮箱': order.customer?.email || '',
+        '客户电话': order.customer?.phone || '',
+        '返回URL': order.returnUrl,
+        '通知URL': order.notifyUrl || '',
+        '创建时间': formatDate(order.createdAt),
+        '更新时间': formatDate(order.updatedAt),
+      }));
+
+      // 创建工作簿
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+      // 设置列宽
+      const columnWidths = [
+        { wch: 20 }, // 订单ID
+        { wch: 15 }, // 商户ID
+        { wch: 10 }, // 订单类型
+        { wch: 12 }, // 订单金额
+        { wch: 10 }, // 手续费
+        { wch: 12 }, // 净额
+        { wch: 8 },  // 货币
+        { wch: 12 }, // 订单状态
+        { wch: 12 }, // 支付商
+        { wch: 20 }, // 支付商参考ID
+        { wch: 20 }, // UPI ID
+        { wch: 15 }, // 手机号
+        { wch: 15 }, // 账户名称
+        { wch: 15 }, // 银行名称
+        { wch: 15 }, // IFSC代码
+        { wch: 15 }, // 账户号码
+        { wch: 20 }, // 游戏订单ID
+        { wch: 15 }, // 游戏名称
+        { wch: 12 }, // 游戏类型
+        { wch: 15 }, // 玩家ID
+        { wch: 15 }, // 玩家名称
+        { wch: 15 }, // 牌桌ID
+        { wch: 15 }, // 房间ID
+        { wch: 12 }, // 下注金额
+        { wch: 12 }, // 赢得金额
+        { wch: 15 }, // 客户姓名
+        { wch: 25 }, // 客户邮箱
+        { wch: 15 }, // 客户电话
+        { wch: 30 }, // 返回URL
+        { wch: 30 }, // 通知URL
+        { wch: 20 }, // 创建时间
+        { wch: 20 }, // 更新时间
+      ];
+      worksheet['!cols'] = columnWidths;
+
+      // 添加工作表到工作簿
+      XLSX.utils.book_append_sheet(workbook, worksheet, '订单数据');
+
+      // 生成文件名
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      const fileName = `订单数据_${timestamp}.xlsx`;
+
+      // 导出文件
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, fileName);
+
+    } catch (err) {
+      console.error('导出失败:', err);
+      setError('导出失败，请重试');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  // 导出Excel功能
+  const handleExportExcel = async () => {
+    setExportLoading(true);
+    try {
+      // 获取所有订单数据（不分页）
+      const params: any = {
+        page: 1,
+        limit: 10000, // 获取大量数据
+      };
+      if (filters.type) params.type = filters.type;
+      if (filters.status) params.status = filters.status;
+
+      const response = await merchantService.getOrders(params);
+      const allOrders = response.data?.data || [];
+
+      // 准备导出数据
+      const exportData = allOrders.map((order: Order) => ({
+        '订单ID': order.orderId,
+        '商户ID': order.merchantId,
+        '订单类型': getTypeText(order.type),
+        '订单金额': order.amount,
+        '手续费': order.fee,
+        '净额': order.netAmount,
+        '货币': order.currency,
+        '订单状态': getStatusText(order.status),
+        '支付商': order.provider.name,
+        '支付商参考ID': order.provider.refId || '',
+        'UPI ID': order.upiPayment?.upiId || '',
+        '手机号': order.upiPayment?.phoneNumber || '',
+        '账户名称': order.upiPayment?.accountName || '',
+        '银行名称': order.upiPayment?.bankName || '',
+        'IFSC代码': order.upiPayment?.ifscCode || '',
+        '账户号码': order.upiPayment?.accountNumber || '',
+        '游戏订单ID': order.gameOrder?.gameOrderId || '',
+        '游戏名称': order.gameOrder?.gameName || '',
+        '游戏类型': order.gameOrder ? getGameTypeText(order.gameOrder.gameType) : '',
+        '玩家ID': order.gameOrder?.playerId || '',
+        '玩家名称': order.gameOrder?.playerName || '',
+        '牌桌ID': order.gameOrder?.tableId || '',
+        '房间ID': order.gameOrder?.roomId || '',
+        '下注金额': order.gameOrder?.betAmount || '',
+        '赢得金额': order.gameOrder?.winAmount || '',
+        '客户姓名': order.customer?.name || '',
+        '客户邮箱': order.customer?.email || '',
+        '客户电话': order.customer?.phone || '',
+        '返回URL': order.returnUrl,
+        '通知URL': order.notifyUrl || '',
+        '创建时间': formatDate(order.createdAt),
+        '更新时间': formatDate(order.updatedAt),
+      }));
+
+      // 创建工作簿
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+      // 设置列宽
+      const columnWidths = [
+        { wch: 20 }, // 订单ID
+        { wch: 15 }, // 商户ID
+        { wch: 10 }, // 订单类型
+        { wch: 12 }, // 订单金额
+        { wch: 10 }, // 手续费
+        { wch: 12 }, // 净额
+        { wch: 8 },  // 货币
+        { wch: 12 }, // 订单状态
+        { wch: 12 }, // 支付商
+        { wch: 20 }, // 支付商参考ID
+        { wch: 20 }, // UPI ID
+        { wch: 15 }, // 手机号
+        { wch: 15 }, // 账户名称
+        { wch: 15 }, // 银行名称
+        { wch: 15 }, // IFSC代码
+        { wch: 15 }, // 账户号码
+        { wch: 20 }, // 游戏订单ID
+        { wch: 15 }, // 游戏名称
+        { wch: 12 }, // 游戏类型
+        { wch: 15 }, // 玩家ID
+        { wch: 15 }, // 玩家名称
+        { wch: 15 }, // 牌桌ID
+        { wch: 15 }, // 房间ID
+        { wch: 12 }, // 下注金额
+        { wch: 12 }, // 赢得金额
+        { wch: 15 }, // 客户姓名
+        { wch: 25 }, // 客户邮箱
+        { wch: 15 }, // 客户电话
+        { wch: 30 }, // 返回URL
+        { wch: 30 }, // 通知URL
+        { wch: 20 }, // 创建时间
+        { wch: 20 }, // 更新时间
+      ];
+      worksheet['!cols'] = columnWidths;
+
+      // 添加工作表到工作簿
+      XLSX.utils.book_append_sheet(workbook, worksheet, '订单数据');
+
+      // 生成文件名
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      const fileName = `订单数据_${timestamp}.xlsx`;
+
+      // 导出文件
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, fileName);
+
+    } catch (err) {
+      console.error('导出失败:', err);
+      setError('导出失败，请重试');
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
+  if (loading && orders.length === 0) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" gutterBottom>
+        订单管理
+      </Typography>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
+
+      {/* 筛选器和导出按钮 */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <FormControl sx={{ minWidth: 120 }}>
+            <InputLabel>订单类型</InputLabel>
+            <Select
+              value={filters.type}
+              label="订单类型"
+              onChange={(e) => handleFilterChange('type', e.target.value)}
+            >
+              <MenuItem value="">全部</MenuItem>
+              <MenuItem value="DEPOSIT">充值</MenuItem>
+              <MenuItem value="WITHDRAWAL">提现</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl sx={{ minWidth: 120 }}>
+            <InputLabel>订单状态</InputLabel>
+            <Select
+              value={filters.status}
+              label="订单状态"
+              onChange={(e) => handleFilterChange('status', e.target.value)}
+            >
+              <MenuItem value="">全部</MenuItem>
+              <MenuItem value="PENDING">待支付</MenuItem>
+              <MenuItem value="SUCCESS">支付成功</MenuItem>
+              <MenuItem value="FAILED">支付失败</MenuItem>
+              <MenuItem value="CANCELLED">已取消</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+
+        <Button
+          variant="outlined"
+          startIcon={exportLoading ? <CircularProgress size={16} /> : <FileDownloadIcon />}
+          onClick={handleExportExcel}
+          disabled={exportLoading || orders.length === 0}
+        >
+          {exportLoading ? '导出中...' : '导出Excel'}
+        </Button>
+      </Box>
+
+      {/* 订单列表 */}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>订单ID</TableCell>
+              <TableCell>商户信息</TableCell>
+              <TableCell>支付账户</TableCell>
+              <TableCell>UPI信息</TableCell>
+              <TableCell>游戏信息</TableCell>
+              <TableCell>订单类型</TableCell>
+              <TableCell>金额</TableCell>
+              <TableCell>手续费</TableCell>
+              <TableCell>净额</TableCell>
+              <TableCell>状态</TableCell>
+              <TableCell>创建时间</TableCell>
+              <TableCell>操作</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {orders.map((order) => (
+              <TableRow key={order.orderId}>
+                <TableCell>
+                  <Typography variant="body2" fontFamily="monospace">
+                    {order.orderId}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.main' }}>
+                      <BusinessIcon sx={{ fontSize: 14 }} />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" fontWeight="medium">
+                        {order.merchantId}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        商户ID
+                      </Typography>
+                    </Box>
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Avatar sx={{ width: 24, height: 24, bgcolor: 'success.main' }}>
+                      <AccountBalanceIcon sx={{ fontSize: 14 }} />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" fontWeight="medium">
+                        {order.provider.name}
+                      </Typography>
+                      {order.provider.refId && (
+                        <Typography variant="caption" color="text.secondary">
+                          {order.provider.refId}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  {order.upiPayment ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Avatar sx={{ width: 24, height: 24, bgcolor: 'info.main' }}>
+                        <PaymentIcon sx={{ fontSize: 14 }} />
+                      </Avatar>
+                      <Box>
+                        <Typography variant="body2" fontWeight="medium">
+                          {order.upiPayment.upiId}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {order.upiPayment.phoneNumber}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      无UPI信息
+                    </Typography>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {order.gameOrder ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Avatar sx={{ width: 24, height: 24, bgcolor: 'warning.main' }}>
+                        <GameIcon sx={{ fontSize: 14 }} />
+                      </Avatar>
+                      <Box>
+                        <Typography variant="body2" fontWeight="medium">
+                          {order.gameOrder.gameName}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {getGameTypeText(order.gameOrder.gameType)}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      非游戏订单
+                    </Typography>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    label={getTypeText(order.type)}
+                    color={order.type === 'DEPOSIT' ? 'primary' : 'secondary'}
+                    size="small"
+                  />
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" fontWeight="medium">
+                    {formatCurrency(order.amount)}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" color="text.secondary">
+                    {formatCurrency(order.fee)}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2" fontWeight="medium">
+                    {formatCurrency(order.netAmount)}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    label={getStatusText(order.status)}
+                    color={getStatusColor(order.status) as any}
+                    size="small"
+                  />
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body2">
+                    {new Date(order.createdAt).toLocaleString('zh-CN')}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Tooltip title="查看详情">
+                    <Button
+                      size="small"
+                      startIcon={<VisibilityIcon />}
+                      onClick={() => handleViewOrder(order)}
+                    >
+                      详情
+                    </Button>
+                  </Tooltip>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* 分页 */}
+      <TablePagination
+        component="div"
+        count={totalPages * 10}
+        page={page}
+        onPageChange={handlePageChange}
+        rowsPerPage={10}
+        rowsPerPageOptions={[10]}
+        labelDisplayedRows={({ from, to, count }) => 
+          `${from}-${to} / ${count !== -1 ? count : `超过 ${to}`}`
+        }
+      />
+
+      {/* 订单详情对话框 */}
+      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="lg" fullWidth>
+        <DialogTitle>订单详情</DialogTitle>
+        <DialogContent>
+          {selectedOrder && (
+            <Box sx={{ mt: 2 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3 }}>
+                <Box>
+                  <Typography variant="h6" gutterBottom>基本信息</Typography>
+                  <Typography variant="body2"><strong>订单ID:</strong> {selectedOrder.orderId}</Typography>
+                  <Typography variant="body2"><strong>商户ID:</strong> {selectedOrder.merchantId}</Typography>
+                  <Typography variant="body2"><strong>订单类型:</strong> {getTypeText(selectedOrder.type)}</Typography>
+                  <Typography variant="body2"><strong>状态:</strong> {getStatusText(selectedOrder.status)}</Typography>
+                  <Typography variant="body2"><strong>创建时间:</strong> {new Date(selectedOrder.createdAt).toLocaleString('zh-CN')}</Typography>
+                  <Typography variant="body2"><strong>更新时间:</strong> {new Date(selectedOrder.updatedAt).toLocaleString('zh-CN')}</Typography>
+                </Box>
+                
+                <Box>
+                  <Typography variant="h6" gutterBottom>金额信息</Typography>
+                  <Typography variant="body2"><strong>订单金额:</strong> {formatCurrency(selectedOrder.amount)}</Typography>
+                  <Typography variant="body2"><strong>手续费:</strong> {formatCurrency(selectedOrder.fee)}</Typography>
+                  <Typography variant="body2"><strong>净额:</strong> {formatCurrency(selectedOrder.netAmount)}</Typography>
+                  <Typography variant="body2"><strong>货币:</strong> {selectedOrder.currency}</Typography>
+                </Box>
+
+                <Box sx={{ gridColumn: '1 / -1' }}>
+                  <Divider sx={{ my: 2 }} />
+                  <Typography variant="h6" gutterBottom>支付信息</Typography>
+                  <Typography variant="body2"><strong>支付商:</strong> {selectedOrder.provider.name}</Typography>
+                  {selectedOrder.provider.refId && (
+                    <Typography variant="body2"><strong>支付商参考ID:</strong> {selectedOrder.provider.refId}</Typography>
+                  )}
+                  <Typography variant="body2"><strong>返回URL:</strong> {selectedOrder.returnUrl}</Typography>
+                  {selectedOrder.notifyUrl && (
+                    <Typography variant="body2"><strong>通知URL:</strong> {selectedOrder.notifyUrl}</Typography>
+                  )}
+                </Box>
+
+                {selectedOrder.upiPayment && (
+                  <Box sx={{ gridColumn: '1 / -1' }}>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="h6" gutterBottom>UPI支付信息</Typography>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                      <Typography variant="body2"><strong>UPI ID:</strong> {selectedOrder.upiPayment.upiId}</Typography>
+                      <Typography variant="body2"><strong>手机号:</strong> {selectedOrder.upiPayment.phoneNumber}</Typography>
+                      {selectedOrder.upiPayment.accountName && (
+                        <Typography variant="body2"><strong>账户名称:</strong> {selectedOrder.upiPayment.accountName}</Typography>
+                      )}
+                      {selectedOrder.upiPayment.bankName && (
+                        <Typography variant="body2"><strong>银行名称:</strong> {selectedOrder.upiPayment.bankName}</Typography>
+                      )}
+                      {selectedOrder.upiPayment.ifscCode && (
+                        <Typography variant="body2"><strong>IFSC代码:</strong> {selectedOrder.upiPayment.ifscCode}</Typography>
+                      )}
+                      {selectedOrder.upiPayment.accountNumber && (
+                        <Typography variant="body2"><strong>账户号码:</strong> {selectedOrder.upiPayment.accountNumber}</Typography>
+                      )}
+                    </Box>
+                  </Box>
+                )}
+
+                {selectedOrder.gameOrder && (
+                  <Box sx={{ gridColumn: '1 / -1' }}>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="h6" gutterBottom>游戏订单信息</Typography>
+                    <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                      <Typography variant="body2"><strong>游戏订单ID:</strong> {selectedOrder.gameOrder.gameOrderId}</Typography>
+                      <Typography variant="body2"><strong>游戏名称:</strong> {selectedOrder.gameOrder.gameName}</Typography>
+                      <Typography variant="body2"><strong>游戏类型:</strong> {getGameTypeText(selectedOrder.gameOrder.gameType)}</Typography>
+                      <Typography variant="body2"><strong>玩家ID:</strong> {selectedOrder.gameOrder.playerId}</Typography>
+                      {selectedOrder.gameOrder.playerName && (
+                        <Typography variant="body2"><strong>玩家名称:</strong> {selectedOrder.gameOrder.playerName}</Typography>
+                      )}
+                      {selectedOrder.gameOrder.tableId && (
+                        <Typography variant="body2"><strong>牌桌ID:</strong> {selectedOrder.gameOrder.tableId}</Typography>
+                      )}
+                      {selectedOrder.gameOrder.roomId && (
+                        <Typography variant="body2"><strong>房间ID:</strong> {selectedOrder.gameOrder.roomId}</Typography>
+                      )}
+                      {selectedOrder.gameOrder.betAmount && (
+                        <Typography variant="body2"><strong>下注金额:</strong> {formatCurrency(selectedOrder.gameOrder.betAmount)}</Typography>
+                      )}
+                      {selectedOrder.gameOrder.winAmount && (
+                        <Typography variant="body2"><strong>赢得金额:</strong> {formatCurrency(selectedOrder.gameOrder.winAmount)}</Typography>
+                      )}
+                    </Box>
+                  </Box>
+                )}
+
+                {selectedOrder.customer && (
+                  <Box sx={{ gridColumn: '1 / -1' }}>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="h6" gutterBottom>客户信息</Typography>
+                    {selectedOrder.customer.name && (
+                      <Typography variant="body2"><strong>姓名:</strong> {selectedOrder.customer.name}</Typography>
+                    )}
+                    {selectedOrder.customer.email && (
+                      <Typography variant="body2"><strong>邮箱:</strong> {selectedOrder.customer.email}</Typography>
+                    )}
+                    {selectedOrder.customer.phone && (
+                      <Typography variant="body2"><strong>电话:</strong> {selectedOrder.customer.phone}</Typography>
+                    )}
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>关闭</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+}
+
+export default Orders;

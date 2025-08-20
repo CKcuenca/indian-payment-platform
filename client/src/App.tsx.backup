@@ -1,0 +1,181 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
+import Layout from './components/Layout';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Orders from './pages/Orders';
+import Transactions from './pages/Transactions';
+import PaymentConfig from './pages/PaymentConfig';
+import Users from './pages/Users';
+import Merchants from './pages/Merchants';
+import Monitoring from './pages/Monitoring';
+import CashGitPaymentTest from './pages/CashGitPaymentTest';import MGPaymentTest from './pages/MGPaymentTest';
+import { authService } from './services/authService';
+import { PermissionGuard } from './components/PermissionGuard';
+import { Permission } from './types';
+
+// 创建主题
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+});
+
+// 受保护的路由组件
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  permissions?: Permission[];
+  anyPermission?: Permission[];
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  children, 
+  permissions = [], 
+  anyPermission = [] 
+}) => {
+  if (!authService.isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return (
+    <PermissionGuard
+      permissions={permissions}
+      anyPermission={anyPermission}
+      fallback={<Navigate to="/" replace />}
+    >
+      {children}
+    </PermissionGuard>
+  );
+};
+
+function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Router>
+        <Routes>
+          {/* 登录页面 */}
+          <Route 
+            path="/login" 
+            element={
+              authService.isAuthenticated() ? 
+                <Navigate to="/" replace /> : 
+                <Login />
+            } 
+          />
+
+          {/* 受保护的路由 */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Dashboard />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute anyPermission={[Permission.VIEW_ALL_ORDERS, Permission.VIEW_OWN_ORDERS]}>
+                <Layout>
+                  <Orders />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/transactions"
+            element={
+              <ProtectedRoute anyPermission={[Permission.VIEW_ALL_TRANSACTIONS, Permission.VIEW_OWN_TRANSACTIONS]}>
+                <Layout>
+                  <Transactions />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 管理员专用路由 */}
+          <Route
+            path="/merchants"
+            element={
+              <ProtectedRoute permissions={[Permission.VIEW_ALL_MERCHANTS]}>
+                <Layout>
+                  <Merchants />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/payment-config"
+            element={
+              <ProtectedRoute permissions={[Permission.VIEW_PAYMENT_CONFIG]}>
+                <Layout>
+                  <PaymentConfig />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute permissions={[Permission.MANAGE_USERS]}>
+                <Layout>
+                  <Users />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/monitoring"
+          <Route
+            path="/cashgit-payment-test"
+            element={
+              <ProtectedRoute permissions={[Permission.SYSTEM_MONITORING]}>
+                <Layout>
+                  <CashGitPaymentTest />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />            element={
+              <ProtectedRoute permissions={[Permission.SYSTEM_MONITORING]}>
+                <Layout>
+                  <Monitoring />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <div>个人资料页面（待实现）</div>
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 默认重定向 */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
+  );
+}
+
+export default App;
