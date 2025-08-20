@@ -1,0 +1,292 @@
+const mongoose = require('mongoose');
+const { getIndianTimeISO } = require('../utils/timeUtils');
+
+class ConcurrencyService {
+  /**
+   * 使用数据库事务处理订单创建
+   */
+  static async createOrderWithTransaction(orderData, merchantId) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    
+    try {
+      // 1. 锁定商户记录进行限额检查
+      const merchant = await mongoose.model('Merchant').findOneAndUpdate(
+        { 
+          merchantId, 
+          status: 'ACTIVE' 
+        },
+        { $inc: { 'balance.frozen': orderData.amount } },
+        { 
+          session,
+          new: true,
+          runValidators: true 
+        }
+      );
+
+      if (!merchant) {
+        throw new Error('Merchant not found or inactive');
+      }
+
+      // 2. 检查限额
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const dailyUsage = await mongoose.model('Transaction').aggregate([
+        {
+          $match: {
+            merchantId,
+            type: 'DEPOSIT',
+            status: { $in: ['PENDING', 'SUCCESS'] },
+            createdAt: { $gte: today }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: '$amount' }
+          }
+        }
+      ], { session });
+
+      const dailyTotal = (dailyUsage[0]?.totalAmount || 0) + orderData.amount;
+      
+      if (dailyTotal > merchant.paymentConfig.limits.maxDeposit) {
+        throw new Error('Daily deposit limit exceeded');
+      }
+
+      // 3. 创建订单
+      const order = new mongoose.model('Order')(orderData);
+      await order.save({ session });
+
+      // 4. 创建交易记录
+      const transaction = new mongoose.model('Transaction')({
+        transactionId: `TXN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        orderId: order.orderId,
+        merchantId,
+        type: 'DEPOSIT',
+        amount: orderData.amount,
+        fee: orderData.fee,
+        currency: orderData.currency,
+        status: 'PENDING',
+        provider: orderData.provider,
+        createdAt: getIndianTimeISO(),
+        updatedAt: getIndianTimeISO()
+      });
+      
+      await transaction.save({ session });
+
+      await session.commitTransaction();
+      
+      return {
+        success: true,
+        order,
+        transaction
+      };
+      
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
+   * 处理订单状态更新
+   */
+  static async updateOrderStatus(orderId, newStatus, additionalData = {}) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    
+    try {
+      // 1. 更新订单状态
+      const order = await mongoose.model('Order').findOneAndUpdate(
+        { orderId },
+        { 
+          status: newStatus,
+          updatedAt: getIndianTimeISO(),
+          ...additionalData
+        },
+        { session, new: true }
+      );
+
+      if (!order) {
+        throw new Error('Order not found');
+      }
+
+      // 2. 更新交易记录
+      const transaction = await mongoose.model('Transaction').findOneAndUpdate(
+        { orderId },
+        { 
+          status: newStatus,
+          updatedAt: getIndianTimeISO(),
+          ...additionalData
+        },
+        { session, new: true }
+      );
+
+      // 3. 如果订单成功，更新商户余额
+      if (newStatus === 'SUCCESS') {
+        await mongoose.model('Merchant').findOneAndUpdate(
+          { merchantId: order.merchantId },
+          { 
+            $inc: { 
+              'balance.available': order.amount,
+              'balance.frozen': -order.amount
+            }
+          },
+          { session }
+        );
+      } else if (newStatus === 'FAILED' || newStatus === 'CANCELLED') {
+        // 如果订单失败，释放冻结的余额
+        await mongoose.model('Merchant').findOneAndUpdate(
+          { merchantId: order.merchantId },
+          { 
+            $inc: { 'balance.frozen': -order.amount }
+          },
+          { session }
+        );
+      }
+
+      await session.commitTransaction();
+      
+      return {
+        success: true,
+        order,
+        transaction
+      };
+      
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
+   * 批量处理订单状态更新
+   */
+  static async batchUpdateOrderStatus(updates) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    
+    try {
+      const results = [];
+      
+      for (const update of updates) {
+        const { orderId, newStatus, additionalData } = update;
+        
+        const result = await this.updateOrderStatus(orderId, newStatus, additionalData);
+        results.push(result);
+      }
+      
+      await session.commitTransaction();
+      return results;
+      
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
+   * 获取商户实时限额使用情况
+   */
+  static async getMerchantUsage(merchantId) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const [dailyUsage, monthlyUsage] = await Promise.all([
+      mongoose.model('Transaction').aggregate([
+        {
+          $match: {
+            merchantId,
+            type: 'DEPOSIT',
+            status: { $in: ['PENDING', 'SUCCESS'] },
+            createdAt: { $gte: today }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: '$amount' },
+            count: { $sum: 1 }
+          }
+        }
+      ]),
+      mongoose.model('Transaction').aggregate([
+        {
+          $match: {
+            merchantId,
+            type: 'DEPOSIT',
+            status: { $in: ['PENDING', 'SUCCESS'] },
+            createdAt: { 
+              $gte: new Date(today.getFullYear(), today.getMonth(), 1) 
+            }
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            totalAmount: { $sum: '$amount' },
+            count: { $sum: 1 }
+          }
+        }
+      ])
+    ]);
+
+    return {
+      daily: {
+        amount: dailyUsage[0]?.totalAmount || 0,
+        count: dailyUsage[0]?.count || 0
+      },
+      monthly: {
+        amount: monthlyUsage[0]?.totalAmount || 0,
+        count: monthlyUsage[0]?.count || 0
+      }
+    };
+  }
+
+  /**
+   * 检查并清理过期订单
+   */
+  static async cleanupExpiredOrders() {
+    const expiredTime = new Date(Date.now() - 30 * 60 * 1000); // 30分钟前
+    
+    const expiredOrders = await mongoose.model('Order').find({
+      status: 'PENDING',
+      createdAt: { $lt: expiredTime }
+    });
+
+    if (expiredOrders.length > 0) {
+      const session = await mongoose.startSession();
+      session.startTransaction();
+      
+      try {
+        for (const order of expiredOrders) {
+          await this.updateOrderStatus(order.orderId, 'CANCELLED', {
+            error: {
+              code: 'TIMEOUT',
+              message: 'Order expired'
+            }
+          });
+        }
+        
+        await session.commitTransaction();
+        console.log(`Cleaned up ${expiredOrders.length} expired orders`);
+        
+      } catch (error) {
+        await session.abortTransaction();
+        console.error('Error cleaning up expired orders:', error);
+      } finally {
+        session.endSession();
+      }
+    }
+  }
+}
+
+module.exports = ConcurrencyService; 

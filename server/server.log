@@ -1,0 +1,1564 @@
+Payment provider mock registered
+Default payment provider set to mock
+Mock provider initialized
+(node:17135) [MONGOOSE] Warning: `errors` is a reserved schema pathname and may break some functionality. You are allowed to use it, but use at your own risk. To disable this warning pass `suppressReservedKeysWarning` as a schema option.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:17135) [MONGOOSE] Warning: `errors` is a reserved schema pathname and may break some functionality. You are allowed to use it, but use at your own risk. To disable this warning pass `suppressReservedKeysWarning` as a schema option.
+Server is running on port 3001
+Environment: development
+Starting scheduler service...
+Scheduler service started successfully
+Provider mock initialized successfully
+Connected to MongoDB
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 50
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 50
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 50
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 50
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 50
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 50
+}
+Filtered transactions count: 7
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+System health check - Pending orders: 6, Processing orders: 0
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Received filter params: {
+  type: undefined,
+  status: undefined,
+  merchantId: undefined,
+  providerName: undefined,
+  startDate: undefined,
+  endDate: undefined,
+  transactionId: undefined,
+  page: 1,
+  limit: 10
+}
+Filtered transactions count: 7
+Error cleaning up expired orders: MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+    at Connection.onMessage (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:202:26)
+    at MessageStream.<anonymous> (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/connection.js:61:60)
+    at MessageStream.emit (node:events:507:28)
+    at processIncomingData (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:124:16)
+    at MessageStream._write (/Users/kaka/indian-payment-platform/node_modules/mongodb/lib/cmap/message_stream.js:33:9)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at Socket.ondata (node:internal/streams/readable:1008:24)
+    at Socket.emit (node:events:507:28) {
+  ok: 0,
+  code: 20,
+  codeName: 'IllegalOperation',
+  Symbol(errorLabels): Set(0) {}
+}
