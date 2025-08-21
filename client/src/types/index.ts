@@ -224,7 +224,7 @@ export interface MGPaymentRequest {
   sign: string;
 }
 
-export interface MGPaymentResponse<T = any> {
+export interface MGPaymentResponse {
   code: number;
   message: string;
   data: any;
@@ -303,10 +303,10 @@ export interface CashGitPaymentRequest {
   sign: string;
 }
 
-export interface CashGitPaymentResponse<T = any> {
+export interface CashGitPaymentResponse {
   code: number;
   message: string;
-  data: T | null;
+  data: any;
   timestamp: number;
 }
 
@@ -316,10 +316,10 @@ export interface CashGitQueryRequest {
   sign: string;
 }
 
-export interface CashGitQueryResponse<T = any> {
+export interface CashGitQueryResponse {
   code: number;
   message: string;
-  data: T | null;
+  data: any;
   timestamp: number;
 }
 
@@ -331,10 +331,10 @@ export interface CashGitRefundRequest {
   sign: string;
 }
 
-export interface CashGitRefundResponse<T = any> {
+export interface CashGitRefundResponse {
   code: number;
   message: string;
-  data: T | null;
+  data: any;
   timestamp: number;
 }
 
@@ -344,10 +344,10 @@ export interface CashGitCloseRequest {
   sign: string;
 }
 
-export interface CashGitCloseResponse<T = any> {
+export interface CashGitCloseResponse {
   code: number;
   message: string;
-  data: T | null;
+  data: any;
   timestamp: number;
 }
 

@@ -2,12 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Paper,
   Card,
   CardContent,
   Chip,
   LinearProgress,
-  Alert,
   CircularProgress,
   Table,
   TableBody,
@@ -16,22 +14,14 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  Tooltip,
-  Divider,
+  Tooltip
 } from '@mui/material';
 import {
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon,
   Warning as WarningIcon,
   Refresh as RefreshIcon,
-  TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon,
-  Speed as SpeedIcon,
-  Storage as StorageIcon,
-  Memory as MemoryIcon,
-  NetworkCheck as NetworkCheckIcon,
-  Security as SecurityIcon,
-  Timeline as TimelineIcon,
+  TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
 import { SystemStats } from '../types';
 
@@ -90,10 +80,10 @@ const mockErrorLogs = [
 export default function Monitoring() {
   const [loading, setLoading] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(new Date());
-  const [systemStats, setSystemStats] = useState(mockSystemStats);
-  const [systemStatus, setSystemStatus] = useState(mockSystemStatus);
-  const [performanceData, setPerformanceData] = useState(mockPerformanceData);
-  const [errorLogs, setErrorLogs] = useState(mockErrorLogs);
+  const [systemStats] = useState(mockSystemStats);
+  const [systemStatus] = useState(mockSystemStatus);
+  const [performanceData] = useState(mockPerformanceData);
+  const [errorLogs] = useState(mockErrorLogs);
 
   useEffect(() => {
     // 在实际项目中，这里会定期从API获取监控数据
@@ -143,12 +133,7 @@ export default function Monitoring() {
     return uptime;
   };
 
-  const formatBytes = (bytes: number) => {
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    if (bytes === 0) return '0 B';
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
-  };
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-IN', {

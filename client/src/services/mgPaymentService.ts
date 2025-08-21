@@ -19,7 +19,7 @@ class MGPaymentService {
    * @param request 支付请求参数
    * @returns 支付响应
    */
-  async createPayment(request: MGPaymentRequest): Promise<MGPaymentResponse<MGPayResponseData>> {
+  async createPayment(request: MGPaymentRequest): Promise<MGPaymentResponse> {
     try {
       const response = await fetch(`${API_BASE_URL}/mg/pay`, {
         method: 'POST',
@@ -44,7 +44,7 @@ class MGPaymentService {
    * @param sign 签名
    * @returns 订单查询响应
    */
-  async queryOrder(appid: string, orderid: string, sign: string): Promise<MGPaymentResponse<MGQueryResponseData>> {
+  async queryOrder(appid: string, orderid: string, sign: string): Promise<MGPaymentResponse> {
     try {
       const request = { appid, orderid, sign };
       const response = await fetch(`${API_BASE_URL}/mg/query`, {
@@ -70,7 +70,7 @@ class MGPaymentService {
    * @param sign 签名
    * @returns 关闭订单响应
    */
-  async closeOrder(appid: string, orderid: string, sign: string): Promise<MGPaymentResponse<any>> {
+  async closeOrder(appid: string, orderid: string, sign: string): Promise<MGPaymentResponse> {
     try {
       const request = { appid, orderid, sign };
       const response = await fetch(`${API_BASE_URL}/mg/close`, {
@@ -94,7 +94,7 @@ class MGPaymentService {
    * @param request 退款请求参数
    * @returns 退款响应
    */
-  async refund(request: MGRefundRequest): Promise<MGPaymentResponse<MGRefundResponseData>> {
+  async refund(request: MGRefundRequest): Promise<MGPaymentResponse> {
     try {
       const response = await fetch(`${API_BASE_URL}/mg/refund`, {
         method: 'POST',

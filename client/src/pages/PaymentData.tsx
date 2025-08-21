@@ -111,7 +111,6 @@ const PaymentData: React.FC = () => {
   // 分页状态
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalPages, setTotalPages] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
 
   // 获取支付配置列表
@@ -155,7 +154,6 @@ const PaymentData: React.FC = () => {
       if (response.data.success) {
         setStats(response.data.data.detailed || []);
         setAggregatedStats(response.data.data.aggregated || null);
-        setTotalPages(response.data.data.pagination?.pages || 0);
         setTotalCount(response.data.data.pagination?.total || 0);
       } else {
         setError(response.data.message || '获取统计数据失败');
@@ -171,19 +169,19 @@ const PaymentData: React.FC = () => {
 
   useEffect(() => {
     fetchPaymentConfigs();
-  }, []);
+  }, [fetchPaymentConfigs]);
 
   useEffect(() => {
     if (selectedAccount && dateRange[0] && dateRange[1]) {
       fetchStats();
     }
-  }, [selectedAccount, dateRange, timeDimension, page, rowsPerPage]);
+  }, [selectedAccount, dateRange, timeDimension, page, rowsPerPage, fetchStats]);
 
   useEffect(() => {
     if (selectedAccount) {
       fetchStats();
     }
-  }, [selectedAccount, dateRange, timeDimension]);
+  }, [selectedAccount, dateRange, timeDimension, fetchStats]);
 
   // 计算成功率趋势
   const getSuccessRateTrend = () => {

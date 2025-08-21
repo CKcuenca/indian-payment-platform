@@ -3,7 +3,6 @@ import {
   Box,
   Paper,
   Typography,
-  Grid,
   Card,
   CardContent,
   TextField,
@@ -14,22 +13,12 @@ import {
   CircularProgress,
   Tabs,
   Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  LinearProgress,
-  IconButton,
-  Tooltip
+  LinearProgress
 } from '@mui/material';
 import {
   Refresh as RefreshIcon,
   Settings as SettingsIcon,
   TrendingUp as TrendingUpIcon,
-  Warning as WarningIcon,
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon
 } from '@mui/icons-material';
@@ -215,7 +204,7 @@ export default function LimitManagement() {
       loadLimitConfig();
       loadLimitStats();
     }
-  }, [currentUser, testProvider, testType]);
+  }, [currentUser, testProvider, testType, loadLimitConfig, loadLimitStats]);
 
   if (!currentUser) {
     return (
