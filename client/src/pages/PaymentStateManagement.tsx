@@ -300,7 +300,7 @@ const PaymentStateManagement: React.FC = () => {
 
       <Grid container spacing={3}>
         {/* 状态机信息 */}
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Paper sx={{ p: 2 }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
               <Typography variant="h6">状态机信息</Typography>
@@ -355,7 +355,7 @@ const PaymentStateManagement: React.FC = () => {
         </Grid>
 
         {/* 订单状态更新 */}
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               更新订单状态
@@ -414,7 +414,7 @@ const PaymentStateManagement: React.FC = () => {
         </Grid>
 
         {/* 状态转换验证 */}
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               验证状态转换
@@ -456,7 +456,7 @@ const PaymentStateManagement: React.FC = () => {
         </Grid>
 
         {/* 订单历史查询 */}
-        <Grid item xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               查询订单历史
@@ -483,7 +483,7 @@ const PaymentStateManagement: React.FC = () => {
         </Grid>
 
         {/* 批量更新 */}
-        <Grid item xs={12}>
+        <Grid xs={12}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
               批量更新状态
@@ -570,19 +570,19 @@ const PaymentStateManagement: React.FC = () => {
               </Typography>
               
               <Grid container spacing={2}>
-                <Grid item xs={6}>
+                <Grid xs={6}>
                   <Typography variant="body2" color="textSecondary">订单ID:</Typography>
                   <Typography variant="body1">{validationResult.orderId}</Typography>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid xs={6}>
                   <Typography variant="body2" color="textSecondary">当前状态:</Typography>
                   <Typography variant="body1">{validationResult.currentStatus}</Typography>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid xs={6}>
                   <Typography variant="body2" color="textSecondary">目标状态:</Typography>
                   <Typography variant="body1">{validationResult.targetStatus}</Typography>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid xs={6}>
                   <Typography variant="body2" color="textSecondary">是否有效:</Typography>
                   <Chip
                     label={validationResult.isValid ? '有效' : '无效'}
