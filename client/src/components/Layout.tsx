@@ -89,6 +89,12 @@ const menuItems = [
     icon: <Api />,
     path: '/cashgit-payment-test',
     permissions: [Permission.SYSTEM_MONITORING]
+  },
+  {
+    text: '数据库优化',
+    icon: <TrendingUp />,
+    path: '/database-optimization',
+    permissions: [Permission.SYSTEM_MONITORING]
   }
 ];
 

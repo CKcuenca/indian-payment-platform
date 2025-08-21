@@ -102,13 +102,7 @@ const DatabaseOptimization: React.FC = () => {
   });
 
   // 检查权限
-  if (!hasPermission(Permission.SYSTEM_MONITORING)) {
-    return (
-      <Box p={3}>
-        <Alert severity="error">您没有权限访问此页面</Alert>
-      </Box>
-    );
-  }
+  const hasAccess = hasPermission(Permission.SYSTEM_MONITORING);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -202,6 +196,15 @@ const DatabaseOptimization: React.FC = () => {
     loadDatabaseStatus();
     loadPerformanceReport();
   }, []);
+
+  // 权限检查
+  if (!hasAccess) {
+    return (
+      <Box p={3}>
+        <Alert severity="error">您没有权限访问此页面</Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 3 }}>
