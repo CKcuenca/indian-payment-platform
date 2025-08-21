@@ -70,6 +70,11 @@ class AuthService {
         // 设置 API 请求头
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
+        // 触发自定义事件，通知其他组件状态变化
+        window.dispatchEvent(new CustomEvent('authStateChanged', { 
+          detail: { isAuthenticated: true, user } 
+        }));
+        
         return response.data.data;
       } else {
         throw new Error(response.data.error || '登录失败');
@@ -84,6 +89,11 @@ class AuthService {
     this.clearAuth();
     // 清除 API 请求头
     delete api.defaults.headers.common['Authorization'];
+    
+    // 触发自定义事件，通知其他组件状态变化
+    window.dispatchEvent(new CustomEvent('authStateChanged', { 
+      detail: { isAuthenticated: false } 
+    }));
   }
 
   // 清除认证信息

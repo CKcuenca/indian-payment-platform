@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -8,45 +8,32 @@ import {
   Typography,
   Alert,
   CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Divider,
 } from '@mui/material';
-import { UserRole, Permission } from '../types';
+import { useAuth } from '../hooks/useAuth';
 
-// 测试用户数据（实际项目中应该从后端获取）
-const testUsers = [
-  {
-    username: 'admin',
-    password: 'Yyw11301107*',
-    role: UserRole.ADMIN,
-    displayName: '管理员'
-  },
-  {
-    username: 'operator',
-    password: 'operator123',
-    role: UserRole.OPERATOR,
-    displayName: '运营人员'
-  },
-  {
-    username: 'merchant',
-    password: 'merchant123',
-    role: UserRole.MERCHANT,
-    displayName: '商户'
-  }
-];
+// 移除测试用户数据，使用真实系统
 
 export default function Login() {
   const navigate = useNavigate();
+  const { isAuthenticated, login, isLoading } = useAuth();
   const [credentials, setCredentials] = useState({
     username: '',
     password: ''
   });
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTestUser, setSelectedTestUser] = useState<string>('');
+  
+  // 组件挂载时清理认证状态
+  useEffect(() => {
+    // 如果用户已经登录，跳转到仪表盘
+    if (isAuthenticated) {
+      navigate('/');
+      return;
+    }
+    
+    // 清理可能存在的旧状态
+    setCredentials({ username: '', password: '' });
+    setError(null);
+  }, [navigate, isAuthenticated]);
 
   const handleInputChange = (field: string, value: string) => {
     setCredentials(prev => ({
@@ -56,17 +43,7 @@ export default function Login() {
     setError(null);
   };
 
-  const handleTestUserSelect = (username: string) => {
-    const testUser = testUsers.find(user => user.username === username);
-    if (testUser) {
-      setCredentials({
-        username: testUser.username,
-        password: testUser.password
-      });
-      setSelectedTestUser(username);
-      setError(null);
-    }
-  };
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,74 +53,19 @@ export default function Login() {
       return;
     }
 
-    setLoading(true);
     setError(null);
 
     try {
-      // 模拟登录成功
-      const testUser = testUsers.find(user => 
-        user.username === credentials.username && 
-        user.password === credentials.password
-      );
-
-      if (testUser) {
-        // 模拟登录成功，创建用户数据
-        const mockUser = {
-          id: '1',
-          username: testUser.username,
-          email: `${testUser.username}@example.com`,
-          role: testUser.role,
-          permissions: getPermissionsForRole(testUser.role),
-          status: 'ACTIVE' as const,
-          createdAt: new Date().toISOString(),
-          merchantId: testUser.role === UserRole.MERCHANT ? 'MERCHANT001' : undefined
-        };
-
-        // 模拟存储用户数据
-        localStorage.setItem('user_data', JSON.stringify(mockUser));
-        localStorage.setItem('auth_token', 'mock_token_' + Date.now());
-        
-        // 跳转到仪表盘
-        navigate('/');
-      } else {
-        setError('用户名或密码错误');
-      }
+      // 使用新的认证Hook进行登录
+      await login(credentials.username, credentials.password);
+      // 登录成功会自动跳转（通过useEffect监听isAuthenticated变化）
     } catch (err: any) {
-      setError(err.message || '登录失败');
-    } finally {
-      setLoading(false);
+      console.error('Login error:', err);
+      setError(err.message || '登录失败，请检查用户名和密码');
     }
   };
 
-  // 根据角色获取权限
-  const getPermissionsForRole = (role: UserRole) => {
-    switch (role) {
-      case UserRole.ADMIN:
-        return [
-          Permission.VIEW_ALL_MERCHANTS,
-          Permission.MANAGE_MERCHANTS,
-          Permission.VIEW_PAYMENT_CONFIG,
-          Permission.MANAGE_PAYMENT_CONFIG,
-          Permission.VIEW_ALL_ORDERS,
-          Permission.VIEW_ALL_TRANSACTIONS,
-          Permission.MANAGE_USERS,
-          Permission.SYSTEM_MONITORING
-        ];
-      case UserRole.OPERATOR:
-        return [
-          Permission.VIEW_ALL_MERCHANTS,
-          Permission.VIEW_ALL_ORDERS,
-          Permission.VIEW_ALL_TRANSACTIONS
-        ];
-      case UserRole.MERCHANT:
-        return [
-          Permission.VIEW_OWN_ORDERS,
-          Permission.VIEW_OWN_TRANSACTIONS
-        ];
-      default:
-        return [];
-    }
-  };
+
 
   return (
     <Box
@@ -188,7 +110,8 @@ export default function Login() {
             onChange={(e) => handleInputChange('username', e.target.value)}
             margin="normal"
             required
-            disabled={loading}
+            disabled={isLoading}
+            placeholder="请输入用户名或邮箱"
           />
           <TextField
             fullWidth
@@ -198,7 +121,8 @@ export default function Login() {
             onChange={(e) => handleInputChange('password', e.target.value)}
             margin="normal"
             required
-            disabled={loading}
+            disabled={isLoading}
+            placeholder="请输入密码"
           />
           
           <Button
@@ -206,33 +130,12 @@ export default function Login() {
             fullWidth
             variant="contained"
             size="large"
-            disabled={loading}
+            disabled={isLoading}
             sx={{ mt: 3, mb: 2 }}
           >
-            {loading ? <CircularProgress size={24} /> : '登录'}
+            {isLoading ? <CircularProgress size={24} /> : '登录'}
           </Button>
         </form>
-
-        <Divider sx={{ my: 3 }}>
-          <Typography variant="body2" color="text.secondary">
-            测试账户
-          </Typography>
-        </Divider>
-
-        <FormControl fullWidth>
-          <InputLabel>选择测试账户</InputLabel>
-          <Select
-            value={selectedTestUser}
-            label="选择测试账户"
-            onChange={(e) => handleTestUserSelect(e.target.value)}
-          >
-            {testUsers.map((user) => (
-              <MenuItem key={user.username} value={user.username}>
-                {user.displayName} ({user.username})
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
       </Paper>
     </Box>
   );

@@ -10,7 +10,7 @@ import {
   CashGitCloseResponse
 } from '../types';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 export const cashgitApiService = {
   // 创建支付订单

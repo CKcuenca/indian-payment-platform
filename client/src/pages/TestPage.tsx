@@ -37,8 +37,8 @@ export default function TestPage() {
         amount: 10000,
         customerEmail: 'test@example.com',
         customerPhone: '919876543210',
-        returnUrl: 'http://localhost:3001',
-        provider: 'mock',
+        returnUrl: 'https://cashgit.com',
+	provider: 'mock',
       });
       alert(`创建支付订单成功！订单ID: ${response.data.orderId}`);
     } catch (err: any) {

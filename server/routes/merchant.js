@@ -17,19 +17,46 @@ const validateRequest = (req, res, next) => {
   next();
 };
 
-// 获取商户信息
-router.get('/info', (req, res) => {
-  // 返回模拟商户数据
+// 获取商户信息（需要认证）
+router.get('/info', apiKeyAuth, (req, res) => {
+  try {
+    // 从认证中间件获取商户信息
+    const merchant = req.merchant;
+    
+    res.json({
+      success: true,
+      data: {
+        merchantId: merchant.merchantId,
+        name: merchant.name,
+        email: merchant.email,
+        status: merchant.status,
+        balance: merchant.balance.available,
+        paymentConfig: {
+          providers: merchant.paymentConfig.providers.map(p => p.name),
+          defaultProvider: merchant.paymentConfig.defaultProvider
+        }
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: '获取商户信息失败'
+    });
+  }
+});
+
+// 获取测试商户信息（无需认证，仅用于开发测试）
+router.get('/test-info', (req, res) => {
   res.json({
     success: true,
     data: {
-      merchantId: 'MERCHANT001',
+      merchantId: 'TEST001',
       name: '测试商户',
-      email: 'merchant@example.com',
+      email: 'test@example.com',
       status: 'ACTIVE',
-      balance: 15000.50,
+      balance: 100000,
       paymentConfig: {
-        providers: ['mock', 'cashgit'],
+        providers: ['mock', 'passpay'],
         defaultProvider: 'mock'
       }
     }

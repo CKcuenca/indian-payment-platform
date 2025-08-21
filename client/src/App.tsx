@@ -13,7 +13,8 @@ import Users from './pages/Users';
 import Monitoring from './pages/Monitoring';
 import CashGitPaymentTest from './pages/CashGitPaymentTest';
 import PaymentData from './pages/PaymentData';
-import { authService } from './services/authService';
+import LimitManagement from './pages/LimitManagement';
+import { useAuth } from './hooks/useAuth';
 import { Permission } from './types';
 
 // 创建主题
@@ -39,9 +40,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   permissions = [], 
   anyPermission = [] 
 }) => {
-  const currentUser = authService.getCurrentUser();
+  const { isAuthenticated, currentUser } = useAuth();
   
-  if (!currentUser) {
+  if (!isAuthenticated || !currentUser) {
     return <Navigate to="/login" replace />;
   }
 
@@ -141,6 +142,17 @@ function App() {
               <ProtectedRoute permissions={[Permission.SYSTEM_MONITORING]}>
                 <Layout>
                   <Monitoring />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/limit-management"
+            element={
+              <ProtectedRoute permissions={[Permission.SYSTEM_MONITORING]}>
+                <Layout>
+                  <LimitManagement />
                 </Layout>
               </ProtectedRoute>
             }

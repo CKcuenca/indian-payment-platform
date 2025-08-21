@@ -14,7 +14,7 @@ const paymentConfigSchema = new mongoose.Schema({
     name: {
       type: String,
       required: true,
-      enum: ['airpay', 'cashfree', 'razorpay', 'paytm', 'mock']
+      enum: ['airpay', 'cashfree', 'razorpay', 'paytm', 'mock', 'passpay']
     },
     accountId: {
       type: String,
@@ -64,6 +64,26 @@ const paymentConfigSchema = new mongoose.Schema({
       required: true,
       default: 100, // 100卢比
       min: 0
+    },
+    // 最大交易金额
+    maxTransactionAmount: {
+      type: Number,
+      required: true,
+      default: 5000000, // 50万卢比
+      min: 0
+    },
+    // 大额交易阈值
+    largeAmountThreshold: {
+      type: Number,
+      default: 100000000, // 1000万卢比
+      min: 0
+    },
+    // 大额交易频率限制
+    maxLargeTransactionsPerDay: {
+      type: Number,
+      default: 3,
+      min: 1,
+      max: 10
     }
   },
   

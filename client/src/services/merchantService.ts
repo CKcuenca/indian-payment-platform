@@ -4,7 +4,8 @@ import { Merchant, ApiResponse, PaginationResponse, Transaction, Order } from '.
 export const merchantService = {
   // 获取商户信息
   getMerchantInfo: (): Promise<ApiResponse<Merchant>> => {
-    return api.get('/merchant/info').then(response => response.data);
+    // 暂时使用测试端点，无需认证
+    return api.get('/merchant/test-info').then(response => response.data);
   },
 
   // 获取交易历史

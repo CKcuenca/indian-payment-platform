@@ -71,9 +71,10 @@ const mockPaymentAccounts = [
     fees: {
       transactionFee: 0.5,
       fixedFee: 0
-    },
-    webhookUrl: 'https://your-domain.com/webhook/airpay',
-    description: 'AirPay主要支付账户',
+          },
+      collectionWebhookSuffix: 'airpay',
+      payoutWebhookSuffix: 'airpay',
+      description: 'AirPay主要支付账户',
     createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-01T00:00:00Z',
   },
@@ -103,9 +104,10 @@ const mockPaymentAccounts = [
     fees: {
       transactionFee: 0.6,
       fixedFee: 0
-    },
-    webhookUrl: 'https://your-domain.com/webhook/cashfree',
-    description: 'Cashfree备用支付账户',
+          },
+      collectionWebhookSuffix: 'cashfree',
+      payoutWebhookSuffix: 'cashfree',
+      description: 'Cashfree备用支付账户',
     createdAt: '2024-01-03T00:00:00Z',
     updatedAt: '2024-01-03T00:00:00Z',
   },
@@ -126,7 +128,8 @@ export default function PaymentManagement() {
     apiKey: '',
     secretKey: '',
     environment: 'sandbox',
-    webhookUrl: '',
+    collectionWebhookSuffix: '',
+    payoutWebhookSuffix: '',
     description: '',
     dailyLimit: 1000000,
     monthlyLimit: 10000000,
@@ -147,7 +150,8 @@ export default function PaymentManagement() {
       apiKey: '',
       secretKey: '',
       environment: 'sandbox',
-      webhookUrl: '',
+      collectionWebhookSuffix: '',
+      payoutWebhookSuffix: '',
       description: '',
       dailyLimit: 1000000,
       monthlyLimit: 10000000,
@@ -170,7 +174,8 @@ export default function PaymentManagement() {
       apiKey: account.provider.apiKey,
       secretKey: account.provider.secretKey,
       environment: account.provider.environment,
-      webhookUrl: account.webhookUrl,
+      collectionWebhookSuffix: account.collectionWebhookSuffix || '',
+      payoutWebhookSuffix: account.payoutWebhookSuffix || '',
       description: account.description,
       dailyLimit: account.limits.dailyLimit,
       monthlyLimit: account.limits.monthlyLimit,
@@ -214,7 +219,8 @@ export default function PaymentManagement() {
           transactionFee: formData.transactionFee,
           fixedFee: formData.fixedFee
         },
-        webhookUrl: formData.webhookUrl,
+        collectionWebhookSuffix: formData.collectionWebhookSuffix,
+        payoutWebhookSuffix: formData.payoutWebhookSuffix,
         description: formData.description,
         priority: formData.priority,
         status: formData.status,
@@ -262,7 +268,8 @@ export default function PaymentManagement() {
       'cashfree': 'secondary',
       'razorpay': 'success',
       'paytm': 'warning',
-      'phonepe': 'info'
+      'phonepe': 'info',
+      'passpay': 'error'
     };
     return colors[providerName.toLowerCase()] || 'default';
   };
@@ -569,6 +576,7 @@ export default function PaymentManagement() {
                       <MenuItem value="razorpay">Razorpay</MenuItem>
                       <MenuItem value="paytm">Paytm</MenuItem>
                       <MenuItem value="phonepe">PhonePe</MenuItem>
+                      <MenuItem value="passpay">PassPay</MenuItem>
                     </Select>
                   </FormControl>
                   <TextField
@@ -606,13 +614,40 @@ export default function PaymentManagement() {
                   />
                 </Box>
                 <Box sx={{ mt: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom sx={{ color: 'text.secondary' }}>
+                    回调地址配置
+                  </Typography>
                   <TextField
                     fullWidth
-                    label="Webhook URL"
-                    value={formData.webhookUrl}
-                    onChange={(e) => setFormData(prev => ({ ...prev, webhookUrl: e.target.value }))}
-                    placeholder="https://your-domain.com/webhook"
+                    label="支付商标识"
+                    value={formData.collectionWebhookSuffix}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      collectionWebhookSuffix: e.target.value,
+                      payoutWebhookSuffix: e.target.value 
+                    }))}
+                    placeholder="例如: passpay, airpay, cashfree"
+                    helperText="输入支付商标识，系统自动生成回调地址"
                   />
+                  
+                  {/* 显示完整的回调地址 */}
+                  {formData.collectionWebhookSuffix && (
+                    <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                      <Typography variant="subtitle2" gutterBottom sx={{ color: 'text.secondary' }}>
+                        完整回调地址:
+                      </Typography>
+                      <Box sx={{ mb: 1 }}>
+                        <Typography variant="body2" sx={{ fontFamily: 'monospace', bgcolor: 'white', p: 1, borderRadius: 0.5 }}>
+                          代收回调: https://cashgit.com/api/webhook/{formData.collectionWebhookSuffix}/collection
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontFamily: 'monospace', bgcolor: 'white', p: 1, borderRadius: 0.5 }}>
+                          代付回调: https://cashgit.com/api/webhook/{formData.collectionWebhookSuffix}/payout
+                        </Typography>
+                      </Box>
+                    </Box>
+                  )}
                 </Box>
                 <Box sx={{ mt: 2 }}>
                   <TextField

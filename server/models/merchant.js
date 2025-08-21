@@ -69,19 +69,35 @@ const merchantSchema = new mongoose.Schema({
     limits: {
       minDeposit: {
         type: Number,
-        default: 100 // 1元
+        default: 100 // 1卢比
       },
       maxDeposit: {
         type: Number,
-        default: 50000 // 500元
+        default: 5000000 // 5万卢比
       },
       minWithdrawal: {
         type: Number,
-        default: 100 // 1元
+        default: 100 // 1卢比
       },
       maxWithdrawal: {
         type: Number,
-        default: 50000 // 500元
+        default: 5000000 // 5万卢比
+      },
+      dailyLimit: {
+        type: Number,
+        default: 50000000 // 50万卢比
+      },
+      monthlyLimit: {
+        type: Number,
+        default: 500000000 // 500万卢比
+      },
+      allowLargeTransactions: {
+        type: Boolean,
+        default: false
+      },
+      maxLargeTransactionsPerDay: {
+        type: Number,
+        default: 3
       }
     }
   },

@@ -41,6 +41,8 @@ const authMiddleware = async (req, res, next) => {
 const apiKeyAuth = async (req, res, next) => {
   try {
     const apiKey = req.headers['x-api-key'];
+    console.log('API Key received:', apiKey);
+    console.log('All headers:', req.headers);
     
     if (!apiKey) {
       return res.status(401).json({ error: 'API key required' });
@@ -51,6 +53,8 @@ const apiKeyAuth = async (req, res, next) => {
       apiKey: apiKey, 
       status: 'ACTIVE' 
     });
+    
+    console.log('Merchant found:', merchant ? {name: merchant.name, apiKey: merchant.apiKey, status: merchant.status} : 'Not found');
     
     if (!merchant) {
       return res.status(401).json({ error: 'Invalid API key' });
