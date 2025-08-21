@@ -298,266 +298,255 @@ const PaymentStateManagement: React.FC = () => {
         </Alert>
       )}
 
-      <Grid container spacing={3}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
         {/* 状态机信息 */}
-        <Grid xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-              <Typography variant="h6">状态机信息</Typography>
-              <Button
-                startIcon={<RefreshIcon />}
-                onClick={loadStateMachine}
-                disabled={loading}
-                size="small"
-              >
-                刷新
-              </Button>
-            </Box>
-            
-            <Box maxHeight={400} overflow="auto">
-              {stateMachine.map((state) => (
-                <Card key={state.status} sx={{ mb: 1 }}>
-                  <CardContent sx={{ py: 1 }}>
-                    <Box display="flex" alignItems="center" justifyContent="space-between">
-                      <Typography variant="subtitle2" fontWeight="bold">
-                        {state.status}
-                      </Typography>
-                      <Chip 
-                        label={`${state.allowedTransitions.length} 个转换`}
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
-                    </Box>
-                    <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                      {state.description}
+        <Paper sx={{ p: 2 }}>
+          <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+            <Typography variant="h6">状态机信息</Typography>
+            <Button
+              startIcon={<RefreshIcon />}
+              onClick={loadStateMachine}
+              disabled={loading}
+              size="small"
+            >
+              刷新
+            </Button>
+          </Box>
+          
+          <Box maxHeight={400} overflow="auto">
+            {stateMachine.map((state) => (
+              <Card key={state.status} sx={{ mb: 1 }}>
+                <CardContent sx={{ py: 1 }}>
+                  <Box display="flex" alignItems="center" justifyContent="space-between">
+                    <Typography variant="subtitle2" fontWeight="bold">
+                      {state.status}
                     </Typography>
-                    <Box mt={1}>
-                      <Typography variant="caption" color="textSecondary">
-                        允许转换到:
-                      </Typography>
-                      <Box display="flex" flexWrap="wrap" gap={0.5} mt={0.5}>
-                        {state.allowedTransitions.map((transition) => (
-                          <Chip
-                            key={transition}
-                            label={transition}
-                            size="small"
-                            variant="outlined"
-                          />
-                        ))}
-                      </Box>
+                    <Chip 
+                      label={`${state.allowedTransitions.length} 个转换`}
+                      size="small"
+                      color="primary"
+                      variant="outlined"
+                    />
+                  </Box>
+                  <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                    {state.description}
+                  </Typography>
+                  <Box mt={1}>
+                    <Typography variant="caption" color="textSecondary">
+                      允许转换到:
+                    </Typography>
+                    <Box display="flex" flexWrap="wrap" gap={0.5} mt={0.5}>
+                      {state.allowedTransitions.map((transition) => (
+                        <Chip
+                          key={transition}
+                          label={transition}
+                          size="small"
+                          variant="outlined"
+                        />
+                      ))}
                     </Box>
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
-          </Paper>
-        </Grid>
+                  </Box>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        </Paper>
 
         {/* 订单状态更新 */}
-        <Grid xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              更新订单状态
-            </Typography>
-            
-            <TextField
-              fullWidth
-              label="订单ID"
-              value={orderId}
-              onChange={(e) => setOrderId(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>新状态</InputLabel>
-              <Select
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
-                label="新状态"
-              >
-                {stateMachine.map((state) => (
-                  <MenuItem key={state.status} value={state.status}>
-                    {state.status} - {state.description}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            
-            <TextField
-              fullWidth
-              label="原因"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            
-            <TextField
-              fullWidth
-              label="额外数据 (JSON格式)"
-              value={additionalData}
-              onChange={(e) => setAdditionalData(e.target.value)}
-              placeholder='{"note": "备注信息"}'
-              sx={{ mb: 2 }}
-            />
-            
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={updateOrderStatus}
-              disabled={loading || !orderId || !newStatus}
-              startIcon={<PlayArrowIcon />}
+        <Paper sx={{ p: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            更新订单状态
+          </Typography>
+          
+          <TextField
+            fullWidth
+            label="订单ID"
+            value={orderId}
+            onChange={(e) => setOrderId(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>新状态</InputLabel>
+            <Select
+              value={newStatus}
+              onChange={(e) => setNewStatus(e.target.value)}
+              label="新状态"
             >
-              更新状态
-            </Button>
-          </Paper>
-        </Grid>
+              {stateMachine.map((state) => (
+                <MenuItem key={state.status} value={state.status}>
+                  {state.status} - {state.description}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          
+          <TextField
+            fullWidth
+            label="原因"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          
+          <TextField
+            fullWidth
+            label="额外数据 (JSON格式)"
+            value={additionalData}
+            onChange={(e) => setAdditionalData(e.target.value)}
+            placeholder='{"note": "备注信息"}'
+            sx={{ mb: 2 }}
+          />
+          
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={updateOrderStatus}
+            disabled={loading || !orderId || !newStatus}
+            startIcon={<PlayArrowIcon />}
+          >
+            更新状态
+          </Button>
+        </Paper>
 
         {/* 状态转换验证 */}
-        <Grid xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              验证状态转换
-            </Typography>
-            
-            <TextField
-              fullWidth
-              label="订单ID"
-              value={validationOrderId}
-              onChange={(e) => setValidationOrderId(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel>目标状态</InputLabel>
-              <Select
-                value={targetStatus}
-                onChange={(e) => setTargetStatus(e.target.value)}
-                label="目标状态"
-              >
-                {stateMachine.map((state) => (
-                  <MenuItem key={state.status} value={state.status}>
-                    {state.status}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={validateTransition}
-              disabled={loading || !validationOrderId || !targetStatus}
-              startIcon={<CheckCircleIcon />}
+        <Paper sx={{ p: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            验证状态转换
+          </Typography>
+          
+          <TextField
+            fullWidth
+            label="订单ID"
+            value={validationOrderId}
+            onChange={(e) => setValidationOrderId(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>目标状态</InputLabel>
+            <Select
+              value={targetStatus}
+              onChange={(e) => setTargetStatus(e.target.value)}
+              label="目标状态"
             >
-              验证转换
-            </Button>
-          </Paper>
-        </Grid>
+              {stateMachine.map((state) => (
+                <MenuItem key={state.status} value={state.status}>
+                  {state.status}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={validateTransition}
+            disabled={loading || !validationOrderId || !targetStatus}
+            startIcon={<CheckCircleIcon />}
+          >
+            验证转换
+          </Button>
+        </Paper>
 
         {/* 订单历史查询 */}
-        <Grid xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              查询订单历史
-            </Typography>
-            
-            <TextField
-              fullWidth
-              label="订单ID"
-              value={historyOrderId}
-              onChange={(e) => setHistoryOrderId(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={getOrderHistory}
-              disabled={loading || !historyOrderId}
-              startIcon={<HistoryIcon />}
-            >
-              查询历史
-            </Button>
-          </Paper>
-        </Grid>
+        <Paper sx={{ p: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            查询订单历史
+          </Typography>
+          
+          <TextField
+            fullWidth
+            label="订单ID"
+            value={historyOrderId}
+            onChange={(e) => setHistoryOrderId(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={getOrderHistory}
+            disabled={loading || !historyOrderId}
+            startIcon={<HistoryIcon />}
+          >
+            查询历史
+          </Button>
+        </Paper>
 
         {/* 批量更新 */}
-        <Grid xs={12}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              批量更新状态
-            </Typography>
-            
-            <TextField
-              fullWidth
-              multiline
-              rows={4}
-              label="批量更新数据 (JSON格式)"
-              value={batchUpdates}
-              onChange={(e) => setBatchUpdates(e.target.value)}
-              placeholder='[{"orderId": "ORD001", "status": "SUCCESS", "reason": "支付成功"}, {"orderId": "ORD002", "status": "FAILED", "reason": "支付失败"}]'
-              sx={{ mb: 2 }}
-            />
-            
-            <Button
-              variant="contained"
-              onClick={batchUpdateStatus}
-              disabled={loading || !batchUpdates}
-              startIcon={<PlayArrowIcon />}
-              sx={{ mr: 2 }}
-            >
-              批量更新
-            </Button>
-            
-            <Button
-              variant="outlined"
-              onClick={cleanupExpiredLocks}
-              disabled={loading}
-              startIcon={<StopIcon />}
-            >
-              清理过期锁
-            </Button>
-            
-            {/* 批量更新结果 */}
-            {batchResults.length > 0 && (
-              <Box mt={2}>
-                <Typography variant="subtitle2" gutterBottom>
-                  批量更新结果:
-                </Typography>
-                <TableContainer>
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>订单ID</TableCell>
-                        <TableCell>状态</TableCell>
-                        <TableCell>结果</TableCell>
-                        <TableCell>操作ID</TableCell>
+        <Paper sx={{ p: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            批量更新状态
+          </Typography>
+          
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="批量更新数据 (JSON格式)"
+            value={batchUpdates}
+            onChange={(e) => setBatchUpdates(e.target.value)}
+            placeholder='[{"orderId": "ORD001", "status": "SUCCESS", "reason": "支付成功"}, {"orderId": "ORD002", "status": "FAILED", "reason": "支付失败"}]'
+            sx={{ mb: 2 }}
+          />
+          
+          <Button
+            variant="contained"
+            onClick={batchUpdateStatus}
+            disabled={loading || !batchUpdates}
+            startIcon={<PlayArrowIcon />}
+            sx={{ mr: 2 }}
+          >
+            批量更新
+          </Button>
+          
+          <Button
+            variant="outlined"
+            onClick={cleanupExpiredLocks}
+            disabled={loading}
+            startIcon={<StopIcon />}
+          >
+            清理过期锁
+          </Button>
+          
+          {/* 批量更新结果 */}
+          {batchResults.length > 0 && (
+            <Box mt={2}>
+              <Typography variant="subtitle2" gutterBottom>
+                批量更新结果:
+              </Typography>
+              <TableContainer>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>订单ID</TableCell>
+                      <TableCell>状态</TableCell>
+                      <TableCell>结果</TableCell>
+                      <TableCell>操作ID</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {batchResults.map((result, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{result.orderId}</TableCell>
+                        <TableCell>{result.status}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={result.success ? '成功' : '失败'}
+                            color={result.success ? 'success' : 'error'}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>{result.operationId}</TableCell>
                       </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {batchResults.map((result, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{result.orderId}</TableCell>
-                          <TableCell>{result.status}</TableCell>
-                          <TableCell>
-                            <Chip
-                              label={result.success ? '成功' : '失败'}
-                              color={result.success ? 'success' : 'error'}
-                              size="small"
-                            />
-                          </TableCell>
-                          <TableCell>{result.operationId}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Box>
-            )}
-          </Paper>
-        </Grid>
-      </Grid>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+          )}
+        </Paper>
 
       {/* 状态转换验证对话框 */}
       <Dialog open={validationDialogOpen} onClose={() => setValidationDialogOpen(false)} maxWidth="md" fullWidth>
@@ -569,28 +558,28 @@ const PaymentStateManagement: React.FC = () => {
                 验证详情
               </Typography>
               
-              <Grid container spacing={2}>
-                <Grid xs={6}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                <Box>
                   <Typography variant="body2" color="textSecondary">订单ID:</Typography>
                   <Typography variant="body1">{validationResult.orderId}</Typography>
-                </Grid>
-                <Grid xs={6}>
+                </Box>
+                <Box>
                   <Typography variant="body2" color="textSecondary">当前状态:</Typography>
                   <Typography variant="body1">{validationResult.currentStatus}</Typography>
-                </Grid>
-                <Grid xs={6}>
+                </Box>
+                <Box>
                   <Typography variant="body2" color="textSecondary">目标状态:</Typography>
                   <Typography variant="body1">{validationResult.targetStatus}</Typography>
-                </Grid>
-                <Grid xs={6}>
+                </Box>
+                <Box>
                   <Typography variant="body2" color="textSecondary">是否有效:</Typography>
                   <Chip
                     label={validationResult.isValid ? '有效' : '无效'}
                     color={validationResult.isValid ? 'success' : 'error'}
                     size="small"
                   />
-                </Grid>
-              </Grid>
+                </Box>
+              </Box>
               
               {!validationResult.isValid && (
                 <Alert severity="error" sx={{ mt: 2 }}>
@@ -669,6 +658,7 @@ const PaymentStateManagement: React.FC = () => {
           <Button onClick={() => setHistoryDialogOpen(false)}>关闭</Button>
         </DialogActions>
       </Dialog>
+      </Box>
     </Box>
   );
 };
