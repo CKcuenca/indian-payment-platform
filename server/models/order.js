@@ -144,7 +144,35 @@ const orderSchema = new mongoose.Schema({
   paidAt: Date,            // 支付时间
   completedAt: Date,       // 完成时间
   expiredAt: Date,         // 过期时间
-  timeoutAt: Date          // 超时时间
+  timeoutAt: Date,         // 超时时间
+  cancelledAt: Date,       // 取消时间
+  failedAt: Date,          // 失败时间
+  refundedAt: Date,        // 退款时间
+  disputedAt: Date,        // 争议时间
+  disputeResolvedAt: Date, // 争议解决时间
+  riskBlockedAt: Date,     // 风控拦截时间
+  manualReviewAt: Date,    // 人工审核时间
+  reversedAt: Date,        // 冲正时间
+  processingStartedAt: Date, // 处理开始时间
+  statusUpdatedAt: Date,   // 状态更新时间
+  
+  // 操作历史记录（幂等性支持）
+  operations: [{
+    operationId: String,
+    fromStatus: String,
+    toStatus: String,
+    additionalData: mongoose.Schema.Types.Mixed,
+    executedBy: String,
+    executedAt: Date
+  }],
+  
+  // 状态历史记录
+  statusHistory: [{
+    status: String,
+    timestamp: Date,
+    reason: String,
+    executedBy: String
+  }]
 });
 
 // 更新时间中间件

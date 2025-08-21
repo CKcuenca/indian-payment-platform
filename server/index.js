@@ -39,6 +39,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/payment-p
   app.use('/api/security', require('./routes/security'));
   app.use('/api/limit-management', require('./routes/limit-management'));
   app.use('/api/monitoring', require('./routes/monitoring'));
+  app.use('/api/payment-state', require('./routes/payment-state'));
   
   // 启动支付状态同步服务
   const PaymentStatusSyncService = require('./services/payment-status-sync');
