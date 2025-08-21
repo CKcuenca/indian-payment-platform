@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -114,7 +114,7 @@ const PaymentData: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
 
   // 获取支付配置列表
-  const fetchPaymentConfigs = async () => {
+  const fetchPaymentConfigs = useCallback(async () => {
     try {
       const response = await api.get('/payment-config');
       if (response.data.success) {
@@ -128,10 +128,10 @@ const PaymentData: React.FC = () => {
     } catch (err) {
       setError('获取支付配置失败');
     }
-  };
+  }, [selectedAccount]);
 
   // 获取统计数据
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     if (!selectedAccount || !dateRange[0] || !dateRange[1]) {
       setError('请选择支付账户和日期范围');
       return;
@@ -165,7 +165,7 @@ const PaymentData: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedAccount, dateRange, timeDimension, page, rowsPerPage]);
 
   useEffect(() => {
     fetchPaymentConfigs();

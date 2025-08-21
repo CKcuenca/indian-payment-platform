@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -117,7 +117,7 @@ export default function LimitManagement() {
   };
 
   // 加载限额配置
-  const loadLimitConfig = async () => {
+  const loadLimitConfig = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.get(`/limit-management/config?provider=${testProvider}`);
@@ -130,10 +130,10 @@ export default function LimitManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [testProvider]);
 
   // 加载限额统计
-  const loadLimitStats = async () => {
+  const loadLimitStats = useCallback(async () => {
     try {
       const response = await api.get(`/limit-management/stats?provider=${testProvider}&type=${testType}`);
       
@@ -143,7 +143,7 @@ export default function LimitManagement() {
     } catch (error: any) {
       console.error('加载限额统计失败:', error);
     }
-  };
+  }, [testProvider, testType]);
 
   // 更新限额配置
   const updateLimitConfig = async () => {
