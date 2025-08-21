@@ -26,20 +26,43 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// 数据库连接
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/payment-platform', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log('Connected to MongoDB');
-  
-  // 数据库连接成功后注册需要数据库的路由
+// 先注册数据库相关路由，再连接数据库
+console.log('🔧 预注册数据库相关路由...');
+
+try {
   app.use('/api/error-monitoring', require('./routes/error-monitoring'));
   app.use('/api/security', require('./routes/security'));
   app.use('/api/limit-management', require('./routes/limit-management'));
   app.use('/api/monitoring', require('./routes/monitoring'));
   app.use('/api/payment-state', require('./routes/payment-state'));
+  app.use('/api/database-optimization', require('./routes/database-optimization'));
+  app.use('/api/test', require('./routes/test-simple'));
+  
+  console.log('✅ Database-dependent routes pre-registered successfully');
+} catch (error) {
+  console.error('❌ Failed to pre-register database-dependent routes:', error);
+}
+
+// 数据库连接
+console.log('🔌 开始连接MongoDB...');
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/payment-platform', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(async () => {
+  console.log('✅ Connected to MongoDB');
+  
+  // 确保模型被加载
+  console.log('📚 加载数据库模型...');
+  require('./models/order');
+  require('./models/transaction');
+  require('./models/merchant');
+  require('./models/user');
+  require('./models/PaymentConfig');
+  require('./models/PaymentStats');
+  
+  console.log('✅ Models loaded successfully');
+  console.log('✅ Database setup completed');
   
   // 启动支付状态同步服务
   const PaymentStatusSyncService = require('./services/payment-status-sync');
@@ -48,15 +71,15 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/payment-p
   // 延迟5秒启动，确保其他服务已初始化
   setTimeout(() => {
     statusSyncService.start();
-    console.log('支付状态同步服务已启动');
+    console.log('✅ 支付状态同步服务已启动');
   }, 5000);
   
 })
 .catch((error) => {
-  console.error('MongoDB connection error:', error);
+  console.error('❌ MongoDB connection error:', error);
 });
 
-// 路由
+// 基础路由（不依赖数据库）
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/payment', require('./routes/payment'));
@@ -67,7 +90,6 @@ app.use('/api', require('./routes/cashgitPayment'));
 app.use('/api/webhook', require('./routes/webhook'));
 app.use('/api/payment-status', require('./routes/payment-status'));
 app.use('/api/status-sync', require('./routes/status-sync'));
-// 这些路由在数据库连接成功后注册
 
 // 健康检查
 app.get('/health', (req, res) => {
