@@ -7,18 +7,10 @@ import {
   CardContent,
   Button,
   Alert,
-  CircularProgress,
   Tabs,
   Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Chip,
   LinearProgress,
-  Grid,
   TextField,
   FormControl,
   InputLabel,
@@ -26,18 +18,13 @@ import {
   MenuItem,
   Accordion,
   AccordionSummary,
-  AccordionDetails,
-  Divider
+  AccordionDetails
 } from '@mui/material';
 import {
   Refresh as RefreshIcon,
   Speed as SpeedIcon,
   Storage as StorageIcon,
   Memory as MemoryIcon,
-  TrendingUp as TrendingUpIcon,
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-  Warning as WarningIcon,
   ExpandMore as ExpandMoreIcon
 } from '@mui/icons-material';
 import { useAuth } from '../hooks/useAuth';
