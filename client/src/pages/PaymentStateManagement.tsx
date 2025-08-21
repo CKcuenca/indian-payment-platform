@@ -44,6 +44,7 @@ import {
   Stop as StopIcon
 } from '@mui/icons-material';
 import { useAuth } from '../hooks/useAuth';
+import { Permission } from '../types';
 import api from '../services/api';
 
 interface PaymentState {
@@ -268,7 +269,7 @@ const PaymentStateManagement: React.FC = () => {
     loadStateMachine();
   }, []);
 
-  if (!hasPermission('SYSTEM_MONITORING')) {
+  if (!hasPermission(Permission.SYSTEM_MONITORING)) {
     return (
       <Box p={3}>
         <Alert severity="error">您没有权限访问此页面</Alert>
