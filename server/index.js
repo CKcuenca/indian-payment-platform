@@ -37,6 +37,7 @@ try {
   app.use('/api/payment-state', require('./routes/payment-state'));
   app.use('/api/database-optimization', require('./routes/database-optimization'));
   app.use('/api/test', require('./routes/test-simple'));
+  app.use('/api/debug', require('./routes/debug'));
   
   console.log('✅ Database-dependent routes pre-registered successfully');
 } catch (error) {
