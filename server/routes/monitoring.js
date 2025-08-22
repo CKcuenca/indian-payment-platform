@@ -149,17 +149,12 @@ router.get('/realtime', apiKeyAuth, async (req, res) => {
     // 强制收集一次最新指标
     await monitoringService.collectMetrics();
     
-    const overview = monitoringService.getSystemOverview();
-    const latestMetrics = monitoringService.getAllMetrics().pop();
+    const realTimeMetrics = monitoringService.getRealTimeMetrics();
     
     res.json({
       success: true,
       message: '获取实时性能数据成功',
-      data: {
-        overview,
-        latest: latestMetrics,
-        timestamp: new Date()
-      }
+      data: realTimeMetrics
     });
 
   } catch (error) {
@@ -168,6 +163,34 @@ router.get('/realtime', apiKeyAuth, async (req, res) => {
       success: false,
       error: '获取实时性能数据失败',
       code: 'REALTIME_ERROR'
+    });
+  }
+});
+
+/**
+ * 获取服务状态
+ * GET /api/monitoring/services
+ */
+router.get('/services', apiKeyAuth, async (req, res) => {
+  try {
+    const services = monitoringService.getServiceStatus();
+    
+    res.json({
+      success: true,
+      message: '获取服务状态成功',
+      data: {
+        services,
+        count: services.length,
+        timestamp: new Date()
+      }
+    });
+
+  } catch (error) {
+    console.error('获取服务状态失败:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取服务状态失败',
+      code: 'SERVICES_ERROR'
     });
   }
 });

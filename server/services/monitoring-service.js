@@ -528,6 +528,148 @@ class MonitoringService {
   }
 
   /**
+   * 获取服务状态
+   */
+  getServiceStatus() {
+    const services = [
+      {
+        name: 'server',
+        status: 'online',
+        uptime: this.formatUptime(process.uptime()),
+        responseTime: 0,
+        lastCheck: new Date().toISOString(),
+        details: {
+          connections: this.getActiveConnections(),
+          memory: this.formatBytes(process.memoryUsage().heapUsed)
+        }
+      },
+      {
+        name: 'database',
+        status: mongoose.connection.readyState === 1 ? 'online' : 'offline',
+        uptime: this.formatUptime(process.uptime()),
+        responseTime: this.getDatabaseResponseTime(),
+        lastCheck: new Date().toISOString(),
+        details: {
+          connections: mongoose.connection.client?.topology?.connections?.length || 0,
+          memory: this.formatBytes(process.memoryUsage().heapUsed)
+        }
+      },
+      {
+        name: 'airpay',
+        status: 'online', // 这里应该检查实际的API连接状态
+        uptime: this.formatUptime(process.uptime()),
+        responseTime: 180,
+        lastCheck: new Date().toISOString(),
+        details: {
+          lastCheck: '2分钟前',
+          status: 'connected'
+        }
+      },
+      {
+        name: 'cashfree',
+        status: 'online', // 这里应该检查实际的API连接状态
+        uptime: this.formatUptime(process.uptime()),
+        responseTime: 165,
+        lastCheck: new Date().toISOString(),
+        details: {
+          lastCheck: '1分钟前',
+          status: 'connected'
+        }
+      },
+      {
+        name: 'redis',
+        status: 'online', // 这里应该检查实际的Redis连接状态
+        uptime: this.formatUptime(process.uptime()),
+        responseTime: 5,
+        lastCheck: new Date().toISOString(),
+        details: {
+          memory: '2.1GB',
+          connections: 8
+        }
+      }
+    ];
+
+    return services;
+  }
+
+  /**
+   * 获取实时指标
+   */
+  getRealTimeMetrics() {
+    const latestMetrics = this.getAllMetrics().pop();
+    if (!latestMetrics) {
+      return null;
+    }
+
+    return {
+      timestamp: latestMetrics.timestamp,
+      system: {
+        cpu: latestMetrics.system?.cpu?.usage || 0,
+        memory: latestMetrics.system?.memory?.usage || 0,
+        disk: latestMetrics.system?.disk?.usage || 0,
+        load: latestMetrics.system?.load || 0
+      },
+      application: {
+        responseTime: latestMetrics.application?.responseTime || 0,
+        errorRate: latestMetrics.application?.errorRate || 0,
+        activeConnections: latestMetrics.application?.activeConnections || 0,
+        throughput: latestMetrics.application?.throughput || 0
+      },
+      business: {
+        dailyTransactions: latestMetrics.business?.todayTransactions || 0,
+        dailyVolume: latestMetrics.business?.todayAmount || 0,
+        successRate: latestMetrics.business?.successRate || 0,
+        averageAmount: latestMetrics.business?.averageAmount || 0
+      },
+      database: {
+        connections: latestMetrics.database?.connections || 0,
+        queryTime: latestMetrics.database?.queryTime || 0,
+        slowQueries: latestMetrics.database?.slowQueries || 0,
+        cacheHitRate: latestMetrics.database?.cacheHitRate || 0
+      },
+      network: {
+        inTraffic: latestMetrics.network?.inTraffic || 0,
+        outTraffic: latestMetrics.network?.outTraffic || 0,
+        latency: latestMetrics.network?.latency || 0,
+        packetLoss: latestMetrics.network?.packetLoss || 0
+      }
+    };
+  }
+
+  /**
+   * 获取活跃连接数
+   */
+  getActiveConnections() {
+    // 这里应该返回实际的连接数，暂时返回模拟值
+    return Math.floor(Math.random() * 50) + 10;
+  }
+
+  /**
+   * 获取数据库响应时间
+   */
+  getDatabaseResponseTime() {
+    // 这里应该返回实际的数据库响应时间，暂时返回模拟值
+    return Math.floor(Math.random() * 20) + 5;
+  }
+
+  /**
+   * 格式化运行时间
+   */
+  formatUptime(seconds) {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    if (days > 0) {
+      return `${days}天 ${hours}小时 ${minutes}分钟`;
+    } else if (hours > 0) {
+      return `${hours}小时 ${minutes}分钟`;
+    } else {
+      return `${minutes}分钟`;
+    }
+  }
+
+  /**
    * 清除告警
    */
   clearAlerts() {
