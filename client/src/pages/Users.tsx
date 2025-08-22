@@ -60,7 +60,7 @@ const mockUsers: User[] = [
       Permission.VIEW_ALL_ORDERS,
       Permission.VIEW_ALL_TRANSACTIONS,
       Permission.MANAGE_USERS,
-      Permission.SYSTEM_MONITORING
+
     ],
   },
   {
@@ -298,7 +298,7 @@ export default function Users() {
           Permission.VIEW_ALL_ORDERS,
           Permission.VIEW_ALL_TRANSACTIONS,
           Permission.MANAGE_USERS,
-          Permission.SYSTEM_MONITORING
+
         ];
       case UserRole.OPERATOR:
         return [

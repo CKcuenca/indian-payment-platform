@@ -37,7 +37,7 @@ try {
   app.use('/api/error-monitoring', require('./routes/error-monitoring'));
   app.use('/api/security', require('./routes/security'));
   app.use('/api/limit-management', require('./routes/limit-management'));
-  app.use('/api/monitoring', require('./routes/monitoring'));
+
   app.use('/api/payment-state', require('./routes/payment-state'));
   
   app.use('/api/memory-management', require('./routes/memory-management'));

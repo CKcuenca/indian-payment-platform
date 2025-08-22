@@ -10,7 +10,7 @@ export const ROLE_PERMISSIONS: RolePermissions = {
     Permission.VIEW_ALL_ORDERS,
     Permission.VIEW_ALL_TRANSACTIONS,
     Permission.MANAGE_USERS,
-    Permission.SYSTEM_MONITORING
+
   ],
   [UserRole.OPERATOR]: [
     Permission.VIEW_ALL_MERCHANTS,
@@ -125,10 +125,7 @@ export class PermissionManager {
     return this.hasPermission(Permission.MANAGE_USERS);
   }
 
-  // 检查是否可以查看系统监控
-  canViewSystemMonitoring(): boolean {
-    return this.hasPermission(Permission.SYSTEM_MONITORING);
-  }
+
 
   // 获取用户角色显示名称
   getRoleDisplayName(): string {
@@ -153,7 +150,7 @@ export class PermissionManager {
       transactions: this.hasAnyPermission([Permission.VIEW_ALL_TRANSACTIONS, Permission.VIEW_OWN_TRANSACTIONS]),
       paymentConfig: this.hasPermission(Permission.VIEW_PAYMENT_CONFIG),
       users: this.hasPermission(Permission.MANAGE_USERS),
-      systemMonitoring: this.hasPermission(Permission.SYSTEM_MONITORING)
+
     };
   }
 }

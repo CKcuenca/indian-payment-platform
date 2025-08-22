@@ -10,7 +10,7 @@ import Transactions from './pages/Transactions';
 import Merchants from './pages/Merchants';
 import PaymentManagement from './pages/PaymentManagement';
 import Users from './pages/Users';
-import Monitoring from './pages/Monitoring';
+
 import CashGitPaymentTest from './pages/CashGitPaymentTest';
 import ApiDocs from './pages/ApiDocs';
 import Orders from './pages/Orders';
@@ -152,7 +152,7 @@ function App() {
           <Route
             path="/payment-data"
             element={
-              <ProtectedRoute permissions={[Permission.SYSTEM_MONITORING]}>
+              <ProtectedRoute>
                 <Layout>
                   <PaymentData />
                 </Layout>
@@ -171,21 +171,12 @@ function App() {
             }
           />
 
-          <Route
-            path="/monitoring"
-            element={
-              <ProtectedRoute permissions={[Permission.SYSTEM_MONITORING]}>
-                <Layout>
-                  <Monitoring />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
+
 
           <Route
             path="/limit-management"
             element={
-              <ProtectedRoute permissions={[Permission.SYSTEM_MONITORING]}>
+              <ProtectedRoute>
                 <Layout>
                   <LimitManagement />
                 </Layout>
@@ -196,7 +187,7 @@ function App() {
           <Route
             path="/cashgit-payment-test"
             element={
-              <ProtectedRoute permissions={[Permission.SYSTEM_MONITORING]}>
+              <ProtectedRoute>
                 <Layout>
                   <CashGitPaymentTest />
                 </Layout>

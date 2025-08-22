@@ -24,7 +24,7 @@ import {
   Dashboard,
   AccountBalance,
   Business,
-  Monitor,
+
   Api,
   Person,
   TrendingUp,
@@ -71,7 +71,7 @@ const menuItems = [
     text: '支付统计',
     icon: <TrendingUp />,
     path: '/payment-data',
-    permissions: [Permission.SYSTEM_MONITORING]
+    permissions: []
   },
   {
     text: '用户管理',
@@ -79,17 +79,12 @@ const menuItems = [
     path: '/users',
     permissions: [Permission.MANAGE_USERS]
   },
-  {
-    text: '系统监控',
-    icon: <Monitor />,
-    path: '/monitoring',
-    permissions: [Permission.SYSTEM_MONITORING]
-  },
+
   {
     text: '支付测试',
     icon: <Api />,
     path: '/cashgit-payment-test',
-    permissions: [Permission.SYSTEM_MONITORING]
+    permissions: []
   },
 
 
