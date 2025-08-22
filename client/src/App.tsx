@@ -13,6 +13,7 @@ import Users from './pages/Users';
 import Monitoring from './pages/Monitoring';
 import CashGitPaymentTest from './pages/CashGitPaymentTest';
 import ApiDocs from './pages/ApiDocs';
+import Orders from './pages/Orders';
 
 import PaymentData from './pages/PaymentData';
 import LimitManagement from './pages/LimitManagement';
@@ -104,7 +105,16 @@ function App() {
             }
           />
 
-
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute anyPermission={[Permission.VIEW_ALL_TRANSACTIONS, Permission.VIEW_OWN_ORDERS]}>
+                <Layout>
+                  <Orders />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/transactions"
@@ -183,8 +193,6 @@ function App() {
             }
           />
 
-
-
           <Route
             path="/cashgit-payment-test"
             element={
@@ -196,9 +204,16 @@ function App() {
             }
           />
 
-
-
-
+          <Route
+            path="/api-docs"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <ApiDocs />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/profile"
