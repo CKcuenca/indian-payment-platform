@@ -356,7 +356,7 @@ const PassPayTest: React.FC = () => {
               </Box>
               
               <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                   <Typography variant="subtitle2" color="textSecondary">
                     账户ID: {status.config.accountId}
                   </Typography>
@@ -364,7 +364,7 @@ const PassPayTest: React.FC = () => {
                     支付ID: {status.config.payId}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid xs={12} md={6}>
                   <Typography variant="subtitle2" color="textSecondary">
                     版本: {status.providerInfo.version}
                   </Typography>
@@ -433,7 +433,7 @@ const PassPayTest: React.FC = () => {
               <Typography variant="h6" gutterBottom>创建代收订单</Typography>
               <form onSubmit={handleCollectionSubmit}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12}>
+                  <Grid xs={12}>
                     <TextField
                       fullWidth
                       label="订单ID"
@@ -442,7 +442,7 @@ const PassPayTest: React.FC = () => {
                       required
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid xs={12}>
                     <TextField
                       fullWidth
                       label="金额"
@@ -452,7 +452,7 @@ const PassPayTest: React.FC = () => {
                       required
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid xs={12}>
                     <TextField
                       fullWidth
                       label="回调URL"
@@ -461,7 +461,7 @@ const PassPayTest: React.FC = () => {
                       required
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid xs={12}>
                     <Button 
                       type="submit" 
                       variant="contained" 
@@ -484,7 +484,7 @@ const PassPayTest: React.FC = () => {
               <Typography variant="h6" gutterBottom>创建代付订单</Typography>
               <form onSubmit={handlePayoutSubmit}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12}>
+                  <Grid xs={12}>
                     <TextField
                       fullWidth
                       label="订单ID"
@@ -493,7 +493,7 @@ const PassPayTest: React.FC = () => {
                       required
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid xs={12}>
                     <TextField
                       fullWidth
                       label="金额"
@@ -503,7 +503,7 @@ const PassPayTest: React.FC = () => {
                       required
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid xs={12}>
                     <TextField
                       fullWidth
                       label="UPI ID"
@@ -512,7 +512,7 @@ const PassPayTest: React.FC = () => {
                       required
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid xs={12}>
                     <TextField
                       fullWidth
                       label="回调URL"
@@ -521,7 +521,7 @@ const PassPayTest: React.FC = () => {
                       required
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid xs={12}>
                     <Button 
                       type="submit" 
                       variant="contained" 
@@ -540,7 +540,7 @@ const PassPayTest: React.FC = () => {
         {/* 订单查询 */}
         <TabPanel value={tabValue} index={2}>
           <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>查询代收订单</Typography>
@@ -572,7 +572,7 @@ const PassPayTest: React.FC = () => {
               </Card>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>查询代付订单</Typography>
@@ -633,13 +633,13 @@ const PassPayTest: React.FC = () => {
         {/* UTR管理 */}
         <TabPanel value={tabValue} index={3}>
           <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>提交UTR</Typography>
                   <form onSubmit={handleUtrSubmit}>
                     <Grid container spacing={2}>
-                      <Grid item xs={12}>
+                      <Grid xs={12}>
                         <TextField
                           fullWidth
                           label="订单ID"
@@ -648,7 +648,7 @@ const PassPayTest: React.FC = () => {
                           required
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid xs={12}>
                         <TextField
                           fullWidth
                           label="交易号"
@@ -657,7 +657,7 @@ const PassPayTest: React.FC = () => {
                           required
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid xs={12}>
                         <TextField
                           fullWidth
                           label="UTR"
@@ -666,7 +666,7 @@ const PassPayTest: React.FC = () => {
                           required
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid xs={12}>
                         <Button 
                           type="submit" 
                           variant="contained" 
@@ -682,7 +682,7 @@ const PassPayTest: React.FC = () => {
               </Card>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid xs={12} md={6}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>查询UTR状态</Typography>
