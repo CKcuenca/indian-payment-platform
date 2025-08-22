@@ -90,6 +90,12 @@ const menuItems = [
     path: '/cashgit-payment-test',
     permissions: [Permission.SYSTEM_MONITORING]
   },
+  {
+    text: 'PassPay测试',
+    icon: <Payment />,
+    path: '/passpay-test',
+    permissions: [Permission.SYSTEM_MONITORING]
+  },
 
 ];
 

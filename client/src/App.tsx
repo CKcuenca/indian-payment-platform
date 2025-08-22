@@ -12,7 +12,8 @@ import PaymentManagement from './pages/PaymentManagement';
 import Users from './pages/Users';
 import Monitoring from './pages/Monitoring';
 import CashGitPaymentTest from './pages/CashGitPaymentTest';
-import PaymentData from './pages/PaymentData';
+import PassPayTest from './pages/PassPayTest';
+import PaymentData from './pages/Pages/PaymentData';
 import LimitManagement from './pages/LimitManagement';
 
 import { useAuth } from './hooks/useAuth';
@@ -189,6 +190,17 @@ function App() {
               <ProtectedRoute permissions={[Permission.SYSTEM_MONITORING]}>
                 <Layout>
                   <CashGitPaymentTest />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/passpay-test"
+            element={
+              <ProtectedRoute permissions={[Permission.SYSTEM_MONITORING]}>
+                <Layout>
+                  <PassPayTest />
                 </Layout>
               </ProtectedRoute>
             }

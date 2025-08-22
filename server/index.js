@@ -96,6 +96,7 @@ app.use('/api', require('./routes/cashgitPayment'));
 app.use('/api/webhook', require('./routes/webhook'));
 app.use('/api/payment-status', require('./routes/payment-status'));
 app.use('/api/status-sync', require('./routes/status-sync'));
+app.use('/api/passpay', require('./routes/passpay'));
 app.use('/api/heap-optimization', require('./routes/heap-optimization'));
 app.use('/api/memory-optimization', require('./routes/memory-optimization'));
 
