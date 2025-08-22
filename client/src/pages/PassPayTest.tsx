@@ -8,15 +8,10 @@ import {
   Button,
   Alert,
   CircularProgress,
-  Divider,
   Chip,
   Paper,
   Tabs,
-  Tab,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon
+  Tab
 } from '@mui/material';
 import {
   AccountBalance,
@@ -25,8 +20,7 @@ import {
   QueryStats,
   CheckCircle,
   Error,
-  Warning,
-  Info
+  Warning
 } from '@mui/icons-material';
 import api from '../services/api';
 
