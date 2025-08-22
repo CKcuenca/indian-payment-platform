@@ -6,7 +6,6 @@ import {
   Typography,
   TextField,
   Button,
-  Grid,
   Alert,
   CircularProgress,
   Divider,
@@ -355,24 +354,24 @@ const PassPayTest: React.FC = () => {
                 />
               </Box>
               
-              <Grid container spacing={2}>
-                <Grid xs={12} md={6}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+                <Box>
                   <Typography variant="subtitle2" color="textSecondary">
                     账户ID: {status.config.accountId}
                   </Typography>
                   <Typography variant="subtitle2" color="textSecondary">
                     支付ID: {status.config.payId}
                   </Typography>
-                </Grid>
-                <Grid xs={12} md={6}>
+                </Box>
+                <Box>
                   <Typography variant="subtitle2" color="textSecondary">
                     版本: {status.providerInfo.version}
                   </Typography>
                   <Typography variant="subtitle2" color="textSecondary">
                     签名算法: {status.providerInfo.signatureAlgorithm}
                   </Typography>
-                </Grid>
-              </Grid>
+                </Box>
+              </Box>
 
               <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle2" color="textSecondary" gutterBottom>
@@ -432,46 +431,38 @@ const PassPayTest: React.FC = () => {
             <CardContent>
               <Typography variant="h6" gutterBottom>创建代收订单</Typography>
               <form onSubmit={handleCollectionSubmit}>
-                <Grid container spacing={2}>
-                  <Grid xs={12}>
-                    <TextField
-                      fullWidth
-                      label="订单ID"
-                      value={collectionForm.orderId}
-                      onChange={(e) => setCollectionForm({...collectionForm, orderId: e.target.value})}
-                      required
-                    />
-                  </Grid>
-                  <Grid xs={12}>
-                    <TextField
-                      fullWidth
-                      label="金额"
-                      type="number"
-                      value={collectionForm.amount}
-                      onChange={(e) => setCollectionForm({...collectionForm, amount: e.target.value})}
-                      required
-                    />
-                  </Grid>
-                  <Grid xs={12}>
-                    <TextField
-                      fullWidth
-                      label="回调URL"
-                      value={collectionForm.notifyUrl}
-                      onChange={(e) => setCollectionForm({...collectionForm, notifyUrl: e.target.value})}
-                      required
-                    />
-                  </Grid>
-                  <Grid xs={12}>
-                    <Button 
-                      type="submit" 
-                      variant="contained" 
-                      disabled={loading}
-                      fullWidth
-                    >
-                      {loading ? <CircularProgress size={20} /> : '创建代收订单'}
-                    </Button>
-                  </Grid>
-                </Grid>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <TextField
+                    fullWidth
+                    label="订单ID"
+                    value={collectionForm.orderId}
+                    onChange={(e) => setCollectionForm({...collectionForm, orderId: e.target.value})}
+                    required
+                  />
+                  <TextField
+                    fullWidth
+                    label="金额"
+                    type="number"
+                    value={collectionForm.amount}
+                    onChange={(e) => setCollectionForm({...collectionForm, amount: e.target.value})}
+                    required
+                  />
+                  <TextField
+                    fullWidth
+                    label="回调URL"
+                    value={collectionForm.notifyUrl}
+                    onChange={(e) => setCollectionForm({...collectionForm, notifyUrl: e.target.value})}
+                    required
+                  />
+                  <Button 
+                    type="submit" 
+                    variant="contained" 
+                    disabled={loading}
+                    fullWidth
+                  >
+                    {loading ? <CircularProgress size={20} /> : '创建代收订单'}
+                  </Button>
+                </Box>
               </form>
             </CardContent>
           </Card>
@@ -483,55 +474,45 @@ const PassPayTest: React.FC = () => {
             <CardContent>
               <Typography variant="h6" gutterBottom>创建代付订单</Typography>
               <form onSubmit={handlePayoutSubmit}>
-                <Grid container spacing={2}>
-                  <Grid xs={12}>
-                    <TextField
-                      fullWidth
-                      label="订单ID"
-                      value={payoutForm.orderId}
-                      onChange={(e) => setPayoutForm({...payoutForm, orderId: e.target.value})}
-                      required
-                    />
-                  </Grid>
-                  <Grid xs={12}>
-                    <TextField
-                      fullWidth
-                      label="金额"
-                      type="number"
-                      value={payoutForm.amount}
-                      onChange={(e) => setPayoutForm({...payoutForm, amount: e.target.value})}
-                      required
-                    />
-                  </Grid>
-                  <Grid xs={12}>
-                    <TextField
-                      fullWidth
-                      label="UPI ID"
-                      value={payoutForm.upiId}
-                      onChange={(e) => setPayoutForm({...payoutForm, upiId: e.target.value})}
-                      required
-                    />
-                  </Grid>
-                  <Grid xs={12}>
-                    <TextField
-                      fullWidth
-                      label="回调URL"
-                      value={payoutForm.notifyUrl}
-                      onChange={(e) => setPayoutForm({...payoutForm, notifyUrl: e.target.value})}
-                      required
-                    />
-                  </Grid>
-                  <Grid xs={12}>
-                    <Button 
-                      type="submit" 
-                      variant="contained" 
-                      disabled={loading}
-                      fullWidth
-                    >
-                      {loading ? <CircularProgress size={20} /> : '创建代付订单'}
-                    </Button>
-                  </Grid>
-                </Grid>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <TextField
+                    fullWidth
+                    label="订单ID"
+                    value={payoutForm.orderId}
+                    onChange={(e) => setPayoutForm({...payoutForm, orderId: e.target.value})}
+                    required
+                  />
+                  <TextField
+                    fullWidth
+                    label="金额"
+                    type="number"
+                    value={payoutForm.amount}
+                    onChange={(e) => setPayoutForm({...payoutForm, amount: e.target.value})}
+                    required
+                  />
+                  <TextField
+                    fullWidth
+                    label="UPI ID"
+                    value={payoutForm.upiId}
+                    onChange={(e) => setPayoutForm({...payoutForm, upiId: e.target.value})}
+                    required
+                  />
+                  <TextField
+                    fullWidth
+                    label="回调URL"
+                    value={payoutForm.notifyUrl}
+                    onChange={(e) => setPayoutForm({...payoutForm, notifyUrl: e.target.value})}
+                    required
+                  />
+                  <Button 
+                    type="submit" 
+                    variant="contained" 
+                    disabled={loading}
+                    fullWidth
+                  >
+                    {loading ? <CircularProgress size={20} /> : '创建代付订单'}
+                  </Button>
+                </Box>
               </form>
             </CardContent>
           </Card>
@@ -539,181 +520,164 @@ const PassPayTest: React.FC = () => {
 
         {/* 订单查询 */}
         <TabPanel value={tabValue} index={2}>
-          <Grid container spacing={2}>
-            <Grid xs={12} md={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>查询代收订单</Typography>
-                  <Box sx={{ mb: 2 }}>
-                    <TextField
-                      fullWidth
-                      label="订单ID"
-                      value={queryForm.orderId}
-                      onChange={(e) => setQueryForm({...queryForm, orderId: e.target.value})}
-                      sx={{ mb: 2 }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="交易号"
-                      value={queryForm.tradeNo}
-                      onChange={(e) => setQueryForm({...queryForm, tradeNo: e.target.value})}
-                      sx={{ mb: 2 }}
-                    />
-                    <Button 
-                      variant="contained" 
-                      onClick={handleCollectionQuery}
-                      disabled={loading}
-                      fullWidth
-                    >
-                      {loading ? <CircularProgress size={20} /> : '查询代收订单'}
-                    </Button>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>查询代收订单</Typography>
+                <Box sx={{ mb: 2 }}>
+                  <TextField
+                    fullWidth
+                    label="订单ID"
+                    value={queryForm.orderId}
+                    onChange={(e) => setQueryForm({...queryForm, orderId: e.target.value})}
+                    sx={{ mb: 2 }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="交易号"
+                    value={queryForm.tradeNo}
+                    onChange={(e) => setQueryForm({...queryForm, tradeNo: e.target.value})}
+                    sx={{ mb: 2 }}
+                  />
+                  <Button 
+                    variant="contained" 
+                    onClick={handleCollectionQuery}
+                    disabled={loading}
+                    fullWidth
+                  >
+                    {loading ? <CircularProgress size={20} /> : '查询代收订单'}
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
 
-            <Grid xs={12} md={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>查询代付订单</Typography>
-                  <Box sx={{ mb: 2 }}>
-                    <TextField
-                      fullWidth
-                      label="订单ID"
-                      value={queryForm.orderId}
-                      onChange={(e) => setQueryForm({...queryForm, orderId: e.target.value})}
-                      sx={{ mb: 2 }}
-                    />
-                    <TextField
-                      fullWidth
-                      label="交易号"
-                      value={queryForm.tradeNo}
-                      onChange={(e) => setQueryForm({...queryForm, tradeNo: e.target.value})}
-                      sx={{ mb: 2 }}
-                    />
-                    <Button 
-                      variant="contained" 
-                      onClick={handlePayoutQuery}
-                      disabled={loading}
-                      fullWidth
-                    >
-                      {loading ? <CircularProgress size={20} /> : '查询代付订单'}
-                    </Button>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>查询代付订单</Typography>
+                <Box sx={{ mb: 2 }}>
+                  <TextField
+                    fullWidth
+                    label="订单ID"
+                    value={queryForm.orderId}
+                    onChange={(e) => setQueryForm({...queryForm, orderId: e.target.value})}
+                    sx={{ mb: 2 }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="交易号"
+                    value={queryForm.tradeNo}
+                    onChange={(e) => setQueryForm({...queryForm, tradeNo: e.target.value})}
+                    sx={{ mb: 2 }}
+                  />
+                  <Button 
+                    variant="contained" 
+                    onClick={handlePayoutQuery}
+                    disabled={loading}
+                    fullWidth
+                  >
+                    {loading ? <CircularProgress size={20} /> : '查询代付订单'}
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
 
-            <Grid item xs={12}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>查询UPI</Typography>
-                  <Box sx={{ display: 'flex', gap: 2 }}>
-                    <TextField
-                      fullWidth
-                      label="UPI ID"
-                      value={queryForm.upiId}
-                      onChange={(e) => setQueryForm({...queryForm, upiId: e.target.value})}
-                    />
-                    <Button 
-                      variant="contained" 
-                      onClick={handleUpiQuery}
-                      disabled={loading}
-                      sx={{ minWidth: 120 }}
-                    >
-                      {loading ? <CircularProgress size={20} /> : '查询UPI'}
-                    </Button>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>查询UPI</Typography>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <TextField
+                    fullWidth
+                    label="UPI ID"
+                    value={queryForm.upiId}
+                    onChange={(e) => setQueryForm({...queryForm, upiId: e.target.value})}
+                  />
+                  <Button 
+                    variant="contained" 
+                    onClick={handleUpiQuery}
+                    disabled={loading}
+                    sx={{ minWidth: 120 }}
+                  >
+                    {loading ? <CircularProgress size={20} /> : '查询UPI'}
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
         </TabPanel>
 
         {/* UTR管理 */}
         <TabPanel value={tabValue} index={3}>
-          <Grid container spacing={2}>
-            <Grid xs={12} md={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>提交UTR</Typography>
-                  <form onSubmit={handleUtrSubmit}>
-                    <Grid container spacing={2}>
-                      <Grid xs={12}>
-                        <TextField
-                          fullWidth
-                          label="订单ID"
-                          value={utrForm.orderId}
-                          onChange={(e) => setUtrForm({...utrForm, orderId: e.target.value})}
-                          required
-                        />
-                      </Grid>
-                      <Grid xs={12}>
-                        <TextField
-                          fullWidth
-                          label="交易号"
-                          value={utrForm.tradeNo}
-                          onChange={(e) => setUtrForm({...utrForm, tradeNo: e.target.value})}
-                          required
-                        />
-                      </Grid>
-                      <Grid xs={12}>
-                        <TextField
-                          fullWidth
-                          label="UTR"
-                          value={utrForm.utr}
-                          onChange={(e) => setUtrForm({...utrForm, utr: e.target.value})}
-                          required
-                        />
-                      </Grid>
-                      <Grid xs={12}>
-                        <Button 
-                          type="submit" 
-                          variant="contained" 
-                          disabled={loading}
-                          fullWidth
-                        >
-                          {loading ? <CircularProgress size={20} /> : '提交UTR'}
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </form>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            <Grid xs={12} md={6}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>查询UTR状态</Typography>
-                  <Box sx={{ mb: 2 }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>提交UTR</Typography>
+                <form onSubmit={handleUtrSubmit}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <TextField
                       fullWidth
                       label="订单ID"
                       value={utrForm.orderId}
                       onChange={(e) => setUtrForm({...utrForm, orderId: e.target.value})}
-                      sx={{ mb: 2 }}
+                      required
                     />
                     <TextField
                       fullWidth
                       label="交易号"
                       value={utrForm.tradeNo}
                       onChange={(e) => setUtrForm({...utrForm, tradeNo: e.target.value})}
-                      sx={{ mb: 2 }}
+                      required
+                    />
+                    <TextField
+                      fullWidth
+                      label="UTR"
+                      value={utrForm.utr}
+                      onChange={(e) => setUtrForm({...utrForm, utr: e.target.value})}
+                      required
                     />
                     <Button 
+                      type="submit" 
                       variant="contained" 
-                      onClick={handleUtrQuery}
                       disabled={loading}
                       fullWidth
                     >
-                      {loading ? <CircularProgress size={20} /> : '查询UTR状态'}
+                      {loading ? <CircularProgress size={20} /> : '提交UTR'}
                     </Button>
                   </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
+                </form>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>查询UTR状态</Typography>
+                <Box sx={{ mb: 2 }}>
+                  <TextField
+                    fullWidth
+                    label="订单ID"
+                    value={utrForm.orderId}
+                    onChange={(e) => setUtrForm({...utrForm, orderId: e.target.value})}
+                    sx={{ mb: 2 }}
+                  />
+                  <TextField
+                    fullWidth
+                    label="交易号"
+                    value={utrForm.tradeNo}
+                    onChange={(e) => setUtrForm({...utrForm, tradeNo: e.target.value})}
+                    sx={{ mb: 2 }}
+                  />
+                  <Button 
+                    variant="contained" 
+                    onClick={handleUtrQuery}
+                    disabled={loading}
+                    fullWidth
+                  >
+                    {loading ? <CircularProgress size={20} /> : '查询UTR状态'}
+                  </Button>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
         </TabPanel>
 
         {/* 余额查询 */}
