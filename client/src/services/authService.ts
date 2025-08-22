@@ -50,7 +50,7 @@ class AuthService {
   // 登录
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     try {
-      const response = await api.post<ApiResponse<LoginResponse>>('/auth/login', credentials);
+      const response = await api.post<ApiResponse<LoginResponse>>('/api/auth/login', credentials);
       
       if (response.data.success) {
         const { user, token, permissions } = response.data.data;
@@ -182,31 +182,48 @@ class AuthService {
     }
   }
 
-  // 更新用户信息
-  async updateProfile(profileData: Partial<User>): Promise<User> {
+  // 获取用户资料
+  async getProfile(): Promise<User> {
     try {
-      const response = await api.put<ApiResponse<User>>('/auth/profile', profileData);
+      const response = await api.get<ApiResponse<User>>('/api/auth/profile');
+      
       if (response.data.success) {
-        this.currentUser = response.data.data;
-        this.initializePermissionManager();
-        localStorage.setItem('user_data', JSON.stringify(this.currentUser));
-        return this.currentUser;
+        return response.data.data;
       } else {
-        throw new Error(response.data.error || '更新失败');
+        throw new Error(response.data.error || '获取用户资料失败');
       }
     } catch (error: any) {
-      throw new Error(error.response?.data?.error || '更新失败');
+      throw new Error(error.response?.data?.error || '获取用户资料失败');
+    }
+  }
+
+  // 更新用户资料
+  async updateProfile(profileData: Partial<User>): Promise<User> {
+    try {
+      const response = await api.put<ApiResponse<User>>('/api/auth/profile', profileData);
+      
+      if (response.data.success) {
+        // 更新本地用户数据
+        this.currentUser = { ...this.currentUser, ...response.data.data };
+        localStorage.setItem('user_data', JSON.stringify(this.currentUser));
+        
+        return response.data.data;
+      } else {
+        throw new Error(response.data.error || '更新用户资料失败');
+      }
+    } catch (error: any) {
+      throw new Error(error.response?.data?.error || '更新用户资料失败');
     }
   }
 
   // 修改密码
-  async changePassword(passwordData: {
-    currentPassword: string;
-    newPassword: string;
-  }): Promise<void> {
+  async changePassword(passwordData: { currentPassword: string; newPassword: string }): Promise<void> {
     try {
-      const response = await api.post<ApiResponse<void>>('/auth/change-password', passwordData);
-      if (!response.data.success) {
+      const response = await api.post<ApiResponse<void>>('/api/auth/change-password', passwordData);
+      
+      if (response.data.success) {
+        return;
+      } else {
         throw new Error(response.data.error || '修改密码失败');
       }
     } catch (error: any) {
