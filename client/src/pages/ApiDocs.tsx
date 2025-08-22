@@ -15,7 +15,6 @@ import {
   Chip,
   Divider,
   Alert,
-  Grid,
   Card,
   CardContent,
   List,
@@ -24,11 +23,9 @@ import {
   ListItemIcon,
   Tabs,
   Tab,
-  Link,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
-  Code as CodeIcon,
   Api as ApiIcon,
   Security as SecurityIcon,
   Info as InfoIcon,
@@ -37,7 +34,6 @@ import {
   Notifications as NotificationsIcon,
   QueryStats as QueryStatsIcon,
 } from '@mui/icons-material';
-import { useAuth } from '../hooks/useAuth';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -66,7 +62,6 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const ApiDocs = () => {
-  const { currentUser } = useAuth();
   const [tabValue, setTabValue] = React.useState(0);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -757,11 +752,11 @@ class CashGitAPI {
 
     public function createOrder($orderData) {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, \$this->baseUrl . '/payment/create');
+        curl_setopt($ch, CURLOPT_URL, $this->baseUrl . '/payment/create');
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($orderData));
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'X-API-Key: ' . \$this->apiKey,
+            'X-API-Key: ' . $this->apiKey,
             'Content-Type: application/json'
         ]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
