@@ -72,7 +72,7 @@ interface PerformanceReport {
 }
 
 const DatabaseOptimization: React.FC = () => {
-  const { hasPermission } = useAuth();
+  const { hasPermission, currentUser, isAuthenticated } = useAuth();
   const [tabValue, setTabValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,6 +91,17 @@ const DatabaseOptimization: React.FC = () => {
   // 检查权限
   const hasAccess = hasPermission(Permission.SYSTEM_MONITORING);
 
+  // 添加调试信息
+  console.log('=== 权限检查调试信息 ===');
+  console.log('认证状态:', isAuthenticated);
+  console.log('当前用户:', currentUser);
+  console.log('用户角色:', currentUser?.role);
+  console.log('用户权限:', currentUser?.permissions);
+  console.log('检查权限:', Permission.SYSTEM_MONITORING);
+  console.log('权限检查结果:', hasAccess);
+  console.log('hasPermission函数:', hasPermission);
+  console.log('========================');
+
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
@@ -99,7 +110,7 @@ const DatabaseOptimization: React.FC = () => {
   const loadDatabaseStatus = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/database-optimization/status');
+      const response = await api.get('/api/database-optimization/status');
       if (response.data.success) {
         setDbStatus(response.data.data);
       }
@@ -116,7 +127,7 @@ const DatabaseOptimization: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      const response = await api.post('/database-optimization/optimize-indexes');
+      const response = await api.post('/api/database-optimization/optimize-indexes');
       if (response.data.success) {
         setSuccess('数据库索引优化完成');
         await loadDatabaseStatus(); // 重新加载状态
@@ -134,7 +145,7 @@ const DatabaseOptimization: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      const response = await api.post('/database-optimization/optimize-connection-pool');
+      const response = await api.post('/api/database-optimization/optimize-connection-pool');
       if (response.data.success) {
         setSuccess('连接池配置优化完成');
         await loadDatabaseStatus(); // 重新加载状态
@@ -150,7 +161,7 @@ const DatabaseOptimization: React.FC = () => {
   const loadPerformanceReport = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/database-optimization/performance-report');
+      const response = await api.get('/api/database-optimization/performance-report');
       if (response.data.success) {
         setPerformanceReport(response.data.data);
       }
@@ -167,7 +178,7 @@ const DatabaseOptimization: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      const response = await api.post('/database-optimization/cleanup-expired-data');
+      const response = await api.post('/api/database-optimization/cleanup-expired-data');
       if (response.data.success) {
         setSuccess('过期数据清理完成');
       }
@@ -186,9 +197,20 @@ const DatabaseOptimization: React.FC = () => {
 
   // 权限检查
   if (!hasAccess) {
+    console.log('❌ 权限检查失败 - 用户无法访问数据库优化页面');
     return (
       <Box p={3}>
-        <Alert severity="error">您没有权限访问此页面</Alert>
+        <Alert severity="error">
+          您没有权限访问此页面
+          <br />
+          <strong>调试信息：</strong>
+          <br />
+          用户角色: {currentUser?.role}
+          <br />
+          用户权限: {currentUser?.permissions?.join(', ') || '无权限'}
+          <br />
+          需要权限: {Permission.SYSTEM_MONITORING}
+        </Alert>
       </Box>
     );
   }
