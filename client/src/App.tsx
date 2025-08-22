@@ -13,7 +13,7 @@ import Users from './pages/Users';
 import Monitoring from './pages/Monitoring';
 import CashGitPaymentTest from './pages/CashGitPaymentTest';
 import PassPayTest from './pages/PassPayTest';
-import PaymentData from './pages/Pages/PaymentData';
+import PaymentData from './pages/PaymentData';
 import LimitManagement from './pages/LimitManagement';
 
 import { useAuth } from './hooks/useAuth';
