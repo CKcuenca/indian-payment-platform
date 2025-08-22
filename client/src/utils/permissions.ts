@@ -24,14 +24,27 @@ export const ROLE_PERMISSIONS: RolePermissions = {
   ]
 };
 
+// 字符串角色到枚举角色的映射
+const STRING_TO_ENUM_ROLE: { [key: string]: UserRole } = {
+  'admin': UserRole.ADMIN,
+  'operator': UserRole.OPERATOR,
+  'merchant': UserRole.MERCHANT,
+  'user': UserRole.MERCHANT // 默认用户角色映射到商户
+};
+
 // 权限检查工具类
 export class PermissionManager {
   private userRole: UserRole;
   private userPermissions: Permission[];
   private merchantId?: string;
 
-  constructor(userRole: UserRole, userPermissions: Permission[], merchantId?: string) {
-    this.userRole = userRole;
+  constructor(userRole: UserRole | string, userPermissions: Permission[], merchantId?: string) {
+    // 处理字符串角色到枚举角色的转换
+    if (typeof userRole === 'string') {
+      this.userRole = STRING_TO_ENUM_ROLE[userRole.toLowerCase()] || UserRole.MERCHANT;
+    } else {
+      this.userRole = userRole;
+    }
     this.userPermissions = userPermissions;
     this.merchantId = merchantId;
   }
@@ -147,7 +160,7 @@ export class PermissionManager {
 
 // 创建权限管理器的工厂函数
 export const createPermissionManager = (
-  userRole: UserRole, 
+  userRole: UserRole | string, 
   userPermissions: Permission[], 
   merchantId?: string
 ): PermissionManager => {
