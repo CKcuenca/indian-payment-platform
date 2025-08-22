@@ -188,18 +188,16 @@ export default function Layout({ children }: LayoutProps) {
             CashGit - Indian Payment Platform
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {/* 对接文档链接 - 只有商户用户才能看到 */}
-            {currentUser?.role === 'MERCHANT' && (
-              <Button
-                color="inherit"
-                variant="outlined"
-                size="small"
-                sx={{ mr: 2, borderColor: 'rgba(255,255,255,0.3)', color: 'white' }}
-                onClick={() => window.open('/api-docs', '_blank')}
-              >
-                对接文档
-              </Button>
-            )}
+            {/* 对接文档链接 - 所有用户都可以看到 */}
+            <Button
+              color="inherit"
+              variant="outlined"
+              size="small"
+              sx={{ mr: 2, borderColor: 'rgba(255,255,255,0.3)', color: 'white' }}
+              onClick={() => window.open('/api-docs', '_blank')}
+            >
+              对接文档
+            </Button>
             <Typography variant="body2" sx={{ mr: 2 }}>
               {currentUser?.displayName || currentUser?.username}
             </Typography>
