@@ -467,11 +467,51 @@ const ApiDocs = () => {
               </TableBody>
             </Table>
           </TableContainer>
+
+          <Divider sx={{ my: 3 }} />
+
+          <Typography variant="h6" gutterBottom>5. 查询商户余额</Typography>
+          <Typography variant="body2" paragraph>
+            查询商户账户的当前余额和额度信息
+          </Typography>
+          
+          <Paper sx={{ p: 2, mb: 2, bgcolor: 'grey.50' }}>
+            <Typography variant="subtitle2" gutterBottom>接口地址</Typography>
+            <code>GET /api/merchant/balance</code>
+          </Paper>
+
+          <Typography variant="subtitle1" gutterBottom>请求参数</Typography>
+          <Typography variant="body2" paragraph>
+            无需参数，系统会自动识别当前商户身份
+          </Typography>
+
+          <Typography variant="subtitle1" gutterBottom>响应示例</Typography>
+          <Box sx={{ bgcolor: 'grey.100', p: 2, borderRadius: 1, fontFamily: 'monospace' }}>
+{`{
+  "success": true,
+  "data": {
+    "merchantId": "MERCHANT_001",
+    "balance": 1500000,
+    "currency": "INR",
+    "limits": {
+      "dailyLimit": 10000000,
+      "monthlyLimit": 100000000,
+      "singleTransactionLimit": 5000000
+    },
+    "usage": {
+      "dailyUsed": 2500000,
+      "monthlyUsed": 15000000,
+      "lastResetDate": "2024-01-01"
+    },
+    "lastUpdate": "2024-01-15T10:00:00Z"
+  }
+}`}
+          </Box>
         </TabPanel>
 
         {/* 回调通知接口 */}
         <TabPanel value={tabValue} index={3}>
-          <Typography variant="h6" gutterBottom>5. 异步回调通知</Typography>
+          <Typography variant="h6" gutterBottom>6. 异步回调通知</Typography>
           <Typography variant="body2" paragraph>
             当订单状态发生变化时，系统会向您配置的notifyUrl发送POST请求
           </Typography>
