@@ -388,29 +388,32 @@ class MonitoringService {
    */
   getSystemOverview() {
     const latestMetrics = Array.from(this.metrics.values()).pop();
-    if (!latestMetrics) return null;
+    if (!latestMetrics) {
+      // 如果没有指标数据，返回默认值
+      return {
+        totalMerchants: 0,
+        activeMerchants: 0,
+        totalTransactions: 0,
+        totalVolume: 0,
+        successRate: 100,
+        averageResponseTime: 0,
+        systemStatus: 'healthy',
+        lastUpdate: new Date().toISOString()
+      };
+    }
 
     const { system, application, business } = latestMetrics;
     
+    // 返回前端期望的数据结构
     return {
-      status: this.getOverallStatus(latestMetrics),
-      system: {
-        cpu: system.cpu.usage,
-        memory: system.memory.usage,
-        disk: system.disk.usage,
-        uptime: system.uptime
-      },
-      application: {
-        memory: application.process.memory.heapUsed,
-        uptime: application.process.uptime
-      },
-      business: {
-        todayOrders: business.orders?.today || 0,
-        todayTransactions: business.transactions?.today || 0,
-        todayAmount: business.amounts?.today || 0
-      },
-      alerts: this.alerts.slice(-5), // 最近5条告警
-      lastUpdate: latestMetrics.timestamp
+      totalMerchants: business.orders?.totalMerchants || 0,
+      activeMerchants: business.orders?.activeMerchants || 0,
+      totalTransactions: business.transactions?.today || 0,
+      totalVolume: business.amounts?.today || 0,
+      successRate: business.successRate || 100,
+      averageResponseTime: application.responseTime || 0,
+      systemStatus: this.getOverallStatus(latestMetrics).toLowerCase(),
+      lastUpdate: latestMetrics.timestamp.toISOString()
     };
   }
 
