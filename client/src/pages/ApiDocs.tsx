@@ -91,34 +91,30 @@ const ApiDocs = () => {
           <InfoIcon color="primary" />
           基础信息
         </Typography>
-        <Grid container spacing={3}>
-          <Grid xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>生产环境</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Base URL: <code>https://cashgit.com/api</code>
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  协议: HTTPS
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>沙箱环境</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Base URL: <code>https://sandbox.cashgit.com/api</code>
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  协议: HTTPS
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>生产环境</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Base URL: <code>https://cashgit.com/api</code>
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                协议: HTTPS
+              </Typography>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>沙箱环境</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Base URL: <code>https://sandbox.cashgit.com/api</code>
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                协议: HTTPS
+              </Typography>
+            </CardContent>
+          </Card>
+        </Box>
       </Paper>
 
       {/* 认证方式 */}
@@ -366,7 +362,7 @@ const ApiDocs = () => {
           
           <Paper sx={{ p: 2, mb: 2, bgcolor: 'grey.50' }}>
             <Typography variant="subtitle2" gutterBottom>接口地址</Typography>
-            <code>GET /api/payment/status/{orderId}</code>
+            <code>GET /api/payment/status/:orderId</code>
           </Paper>
 
           <Typography variant="subtitle1" gutterBottom>请求参数</Typography>
@@ -582,8 +578,8 @@ X-Signature: signature_here
           状态码说明
         </Typography>
         
-        <Grid container spacing={2}>
-          <Grid xs={12} md={6}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2 }}>
+          <Box>
             <Typography variant="h6" gutterBottom>订单状态</Typography>
             <List dense>
               <ListItem>
@@ -595,7 +591,7 @@ X-Signature: signature_here
                 <ListItemText primary="处理中" secondary="用户已支付，正在处理" />
               </ListItem>
               <ListItem>
-                <ListItemIcon><Chip label="SUCCESS" size="small" color="success" /></ListItemText>
+                <ListItemIcon><Chip label="SUCCESS" size="small" color="success" /></ListItemIcon>
                 <ListItemText primary="成功" secondary="支付成功，资金已到账" />
               </ListItem>
               <ListItem>
@@ -607,9 +603,9 @@ X-Signature: signature_here
                 <ListItemText primary="已取消" secondary="用户或系统取消" />
               </ListItem>
             </List>
-          </Grid>
+          </Box>
           
-          <Grid xs={12} md={6}>
+          <Box>
             <Typography variant="h6" gutterBottom>HTTP状态码</Typography>
             <List dense>
               <ListItem>
@@ -633,8 +629,8 @@ X-Signature: signature_here
                 <ListItemText primary="服务器错误" secondary="系统内部错误" />
               </ListItem>
             </List>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Paper>
 
       {/* 错误码说明 */}
@@ -805,8 +801,8 @@ try {
       {/* 联系信息 */}
       <Paper sx={{ p: 3 }}>
         <Typography variant="h5" gutterBottom>技术支持</Typography>
-        <Grid container spacing={3}>
-          <Grid xs={12} md={6}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+          <Box>
             <Typography variant="h6" gutterBottom>联系方式</Typography>
             <List>
               <ListItem>
@@ -828,8 +824,8 @@ try {
                 />
               </ListItem>
             </List>
-          </Grid>
-          <Grid xs={12} md={6}>
+          </Box>
+          <Box>
             <Typography variant="h6" gutterBottom>文档更新</Typography>
             <Typography variant="body2" paragraph>
               本文档会定期更新，请关注最新版本。如有疑问或建议，请及时联系我们的技术支持团队。
@@ -837,8 +833,8 @@ try {
             <Typography variant="body2" color="text.secondary">
               最后更新时间: 2024年1月15日
             </Typography>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Paper>
     </Box>
   );
