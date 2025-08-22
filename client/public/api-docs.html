@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CashGit 商户API对接文档</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 10px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .password-form {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .password-form h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .password-input {
+            width: 300px;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            margin-right: 10px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .password-input:focus {
+            border-color: #667eea;
+        }
+
+        .submit-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .content {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: white;
+            border-bottom-color: #667eea;
+            color: #667eea;
+        }
+
+        .tab-content {
+            padding: 30px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .section h4 {
+            color: #495057;
+            margin: 20px 0 10px 0;
+            font-size: 1.2rem;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        .endpoint {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .endpoint strong {
+            color: #1976d2;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .table th,
+        .table td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .contact-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 30px;
+        }
+
+        .contact-info h4 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .contact-item {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .contact-label {
+            font-weight: 600;
+            min-width: 120px;
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .password-input {
+                width: 100%;
+                margin-bottom: 10px;
+                margin-right: 0;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                border-bottom: 1px solid #dee2e6;
+                border-right: none;
+            }
+            
+            .tab.active {
+                border-bottom-color: #667eea;
+                border-right: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CashGit 商户API对接文档</h1>
+            <p>专业的印度支付平台，支持UPI充值、银行代付等功能</p>
+        </div>
+
+        <!-- 密码保护表单 -->
+        <div id="passwordForm" class="password-form">
+            <h2>请输入访问密码</h2>
+            <input type="password" id="passwordInput" class="password-input" placeholder="请输入密码" maxlength="8">
+            <button onclick="checkPassword()" class="submit-btn">确认</button>
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+
+        <!-- 文档内容 -->
+        <div id="content" class="content">
+            <!-- 标签页 -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab(0)">代收充值</button>
+                <button class="tab" onclick="showTab(1)">代付提现</button>
+                <button class="tab" onclick="showTab(2)">订单查询</button>
+                <button class="tab" onclick="showTab(3)">回调通知</button>
+            </div>
+
+            <!-- 代收充值 -->
+            <div id="tab0" class="tab-content active">
+                <div class="section">
+                    <h3>1. 创建代收订单</h3>
+                    <p>为玩家创建充值订单，返回支付链接</p>
+                    
+                    <div class="endpoint">
+                        <strong>接口地址：</strong> POST /api/payment/create
+                    </div>
+
+                    <h4>请求参数</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>merchantId</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>商户ID</td>
+                            </tr>
+                            <tr>
+                                <td>amount</td>
+                                <td>integer</td>
+                                <td>是</td>
+                                <td>充值金额（分）</td>
+                            </tr>
+                            <tr>
+                                <td>currency</td>
+                                <td>string</td>
+                                <td>否</td>
+                                <td>货币代码，默认INR</td>
+                            </tr>
+                            <tr>
+                                <td>customerEmail</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>玩家邮箱</td>
+                            </tr>
+                            <tr>
+                                <td>customerPhone</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>玩家手机号</td>
+                            </tr>
+                            <tr>
+                                <td>returnUrl</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>支付完成后的跳转URL</td>
+                            </tr>
+                            <tr>
+                                <td>notifyUrl</td>
+                                <td>string</td>
+                                <td>否</td>
+                                <td>异步通知URL</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>请求示例</h4>
+                    <div class="code-block">
+{
+  "merchantId": "MERCHANT_001",
+  "amount": 10000,
+  "currency": "INR",
+  "customerEmail": "player@example.com",
+  "customerPhone": "919876543210",
+  "returnUrl": "https://yourgame.com/payment/return",
+  "notifyUrl": "https://yourgame.com/payment/notify"
+}
+                    </div>
+
+                    <h4>响应示例</h4>
+                    <div class="code-block">
+{
+  "success": true,
+  "data": {
+    "orderId": "ORD1234567890",
+    "paymentUrl": "https://cashgit.com/pay/ORD1234567890",
+    "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+    "expiresAt": "2024-01-15T11:00:00Z"
+  }
+}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 代付提现 -->
+            <div id="tab1" class="tab-content">
+                <div class="section">
+                    <h3>2. 创建代付订单</h3>
+                    <p>为玩家创建提现订单，将资金转入指定银行账户</p>
+                    
+                    <div class="endpoint">
+                        <strong>接口地址：</strong> POST /api/payment/withdraw
+                    </div>
+
+                    <h4>请求参数</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>merchantId</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>商户ID</td>
+                            </tr>
+                            <tr>
+                                <td>amount</td>
+                                <td>integer</td>
+                                <td>是</td>
+                                <td>提现金额（分）</td>
+                            </tr>
+                            <tr>
+                                <td>bankAccount</td>
+                                <td>object</td>
+                                <td>是</td>
+                                <td>银行账户信息</td>
+                            </tr>
+                            <tr>
+                                <td>customerEmail</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>玩家邮箱</td>
+                            </tr>
+                            <tr>
+                                <td>customerPhone</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>玩家手机号</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>银行账户信息结构</h4>
+                    <div class="code-block">
+{
+  "accountNumber": "1234567890",
+  "ifscCode": "SBIN0001234",
+  "accountHolderName": "Player Name",
+  "bankName": "State Bank of India"
+}
+                    </div>
+
+                    <h4>请求示例</h4>
+                    <div class="code-block">
+{
+  "merchantId": "MERCHANT_001",
+  "amount": 50000,
+  "currency": "INR",
+  "bankAccount": {
+    "accountNumber": "1234567890",
+    "ifscCode": "SBIN0001234",
+    "accountHolderName": "Player Name",
+    "bankName": "State Bank of India"
+  },
+  "customerEmail": "player@example.com",
+  "customerPhone": "919876543210"
+}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 订单查询 -->
+            <div id="tab2" class="tab-content">
+                <div class="section">
+                    <h3>3. 查询订单状态</h3>
+                    <p>查询订单的当前状态和详细信息</p>
+                    
+                    <div class="endpoint">
+                        <strong>接口地址：</strong> GET /api/payment/status/:orderId
+                    </div>
+
+                    <h4>响应示例</h4>
+                    <div class="code-block">
+{
+  "success": true,
+  "data": {
+    "orderId": "ORD1234567890",
+    "merchantId": "MERCHANT_001",
+    "type": "DEPOSIT",
+    "amount": 10000,
+    "currency": "INR",
+    "status": "SUCCESS",
+    "provider": {
+      "name": "passpay",
+      "transactionId": "TXN_123456"
+    },
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:05:00Z"
+  }
+}
+                    </div>
+
+                    <h3>4. 查询商户余额</h3>
+                    <p>查询商户账户的当前余额和额度信息</p>
+                    
+                    <div class="endpoint">
+                        <strong>接口地址：</strong> GET /api/merchant/balance
+                    </div>
+
+                    <h4>响应示例</h4>
+                    <div class="code-block">
+{
+  "success": true,
+  "data": {
+    "merchantId": "MERCHANT_001",
+    "balance": 1500000,
+    "currency": "INR",
+    "limits": {
+      "dailyLimit": 10000000,
+      "monthlyLimit": 100000000,
+      "singleTransactionLimit": 5000000
+    },
+    "usage": {
+      "dailyUsed": 2500000,
+      "monthlyUsed": 15000000,
+      "lastResetDate": "2024-01-01"
+    }
+  }
+}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 回调通知 -->
+            <div id="tab3" class="tab-content">
+                <div class="section">
+                    <h3>5. 异步回调通知</h3>
+                    <p>当订单状态发生变化时，系统会向您配置的notifyUrl发送POST请求</p>
+
+                    <div class="alert alert-info">
+                        回调通知采用重试机制，如果您的服务器返回非200状态码，系统会在5分钟、15分钟、30分钟后重试，最多重试3次。
+                    </div>
+
+                    <h4>回调请求格式</h4>
+                    <div class="code-block">
+POST /your-notify-url
+Content-Type: application/json
+X-Signature: signature_here
+
+{
+  "orderId": "ORD1234567890",
+  "merchantId": "MERCHANT_001",
+  "status": "SUCCESS",
+  "amount": 10000,
+  "currency": "INR",
+  "providerTransactionId": "TXN_123456",
+  "timestamp": "2024-01-15T10:05:00Z",
+  "signature": "calculated_signature"
+}
+                    </div>
+
+                    <h4>回调响应要求</h4>
+                    <p>您的服务器收到回调后，必须返回HTTP 200状态码和以下JSON格式：</p>
+                    <div class="code-block">
+{
+  "success": true,
+  "message": "received"
+}
+                    </div>
+                </div>
+            </div>
+
+            <!-- 联系信息 -->
+            <div class="contact-info">
+                <h4>技术支持</h4>
+                <div class="contact-item">
+                    <span class="contact-label">技术支持邮箱：</span>
+                    <span>support@cashgit.com</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">商务合作：</span>
+                    <span>business@cashgit.com</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">紧急联系：</span>
+                    <span>+91 98765 43210</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">最后更新：</span>
+                    <span>2024年1月15日</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            const correctPassword = '88888888';
+            
+            if (password === correctPassword) {
+                document.getElementById('passwordForm').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                document.getElementById('errorMessage').textContent = '';
+            } else {
+                document.getElementById('errorMessage').textContent = '密码错误，请重新输入';
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+            }
+        }
+
+        function showTab(index) {
+            // 隐藏所有标签页内容
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // 移除所有标签页的active状态
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // 显示选中的标签页内容
+            document.getElementById('tab' + index).classList.add('active');
+            tabs[index].classList.add('active');
+        }
+
+        // 支持回车键提交密码
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        // 页面加载完成后自动聚焦到密码输入框
+        window.addEventListener('load', function() {
+            document.getElementById('passwordInput').focus();
+        });
+    </script>
+</body>
+</html>

@@ -194,7 +194,7 @@ export default function Layout({ children }: LayoutProps) {
               variant="outlined"
               size="small"
               sx={{ mr: 2, borderColor: 'rgba(255,255,255,0.3)', color: 'white' }}
-              onClick={() => window.open('/api-docs', '_blank')}
+              onClick={() => window.open('/api-docs.html', '_blank')}
             >
               对接文档
             </Button>

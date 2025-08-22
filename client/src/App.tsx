@@ -12,7 +12,7 @@ import PaymentManagement from './pages/PaymentManagement';
 import Users from './pages/Users';
 
 import CashGitPaymentTest from './pages/CashGitPaymentTest';
-import ApiDocs from './pages/ApiDocs';
+
 import Orders from './pages/Orders';
 
 import PaymentData from './pages/PaymentData';
@@ -195,16 +195,7 @@ function App() {
             }
           />
 
-          <Route
-            path="/api-docs"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <ApiDocs />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
+
 
           <Route
             path="/profile"
