@@ -85,6 +85,16 @@ jobs:
         target: "/var/www/cashgit.com/server"
         strip_components: 1
         
+    - name: Upload Nginx config
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: ${{ secrets.EC2_PORT }}
+        source: "nginx-cashgit.conf"
+        target: "/tmp/nginx-cashgit.conf"
+        
     - name: Restart services
       uses: appleboy/ssh-action@v1.0.3
       with:
@@ -98,13 +108,14 @@ jobs:
           # 安装新的依赖
           npm ci --only=production
           
+          # 更新Nginx配置
+          sudo cp /tmp/nginx-cashgit.conf /etc/nginx/sites-available/cashgit.com
+          sudo nginx -t && sudo systemctl reload nginx
+          
           # 启动后端服务
           pm2 start cashgit-backend
           
           # 检查服务状态
           pm2 status
-          
-          # 重启Nginx
-          sudo systemctl restart nginx
           
           echo "Deployment completed successfully!"
