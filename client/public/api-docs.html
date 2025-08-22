@@ -127,9 +127,10 @@
         .content {
             display: none;
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: visible;
+            width: 100%;
         }
 
         .sidebar-header {
@@ -440,12 +441,6 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>PassPay Merchant API 对接文档</h1>
-            <p>专业的印度支付平台，支持UPI充值、银行代付、UTR验证等功能</p>
-        </div>
-
         <!-- 密码保护表单 -->
         <div id="passwordForm" class="password-form">
             <h2>请输入访问密码</h2>
@@ -459,7 +454,8 @@
             <!-- 左侧导航栏 -->
             <div class="sidebar">
                 <div class="sidebar-header">
-                    <h2>API 导航</h2>
+                    <h2>PassPay Merchant</h2>
+                    <p>API 对接文档</p>
                 </div>
                 <div class="nav-menu">
                     <div class="nav-item active" onclick="showSection(0)">
@@ -1012,16 +1008,28 @@ MD5签名: {计算得到的MD5值}
         function showSection(index) {
             // 隐藏所有内容区域
             const sections = document.querySelectorAll('.content-section');
-            sections.forEach(section => section.classList.remove('active'));
+            sections.forEach(section => section.style.display = 'none');
             
             // 移除所有导航项的active状态
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach(item => item.classList.remove('active'));
             
             // 显示选中的内容区域
-            document.getElementById('section' + index).classList.add('active');
+            const targetSection = document.getElementById('section' + index);
+            if (targetSection) {
+                targetSection.style.display = 'block';
+            }
             navItems[index].classList.add('active');
         }
+
+        // 页面加载完成后显示第一个内容区域
+        window.addEventListener('load', function() {
+            document.getElementById('passwordInput').focus();
+            // 默认显示第一个内容区域
+            if (document.getElementById('section0')) {
+                document.getElementById('section0').style.display = 'block';
+            }
+        });
 
         // 支持回车键提交密码
         document.getElementById('passwordInput').addEventListener('keypress', function(e) {
