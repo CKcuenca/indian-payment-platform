@@ -5,7 +5,7 @@ export const merchantService = {
   // 获取商户信息
   getMerchantInfo: (): Promise<ApiResponse<Merchant>> => {
     // 暂时使用测试端点，无需认证
-    return api.get('/merchant/test-info').then(response => response.data);
+    return api.get('/api/merchant/test-info').then(response => response.data);
   },
 
   // 获取交易历史
@@ -15,7 +15,7 @@ export const merchantService = {
     type?: 'DEPOSIT' | 'WITHDRAWAL';
     status?: 'PENDING' | 'SUCCESS' | 'FAILED';
   }): Promise<ApiResponse<PaginationResponse<Transaction>>> => {
-    return api.get('/merchant/transactions', { params }).then(response => response.data);
+    return api.get('/api/merchant/transactions', { params }).then(response => response.data);
   },
 
   // 获取订单历史
@@ -25,7 +25,7 @@ export const merchantService = {
     type?: 'DEPOSIT' | 'WITHDRAWAL';
     status?: 'PENDING' | 'PROCESSING' | 'SUCCESS' | 'FAILED' | 'CANCELLED';
   }): Promise<ApiResponse<PaginationResponse<Order>>> => {
-    return api.get('/merchant/orders', { params }).then(response => response.data);
+    return api.get('/api/merchant/orders', { params }).then(response => response.data);
   },
 
   // 创建充值订单
@@ -46,16 +46,16 @@ export const merchantService = {
     currency: string;
     status: string;
   }>> => {
-    return api.post('/payment/create', data).then(response => response.data);
+    return api.post('/api/payment/create', data).then(response => response.data);
   },
 
   // 查询订单状态
   queryOrder: (orderId: string, merchantId: string): Promise<ApiResponse<Order>> => {
-    return api.get(`/payment/status/${orderId}`, { params: { merchantId } }).then(response => response.data);
+    return api.get(`/api/payment/status/${orderId}`, { params: { merchantId } }).then(response => response.data);
   },
 
   // 获取可用支付提供者
   getAvailableProviders: (): Promise<ApiResponse<string[]>> => {
-    return api.get('/payment/providers').then(response => response.data);
+    return api.get('/api/payment/providers').then(response => response.data);
   },
 };
