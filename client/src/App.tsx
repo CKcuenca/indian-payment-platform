@@ -198,7 +198,7 @@ function App() {
           <Route
             path="/passpay-test"
             element={
-              <ProtectedRoute permissions={[Permission.SYSTEM_MONITORING]}>
+              <ProtectedRoute permissions={[Permission.VIEW_PAYMENT_CONFIG]}>
                 <Layout>
                   <PassPayTest />
                 </Layout>

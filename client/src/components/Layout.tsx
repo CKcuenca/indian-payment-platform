@@ -95,7 +95,7 @@ const menuItems = [
     text: 'PassPay测试',
     icon: <Payment />,
     path: '/passpay-test',
-    permissions: [Permission.SYSTEM_MONITORING]
+    permissions: [Permission.VIEW_PAYMENT_CONFIG]
   },
 
 ];
