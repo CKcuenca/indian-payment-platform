@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CashGit 商户API对接文档</title>
+    <title>PassPay Merchant API 对接文档 - 印度支付平台</title>
     <style>
         * {
             margin: 0;
@@ -15,7 +15,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
             line-height: 1.6;
             color: #333;
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
         }
 
         .container {
@@ -25,12 +25,13 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
             padding: 40px 20px;
             text-align: center;
             margin-bottom: 30px;
             border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
         }
 
         .header h1 {
@@ -70,11 +71,11 @@
         }
 
         .password-input:focus {
-            border-color: #667eea;
+            border-color: #28a745;
         }
 
         .submit-btn {
-            background: #667eea;
+            background: #28a745;
             color: white;
             border: none;
             padding: 12px 24px;
@@ -85,11 +86,11 @@
         }
 
         .submit-btn:hover {
-            background: #5a6fd8;
+            background: #218838;
         }
 
         .error-message {
-            color: #e74c3c;
+            color: #dc3545;
             margin-top: 10px;
             font-size: 14px;
         }
@@ -125,8 +126,8 @@
 
         .tab.active {
             background: white;
-            border-bottom-color: #667eea;
-            color: #667eea;
+            border-bottom-color: #28a745;
+            color: #28a745;
         }
 
         .tab-content {
@@ -143,9 +144,11 @@
         }
 
         .section h3 {
-            color: #667eea;
+            color: #28a745;
             margin-bottom: 15px;
             font-size: 1.5rem;
+            border-left: 4px solid #28a745;
+            padding-left: 15px;
         }
 
         .section h4 {
@@ -167,21 +170,22 @@
         }
 
         .endpoint {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
+            background: #d4edda;
+            border-left: 4px solid #28a745;
             padding: 15px;
             margin: 15px 0;
             border-radius: 0 6px 6px 0;
         }
 
         .endpoint strong {
-            color: #1976d2;
+            color: #155724;
         }
 
         .table {
             width: 100%;
             border-collapse: collapse;
             margin: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .table th,
@@ -192,8 +196,13 @@
         }
 
         .table th {
-            background: #f8f9fa;
+            background: #e9ecef;
             font-weight: 600;
+            color: #495057;
+        }
+
+        .table tr:nth-child(even) {
+            background-color: #f8f9fa;
         }
 
         .alert {
@@ -212,6 +221,12 @@
             background: #fff3cd;
             border: 1px solid #ffeaa7;
             color: #856404;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
         }
 
         .contact-info {
@@ -235,8 +250,35 @@
         .contact-label {
             font-weight: 600;
             min-width: 120px;
-            color: #667eea;
+            color: #28a745;
         }
+
+        .signature-example {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .signature-example h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-success { background: #d4edda; color: #155724; }
+        .status-failed { background: #f8d7da; color: #721c24; }
+        .status-processing { background: #cce7ff; color: #004085; }
 
         @media (max-width: 768px) {
             .container {
@@ -263,7 +305,7 @@
             }
             
             .tab.active {
-                border-bottom-color: #667eea;
+                border-bottom-color: #28a745;
                 border-right: none;
             }
         }
@@ -272,8 +314,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>CashGit 商户API对接文档</h1>
-            <p>专业的印度支付平台，支持UPI充值、银行代付等功能</p>
+            <h1>PassPay Merchant API 对接文档</h1>
+            <p>专业的印度支付平台，支持UPI充值、银行代付、UTR验证等功能</p>
         </div>
 
         <!-- 密码保护表单 -->
@@ -291,17 +333,18 @@
                 <button class="tab active" onclick="showTab(0)">代收充值</button>
                 <button class="tab" onclick="showTab(1)">代付提现</button>
                 <button class="tab" onclick="showTab(2)">订单查询</button>
-                <button class="tab" onclick="showTab(3)">回调通知</button>
+                <button class="tab" onclick="showTab(3)">UTR管理</button>
+                <button class="tab" onclick="showTab(4)">回调通知</button>
             </div>
 
             <!-- 代收充值 -->
             <div id="tab0" class="tab-content active">
                 <div class="section">
                     <h3>1. 创建代收订单</h3>
-                    <p>为玩家创建充值订单，返回支付链接</p>
+                    <p>为玩家创建充值订单，支持UPI支付方式</p>
                     
                     <div class="endpoint">
-                        <strong>接口地址：</strong> POST /api/payment/create
+                        <strong>接口地址：</strong> POST https://api.merchant.passpay.cc/api/developer/order/create
                     </div>
 
                     <h4>请求参数</h4>
@@ -316,46 +359,40 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>merchantId</td>
+                                <td>mchid</td>
                                 <td>string</td>
                                 <td>是</td>
                                 <td>商户ID</td>
                             </tr>
                             <tr>
+                                <td>pay_id</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>支付ID</td>
+                            </tr>
+                            <tr>
+                                <td>out_trade_no</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>商户订单号，唯一标识</td>
+                            </tr>
+                            <tr>
                                 <td>amount</td>
-                                <td>integer</td>
-                                <td>是</td>
-                                <td>充值金额（分）</td>
-                            </tr>
-                            <tr>
-                                <td>currency</td>
-                                <td>string</td>
-                                <td>否</td>
-                                <td>货币代码，默认INR</td>
-                            </tr>
-                            <tr>
-                                <td>customerEmail</td>
                                 <td>string</td>
                                 <td>是</td>
-                                <td>玩家邮箱</td>
+                                <td>订单金额（保留2位小数）</td>
                             </tr>
                             <tr>
-                                <td>customerPhone</td>
-                                <td>string</td>
-                                <td>是</td>
-                                <td>玩家手机号</td>
-                            </tr>
-                            <tr>
-                                <td>returnUrl</td>
-                                <td>string</td>
-                                <td>是</td>
-                                <td>支付完成后的跳转URL</td>
-                            </tr>
-                            <tr>
-                                <td>notifyUrl</td>
+                                <td>notify_url</td>
                                 <td>string</td>
                                 <td>否</td>
                                 <td>异步通知URL</td>
+                            </tr>
+                            <tr>
+                                <td>sign</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>MD5签名</td>
                             </tr>
                         </tbody>
                     </table>
@@ -363,27 +400,93 @@
                     <h4>请求示例</h4>
                     <div class="code-block">
 {
-  "merchantId": "MERCHANT_001",
-  "amount": 10000,
-  "currency": "INR",
-  "customerEmail": "player@example.com",
-  "customerPhone": "919876543210",
-  "returnUrl": "https://yourgame.com/payment/return",
-  "notifyUrl": "https://yourgame.com/payment/notify"
+  "mchid": "MERCHANT_001",
+  "pay_id": "PAY_001",
+  "out_trade_no": "ORD1234567890",
+  "amount": "100.00",
+  "notify_url": "https://yourgame.com/payment/notify"
 }
                     </div>
 
                     <h4>响应示例</h4>
                     <div class="code-block">
 {
-  "success": true,
+  "rCode": 200,
+  "message": "订单创建成功",
   "data": {
-    "orderId": "ORD1234567890",
-    "paymentUrl": "https://cashgit.com/pay/ORD1234567890",
-    "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
-    "expiresAt": "2024-01-15T11:00:00Z"
+    "trade_no": "TXN_123456",
+    "out_trade_no": "ORD1234567890",
+    "amount": "100.00",
+    "status": "0"
   }
 }
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>注意：</strong> 订单创建成功后，玩家可以通过UPI应用扫描二维码或使用支付链接完成支付。
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>2. 查询代收订单状态</h3>
+                    <p>查询订单的当前状态和详细信息</p>
+                    
+                    <div class="endpoint">
+                        <strong>接口地址：</strong> POST https://api.merchant.passpay.cc/api/developer/order/query
+                    </div>
+
+                    <h4>请求参数</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>mchid</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>商户ID</td>
+                            </tr>
+                            <tr>
+                                <td>pay_id</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>支付ID</td>
+                            </tr>
+                            <tr>
+                                <td>out_trade_no</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>商户订单号</td>
+                            </tr>
+                            <tr>
+                                <td>trade_no</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>平台交易号</td>
+                            </tr>
+                            <td>sign</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>MD5签名</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>订单状态说明</h4>
+                    <div class="code-block">
+状态码说明：
+0 - 待处理 (PENDING)
+1 - 处理中 (PROCESSING) 
+2 - 成功 (SUCCESS)
+3 - 失败 (FAILED)
+4 - 取消 (CANCELLED)
+5 - 过期 (EXPIRED)
                     </div>
                 </div>
             </div>
@@ -391,11 +494,11 @@
             <!-- 代付提现 -->
             <div id="tab1" class="tab-content">
                 <div class="section">
-                    <h3>2. 创建代付订单</h3>
+                    <h3>1. 创建代付订单</h3>
                     <p>为玩家创建提现订单，将资金转入指定银行账户</p>
                     
                     <div class="endpoint">
-                        <strong>接口地址：</strong> POST /api/payment/withdraw
+                        <strong>接口地址：</strong> POST https://api.merchant.passpay.cc/api/developer/payout/create
                     </div>
 
                     <h4>请求参数</h4>
@@ -410,63 +513,94 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td>merchantId</td>
+                                <td>mchid</td>
                                 <td>string</td>
                                 <td>是</td>
                                 <td>商户ID</td>
                             </tr>
                             <tr>
+                                <td>pay_id</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>支付ID</td>
+                            </tr>
+                            <tr>
+                                <td>out_trade_no</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>商户订单号</td>
+                            </tr>
+                            <tr>
                                 <td>amount</td>
-                                <td>integer</td>
-                                <td>是</td>
-                                <td>提现金额（分）</td>
-                            </tr>
-                            <tr>
-                                <td>bankAccount</td>
-                                <td>object</td>
-                                <td>是</td>
-                                <td>银行账户信息</td>
-                            </tr>
-                            <tr>
-                                <td>customerEmail</td>
                                 <td>string</td>
                                 <td>是</td>
-                                <td>玩家邮箱</td>
+                                <td>提现金额（保留2位小数）</td>
                             </tr>
                             <tr>
-                                <td>customerPhone</td>
+                                <td>account_number</td>
                                 <td>string</td>
                                 <td>是</td>
-                                <td>玩家手机号</td>
+                                <td>银行账户号</td>
+                            </tr>
+                            <tr>
+                                <td>ifsc_code</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>IFSC代码</td>
+                            </tr>
+                            <tr>
+                                <td>account_holder</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>账户持有人姓名</td>
+                            </tr>
+                            <tr>
+                                <td>notify_url</td>
+                                <td>string</td>
+                                <td>否</td>
+                                <td>异步通知URL</td>
+                            </tr>
+                            <tr>
+                                <td>sign</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>MD5签名</td>
                             </tr>
                         </tbody>
                     </table>
 
-                    <h4>银行账户信息结构</h4>
-                    <div class="code-block">
-{
-  "accountNumber": "1234567890",
-  "ifscCode": "SBIN0001234",
-  "accountHolderName": "Player Name",
-  "bankName": "State Bank of India"
-}
-                    </div>
-
                     <h4>请求示例</h4>
                     <div class="code-block">
 {
-  "merchantId": "MERCHANT_001",
-  "amount": 50000,
-  "currency": "INR",
-  "bankAccount": {
-    "accountNumber": "1234567890",
-    "ifscCode": "SBIN0001234",
-    "accountHolderName": "Player Name",
-    "bankName": "State Bank of India"
-  },
-  "customerEmail": "player@example.com",
-  "customerPhone": "919876543210"
+  "mchid": "MERCHANT_001",
+  "pay_id": "PAY_001",
+  "out_trade_no": "Payout_1234567890",
+  "amount": "500.00",
+  "account_number": "1234567890",
+  "ifsc_code": "SBIN0001234",
+  "account_holder": "Player Name",
+  "notify_url": "https://yourgame.com/payout/notify"
 }
+                    </div>
+
+                    <h4>代付状态说明</h4>
+                    <div class="code-block">
+状态码说明：
+0 - 待处理 (PENDING)
+1 - 处理中 (PROCESSING)
+2 - 成功 (SUCCESS)
+3 - 失败 (FAILED)
+4 - 取消 (CANCELLED)
+5 - 拒绝 (REJECTED)
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>2. 查询代付订单状态</h3>
+                    <p>查询代付订单的当前状态</p>
+                    
+                    <div class="endpoint">
+                        <strong>接口地址：</strong> POST https://api.merchant.passpay.cc/api/developer/payout/query
                     </div>
                 </div>
             </div>
@@ -474,90 +608,179 @@
             <!-- 订单查询 -->
             <div id="tab2" class="tab-content">
                 <div class="section">
-                    <h3>3. 查询订单状态</h3>
-                    <p>查询订单的当前状态和详细信息</p>
+                    <h3>1. 查询商户余额</h3>
+                    <p>查询商户账户的当前余额</p>
                     
                     <div class="endpoint">
-                        <strong>接口地址：</strong> GET /api/payment/status/:orderId
+                        <strong>接口地址：</strong> POST https://api.merchant.passpay.cc/api/developer/balance/query
                     </div>
+
+                    <h4>请求参数</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>mchid</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>商户ID</td>
+                            </tr>
+                            <tr>
+                                <td>pay_id</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>支付ID</td>
+                            </tr>
+                            <tr>
+                                <td>sign</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>MD5签名</td>
+                            </tr>
+                        </tbody>
+                    </table>
 
                     <h4>响应示例</h4>
                     <div class="code-block">
 {
-  "success": true,
+  "rCode": 200,
+  "message": "余额查询成功",
   "data": {
-    "orderId": "ORD1234567890",
-    "merchantId": "MERCHANT_001",
-    "type": "DEPOSIT",
-    "amount": 10000,
-    "currency": "INR",
-    "status": "SUCCESS",
-    "provider": {
-      "name": "passpay",
-      "transactionId": "TXN_123456"
-    },
-    "createdAt": "2024-01-15T10:00:00Z",
-    "updatedAt": "2024-01-15T10:05:00Z"
+    "balance": "15000.00",
+    "currency": "INR"
   }
 }
                     </div>
+                </div>
 
-                    <h3>4. 查询商户余额</h3>
-                    <p>查询商户账户的当前余额和额度信息</p>
+                <div class="section">
+                    <h3>2. 查询UPI状态</h3>
+                    <p>查询UPI支付的状态信息</p>
                     
                     <div class="endpoint">
-                        <strong>接口地址：</strong> GET /api/merchant/balance
+                        <strong>接口地址：</strong> POST https://api.merchant.passpay.cc/api/developer/order/upi/query
                     </div>
 
-                    <h4>响应示例</h4>
+                    <h4>UPI状态说明</h4>
                     <div class="code-block">
-{
-  "success": true,
-  "data": {
-    "merchantId": "MERCHANT_001",
-    "balance": 1500000,
-    "currency": "INR",
-    "limits": {
-      "dailyLimit": 10000000,
-      "monthlyLimit": 100000000,
-      "singleTransactionLimit": 5000000
-    },
-    "usage": {
-      "dailyUsed": 2500000,
-      "monthlyUsed": 15000000,
-      "lastResetDate": "2024-01-01"
-    }
-  }
-}
+状态码说明：
+0 - 待处理 (PENDING)
+1 - 成功 (SUCCESS)
+2 - 失败 (FAILED)
+3 - 过期 (EXPIRED)
+                    </div>
+                </div>
+            </div>
+
+            <!-- UTR管理 -->
+            <div id="tab3" class="tab-content">
+                <div class="section">
+                    <h3>1. 提交UTR</h3>
+                    <p>提交UTR（统一交易参考号）用于验证交易</p>
+                    
+                    <div class="endpoint">
+                        <strong>接口地址：</strong> POST https://api.merchant.passpay.cc/api/developer/order/utr
+                    </div>
+
+                    <h4>请求参数</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>mchid</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>商户ID</td>
+                            </tr>
+                            <tr>
+                                <td>pay_id</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>支付ID</td>
+                            </tr>
+                            <tr>
+                                <td>out_trade_no</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>商户订单号</td>
+                            </tr>
+                            <tr>
+                                <td>trade_no</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>平台交易号</td>
+                            </tr>
+                            <tr>
+                                <td>utr</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>UTR号码</td>
+                            </tr>
+                            <tr>
+                                <td>sign</td>
+                                <td>string</td>
+                                <td>是</td>
+                                <td>MD5签名</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h4>UTR状态说明</h4>
+                    <div class="code-block">
+状态码说明：
+0 - 待验证 (PENDING)
+1 - 已验证 (VERIFIED)
+2 - 拒绝 (REJECTED)
+3 - 过期 (EXPIRED)
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>2. 查询UTR状态</h3>
+                    <p>查询UTR的验证状态</p>
+                    
+                    <div class="endpoint">
+                        <strong>接口地址：</strong> POST https://api.merchant.passpay.cc/api/developer/order/utr/query
                     </div>
                 </div>
             </div>
 
             <!-- 回调通知 -->
-            <div id="tab3" class="tab-content">
+            <div id="tab4" class="tab-content">
                 <div class="section">
-                    <h3>5. 异步回调通知</h3>
-                    <p>当订单状态发生变化时，系统会向您配置的notifyUrl发送POST请求</p>
+                    <h3>1. 异步回调通知</h3>
+                    <p>当订单状态发生变化时，系统会向您配置的notify_url发送POST请求</p>
 
-                    <div class="alert alert-info">
-                        回调通知采用重试机制，如果您的服务器返回非200状态码，系统会在5分钟、15分钟、30分钟后重试，最多重试3次。
+                    <div class="alert alert-warning">
+                        <strong>重要：</strong> 回调通知采用重试机制，如果您的服务器返回非200状态码，系统会在5分钟、15分钟、30分钟后重试，最多重试3次。
                     </div>
 
                     <h4>回调请求格式</h4>
                     <div class="code-block">
 POST /your-notify-url
 Content-Type: application/json
-X-Signature: signature_here
 
 {
   "orderId": "ORD1234567890",
-  "merchantId": "MERCHANT_001",
-  "status": "SUCCESS",
-  "amount": 10000,
-  "currency": "INR",
-  "providerTransactionId": "TXN_123456",
-  "timestamp": "2024-01-15T10:05:00Z",
-  "signature": "calculated_signature"
+  "tradeNo": "TXN_123456",
+  "status": "2",
+  "amount": "100.00",
+  "utr": "UTR123456789",
+  "timestamp": "2024-01-15T10:05:00Z"
 }
                     </div>
 
@@ -570,6 +793,30 @@ X-Signature: signature_here
 }
                     </div>
                 </div>
+
+                <div class="section">
+                    <h3>2. 签名验证</h3>
+                    <p>所有API请求都需要进行MD5签名验证，确保数据安全</p>
+
+                    <div class="signature-example">
+                        <h4>MD5签名生成步骤：</h4>
+                        <ol>
+                            <li><strong>参数排序：</strong> 所有请求参数按ASCII码从小到大排序</li>
+                            <li><strong>拼接参数：</strong> 按 key=value&key=value... 格式拼接参数签名源串</li>
+                            <li><strong>添加密钥：</strong> 拼接好的源串最后拼接上 secret key</li>
+                            <li><strong>计算MD5：</strong> 计算最终拼接好签名源串的MD5散列值</li>
+                            <li><strong>提交签名：</strong> 计算得到的散列值作为sign参数的值</li>
+                        </ol>
+                    </div>
+
+                    <h4>签名示例</h4>
+                    <div class="code-block">
+假设请求参数为: mchid=MERCHANT_001&pay_id=PAY_001&out_trade_no=ORD123&amount=100.00
+排序后: amount=100.00&mchid=MERCHANT_001&out_trade_no=ORD123&pay_id=PAY_001
+添加密钥: amount=100.00&mchid=MERCHANT_001&out_trade_no=ORD123&pay_id=PAY_001&key=your_secret_key
+MD5签名: {计算得到的MD5值}
+                    </div>
+                </div>
             </div>
 
             <!-- 联系信息 -->
@@ -577,15 +824,15 @@ X-Signature: signature_here
                 <h4>技术支持</h4>
                 <div class="contact-item">
                     <span class="contact-label">技术支持邮箱：</span>
-                    <span>support@cashgit.com</span>
+                    <span>support@passpay.cc</span>
                 </div>
                 <div class="contact-item">
                     <span class="contact-label">商务合作：</span>
-                    <span>business@cashgit.com</span>
+                    <span>business@passpay.cc</span>
                 </div>
                 <div class="contact-item">
-                    <span class="contact-label">紧急联系：</span>
-                    <span>+91 98765 43210</span>
+                    <span class="contact-label">API文档：</span>
+                    <span>https://api.merchant.passpay.cc/docs</span>
                 </div>
                 <div class="contact-item">
                     <span class="contact-label">最后更新：</span>
