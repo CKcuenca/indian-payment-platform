@@ -12,7 +12,7 @@ import PaymentManagement from './pages/PaymentManagement';
 import Users from './pages/Users';
 import Monitoring from './pages/Monitoring';
 import CashGitPaymentTest from './pages/CashGitPaymentTest';
-import PassPayTest from './pages/PassPayTest';
+
 import PaymentData from './pages/PaymentData';
 import LimitManagement from './pages/LimitManagement';
 
@@ -195,16 +195,9 @@ function App() {
             }
           />
 
-          <Route
-            path="/passpay-test"
-            element={
-              <ProtectedRoute permissions={[Permission.VIEW_PAYMENT_CONFIG]}>
-                <Layout>
-                  <PassPayTest />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
+
+
+
 
           <Route
             path="/profile"

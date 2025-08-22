@@ -27,8 +27,7 @@ import {
   Api,
   Person,
   TrendingUp,
-  CreditCard,
-  Payment
+  CreditCard
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../services/authService';
@@ -91,12 +90,7 @@ const menuItems = [
     path: '/cashgit-payment-test',
     permissions: [Permission.SYSTEM_MONITORING]
   },
-  {
-    text: 'PassPay测试',
-    icon: <Payment />,
-    path: '/passpay-test',
-    permissions: [Permission.VIEW_PAYMENT_CONFIG]
-  },
+
 
 ];
 
