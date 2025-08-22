@@ -1,5 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
+const { apiKeyAuth } = require('../middleware/auth');
 const PaymentController = require('../controllers/payment-controller');
 
 const router = express.Router();
@@ -17,7 +18,7 @@ const validateRequest = (req, res, next) => {
 };
 
 // 创建支付订单
-router.post('/create', [
+router.post('/create', apiKeyAuth, [
   body('merchantId').notEmpty().withMessage('Merchant ID is required'),
   body('amount').isInt({ min: 1 }).withMessage('Amount must be a positive integer'),
   body('currency').optional().isIn(['INR', 'USD']).withMessage('Currency must be INR or USD'),

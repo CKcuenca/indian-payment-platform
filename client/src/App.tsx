@@ -12,6 +12,7 @@ import PaymentManagement from './pages/PaymentManagement';
 import Users from './pages/Users';
 import Monitoring from './pages/Monitoring';
 import CashGitPaymentTest from './pages/CashGitPaymentTest';
+import ApiDocs from './pages/ApiDocs';
 
 import PaymentData from './pages/PaymentData';
 import LimitManagement from './pages/LimitManagement';

@@ -2,6 +2,7 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { apiKeyAuth } = require('../middleware/auth');
 const { getIndianTimeISO } = require('../utils/timeUtils');
+const mongoose = require('mongoose');
 
 const router = express.Router();
 
@@ -341,89 +342,74 @@ router.get('/transactions', (req, res) => {
 });
 
 // 获取订单历史
-router.get('/orders', (req, res) => {
-  // 返回模拟订单数据，匹配前端期望的数据结构
-  const mockOrders = [
-    {
-      orderId: 'ORD001',
-      merchantId: 'MERCHANT001',
-      type: 'DEPOSIT',
-      amount: 1000.00,
-      currency: 'INR',
-      status: 'SUCCESS',
-      fee: 10.00,
-      netAmount: 990.00,
-      customer: {
-        email: 'customer1@example.com',
-        phone: '+91-9876543210',
-        name: 'Customer One'
-      },
-      provider: {
-        name: 'mock',
-        refId: 'MOCK_REF_001'
-      },
-      returnUrl: 'http://localhost:3000/return',
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      updatedAt: new Date(Date.now() - 86400000).toISOString()
-    },
-    {
-      orderId: 'ORD002',
-      merchantId: 'MERCHANT001',
-      type: 'WITHDRAWAL',
-      amount: 500.00,
-      currency: 'INR',
-      status: 'PROCESSING',
-      fee: 5.00,
-      netAmount: 495.00,
-      customer: {
-        email: 'customer2@example.com',
-        phone: '+91-9876543211',
-        name: 'Customer Two'
-      },
-      provider: {
-        name: 'cashgit',
-        refId: 'CASHGIT_REF_002'
-      },
-      returnUrl: 'http://localhost:3000/return',
-      createdAt: new Date(Date.now() - 172800000).toISOString(),
-      updatedAt: new Date(Date.now() - 172800000).toISOString()
-    },
-    {
-      orderId: 'ORD003',
-      merchantId: 'MERCHANT001',
-      type: 'DEPOSIT',
-      amount: 2000.00,
-      currency: 'INR',
-      status: 'PENDING',
-      fee: 20.00,
-      netAmount: 1980.00,
-      customer: {
-        email: 'customer3@example.com',
-        phone: '+91-9876543212',
-        name: 'Customer Three'
-      },
-      provider: {
-        name: 'mock',
-        refId: 'MOCK_REF_003'
-      },
-      returnUrl: 'http://localhost:3000/return',
-      createdAt: new Date(Date.now() - 259200000).toISOString(),
-      updatedAt: new Date(Date.now() - 259200000).toISOString()
+router.get('/orders', apiKeyAuth, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, status, type, startDate, endDate } = req.query;
+    const merchantId = req.merchant.merchantId; // 从认证中间件获取商户ID
+    
+    // 构建查询条件
+    const query = { merchantId };
+    if (status) query.status = status;
+    if (type) query.type = type;
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) query.createdAt.$lte = new Date(endDate);
     }
-  ];
-
-  res.json({
-    success: true,
-    data: {
-      data: mockOrders,
-      pagination: {
-        page: 1,
-        limit: 10,
-        total: mockOrders.length,
-        pages: 1
+    
+    // 分页参数
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 10));
+    const skip = (pageNum - 1) * limitNum;
+    
+    // 查询订单
+    const Order = mongoose.model('Order');
+    const [orders, total] = await Promise.all([
+      Order.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      Order.countDocuments(query)
+    ]);
+    
+    // 格式化响应数据
+    const formattedOrders = orders.map(order => ({
+      orderId: order.orderId,
+      merchantId: order.merchantId,
+      type: order.type,
+      amount: order.amount,
+      currency: order.currency,
+      status: order.status,
+      fee: order.fee || 0,
+      netAmount: order.amount - (order.fee || 0),
+      customer: order.customer || {},
+      provider: order.provider || {},
+      returnUrl: order.callback?.successUrl,
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt
+    }));
+    
+    res.json({
+      success: true,
+      data: {
+        data: formattedOrders,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total,
+          pages: Math.ceil(total / limitNum)
+        }
       }
-    }
-  });
+    });
+    
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取订单列表失败'
+    });
+  }
 });
 
 module.exports = router;

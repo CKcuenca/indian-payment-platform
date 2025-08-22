@@ -2,7 +2,7 @@ const paymentManager = require('../services/payment-service');
 const Order = require('../models/order');
 const Transaction = require('../models/transaction');
 const Merchant = require('../models/merchant');
-const ConcurrencyService = require('../services/concurrency-service');
+const ConcurrencyService = require('../services/concurrency-service-fixed');
 const OrderStatusService = require('../services/order-status-service');
 const { v4: uuidv4 } = require('uuid');
 
@@ -23,6 +23,14 @@ class PaymentController {
         provider = 'mock', // 默认使用mock提供者
         description
       } = req.body;
+
+      // 验证商户ID与认证用户匹配
+      if (req.merchant && req.merchant.merchantId !== merchantId) {
+        return res.status(403).json({
+          success: false,
+          error: 'Merchant ID mismatch'
+        });
+      }
 
       // 生成订单ID
       const orderId = Order.generateOrderId();
