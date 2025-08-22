@@ -46,7 +46,7 @@ export default function Monitoring() {
   
     // 数据状态
   const [systemOverview, setSystemOverview] = useState<SystemOverview | null>(null);
-  const [systemMetrics, setSystemMetrics] = useState<SystemMetrics[]>([]);
+
   const [systemAlerts, setSystemAlerts] = useState<SystemAlert[]>([]);
   const [serviceStatus, setServiceStatus] = useState<ServiceStatus[]>([]);
   const [realTimeMetrics, setRealTimeMetrics] = useState<SystemMetrics | null>(null);
@@ -70,16 +70,7 @@ export default function Monitoring() {
     }
   }, []);
 
-  // 获取系统指标
-  const fetchSystemMetrics = useCallback(async () => {
-    try {
-      const data = await monitoringService.getSystemMetrics(timeRange);
-      setSystemMetrics(data);
-    } catch (err) {
-      console.error('获取系统指标失败:', err);
-      setError('获取系统指标失败');
-    }
-  }, [timeRange]);
+
 
   // 获取系统告警
   const fetchSystemAlerts = useCallback(async () => {
@@ -122,7 +113,7 @@ export default function Monitoring() {
     try {
       await Promise.all([
         fetchSystemOverview(),
-        fetchSystemMetrics(),
+
         fetchSystemAlerts(),
         fetchServiceStatus(),
         fetchRealTimeMetrics()
@@ -132,7 +123,7 @@ export default function Monitoring() {
     } finally {
       setLoading(false);
     }
-  }, [fetchSystemOverview, fetchSystemMetrics, fetchSystemAlerts, fetchServiceStatus, fetchRealTimeMetrics]);
+  }, [fetchSystemOverview, fetchSystemAlerts, fetchServiceStatus, fetchRealTimeMetrics]);
 
   // 刷新数据
   const handleRefresh = useCallback(async () => {
@@ -196,10 +187,7 @@ export default function Monitoring() {
     return () => clearInterval(interval);
   }, [fetchRealTimeMetrics]);
 
-  // 当筛选条件改变时重新获取数据
-  useEffect(() => {
-    fetchSystemMetrics();
-  }, [fetchSystemMetrics]);
+
 
   useEffect(() => {
     fetchSystemAlerts();
