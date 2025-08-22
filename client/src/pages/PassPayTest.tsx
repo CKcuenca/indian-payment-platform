@@ -582,28 +582,27 @@ const PassPayTest: React.FC = () => {
             </Card>
           </Box>
 
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>查询UPI</Typography>
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  <TextField
-                    fullWidth
-                    label="UPI ID"
-                    value={queryForm.upiId}
-                    onChange={(e) => setQueryForm({...queryForm, upiId: e.target.value})}
-                  />
-                  <Button 
-                    variant="contained" 
-                    onClick={handleUpiQuery}
-                    disabled={loading}
-                    sx={{ minWidth: 120 }}
-                  >
-                    {loading ? <CircularProgress size={20} /> : '查询UPI'}
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          </Box>
+          <Card sx={{ mt: 2 }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>查询UPI</Typography>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <TextField
+                  fullWidth
+                  label="UPI ID"
+                  value={queryForm.upiId}
+                  onChange={(e) => setQueryForm({...queryForm, upiId: e.target.value})}
+                />
+                <Button 
+                  variant="contained" 
+                  onClick={handleUpiQuery}
+                  disabled={loading}
+                  sx={{ minWidth: 120 }}
+                >
+                  {loading ? <CircularProgress size={20} /> : '查询UPI'}
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
         </TabPanel>
 
         {/* UTR管理 */}
