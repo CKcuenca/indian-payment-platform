@@ -18,6 +18,37 @@ class PassPayProvider {
   }
 
   /**
+   * 初始化提供商
+   */
+  async initialize() {
+    try {
+      console.log('PassPay提供商初始化中...');
+      
+      // 验证配置
+      if (!this.mchid || !this.payId || !this.secretKey) {
+        throw new Error('PassPay配置不完整：缺少accountId、payId或secretKey');
+      }
+      
+      // 测试API连接
+      const testResponse = await axios.get(`${this.baseUrl}/health`, {
+        timeout: 5000
+      }).catch(() => null);
+      
+      if (testResponse && testResponse.status === 200) {
+        console.log('✅ PassPay API连接正常');
+      } else {
+        console.log('⚠️ PassPay API连接测试失败，但继续初始化');
+      }
+      
+      console.log('✅ PassPay提供商初始化完成');
+      return true;
+    } catch (error) {
+      console.error('❌ PassPay提供商初始化失败:', error.message);
+      return false;
+    }
+  }
+
+  /**
    * 生成PassPay签名 - 保持与现有API的完全兼容
    * 1. 按参数名ASCII从小到大排序
    * 2. 空值或null不参与加密

@@ -15,6 +15,10 @@ const PORT = process.env.PORT || 3001;
 // 安全中间件
 app.use(helmet());
 app.use(cors());
+
+// 信任代理设置 - 解决X-Forwarded-For头问题
+app.set('trust proxy', true);
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
