@@ -1,4 +1,4 @@
-const ConcurrencyService = require('./concurrency-service');
+const ConcurrencyService = require('./concurrency-service-fixed');
 
 class SchedulerService {
   constructor() {

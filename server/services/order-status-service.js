@@ -35,15 +35,12 @@ class OrderStatusService {
    * 更新订单状态
    */
   static async updateOrderStatus(orderId, newStatus, additionalData = {}) {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    
     try {
       const Order = mongoose.model('Order');
       const Transaction = mongoose.model('Transaction');
       
       // 获取当前订单
-      const order = await Order.findOne({ orderId }).session(session);
+      const order = await Order.findOne({ orderId });
       if (!order) {
         throw new Error('Order not found');
       }
@@ -112,7 +109,7 @@ class OrderStatusService {
       const updatedOrder = await Order.findOneAndUpdate(
         { orderId },
         updateData,
-        { session, new: true }
+        { new: true }
       );
 
       // 更新对应的交易记录
@@ -122,14 +119,11 @@ class OrderStatusService {
           status: newStatus,
           updatedAt: getIndianTimeISO(),
           completedAt: ['SUCCESS', 'FAILED', 'CANCELLED', 'REFUNDED'].includes(newStatus) ? getIndianTimeISO() : null
-        },
-        { session }
+        }
       );
 
       // 处理余额变更
-      await this.handleBalanceChange(updatedOrder, newStatus, session);
-
-      await session.commitTransaction();
+      await this.handleBalanceChange(updatedOrder, newStatus);
       
       return {
         success: true,
@@ -137,17 +131,15 @@ class OrderStatusService {
       };
       
     } catch (error) {
-      await session.abortTransaction();
+      console.error('Error updating order status:', error);
       throw error;
-    } finally {
-      session.endSession();
     }
   }
 
   /**
    * 处理余额变更
    */
-  static async handleBalanceChange(order, newStatus, session) {
+  static async handleBalanceChange(order, newStatus) {
     const Merchant = mongoose.model('Merchant');
     
     switch (newStatus) {
@@ -160,8 +152,7 @@ class OrderStatusService {
               'balance.available': order.amount,
               'balance.frozen': -order.amount
             }
-          },
-          { session }
+          }
         );
         break;
         
@@ -174,8 +165,7 @@ class OrderStatusService {
           { merchantId: order.merchantId },
           { 
             $inc: { 'balance.frozen': -order.amount }
-          },
-          { session }
+          }
         );
         break;
         
@@ -186,8 +176,7 @@ class OrderStatusService {
           { merchantId: order.merchantId },
           { 
             $inc: { 'balance.available': -refundAmount }
-          },
-          { session }
+          }
         );
         break;
         
@@ -198,8 +187,7 @@ class OrderStatusService {
           { merchantId: order.merchantId },
           { 
             $inc: { 'balance.available': -partialRefundAmount }
-          },
-          { session }
+          }
         );
         break;
     }
@@ -209,9 +197,6 @@ class OrderStatusService {
    * 批量更新订单状态
    */
   static async batchUpdateOrderStatus(updates) {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    
     try {
       const results = [];
       
@@ -222,14 +207,11 @@ class OrderStatusService {
         results.push(result);
       }
       
-      await session.commitTransaction();
       return results;
       
     } catch (error) {
-      await session.abortTransaction();
+      console.error('Error in batch update:', error);
       throw error;
-    } finally {
-      session.endSession();
     }
   }
 

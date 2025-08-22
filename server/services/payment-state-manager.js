@@ -395,14 +395,11 @@ class PaymentStateManager {
       }
 
       // 5. 执行状态转换
-      const session = await mongoose.startSession();
-      session.startTransaction();
-
       try {
         // 获取状态转换的额外数据
         const stateConfig = PaymentStateManager.STATE_MACHINE[newStatus];
         const stateData = stateConfig.onEnter ? 
-          await stateConfig.onEnter(order, session) : {};
+          await stateConfig.onEnter(order) : {};
 
         // 更新订单状态
         const updateData = {
@@ -415,7 +412,7 @@ class PaymentStateManager {
         const updatedOrder = await mongoose.model('Order').findOneAndUpdate(
           { orderId },
           updateData,
-          { session, new: true }
+          { new: true }
         );
 
         // 更新交易记录
@@ -426,8 +423,7 @@ class PaymentStateManager {
             updatedAt: getIndianTimeISO(),
             completedAt: ['SUCCESS', 'FAILED', 'CANCELLED', 'REFUNDED'].includes(newStatus) ? 
               getIndianTimeISO() : null
-          },
-          { session }
+          }
         );
 
         // 记录操作
@@ -438,8 +434,6 @@ class PaymentStateManager {
           executedBy: options.executedBy || 'system'
         });
 
-        await session.commitTransaction();
-
         return {
           success: true,
           order: updatedOrder,
@@ -449,10 +443,8 @@ class PaymentStateManager {
         };
 
       } catch (error) {
-        await session.abortTransaction();
+        console.error('Error during state transition:', error);
         throw error;
-      } finally {
-        session.endSession();
       }
 
     } catch (error) {
