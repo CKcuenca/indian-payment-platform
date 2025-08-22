@@ -17,14 +17,18 @@
             color: #24292e;
             background: #f6f8fa;
             min-height: 100vh;
+            margin: 0;
+            padding: 0;
         }
 
         .container {
-            width: 1200px;
-            margin: 0 auto;
+            width: 1200px !important;
+            max-width: 1200px !important;
+            margin: 0 auto !important;
             padding: 0;
             min-height: 100vh;
             background: #ffffff;
+            box-sizing: border-box;
         }
 
         .header {
@@ -33,9 +37,6 @@
             padding: 0;
             text-align: left;
             border-bottom: 1px solid #e1e4e8;
-        }
-
-        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
