@@ -16,14 +16,9 @@ module.exports = {
         '--max-old-space-size=1024',
         '--initial-heap-size=512',
         '--max-semi-space-size=64',
-        '--gc-interval=100',
-        '--max-code-cache-size=128',
-        '--string-slice-copy-cache-size=64',
-        '--max-external-memory-size=256',
-        '--max-array-buffer-size=128'
+        '--gc-interval=100'
+        // 移除不兼容的参数
       ],
-      // 移除 --optimize-for-size 标志
-      // 添加性能优化标志
       exec_mode: 'fork',
       error_file: '/var/www/cashgit.com/logs/err.log',  // 使用绝对路径
       out_file: '/var/www/cashgit.com/logs/out.log',    // 使用绝对路径
