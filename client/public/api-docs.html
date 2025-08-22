@@ -35,12 +35,51 @@
             border-bottom: 1px solid #e1e4e8;
         }
 
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         .header h1 {
             font-size: 1.4rem;
             margin: 0;
             font-weight: 600;
             color: #24292e;
             padding: 15px 20px;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-right: 20px;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            justify-content: center;
+        }
+
+        .remember-me input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .remember-me label {
+            font-size: 0.9rem;
+            color: #586069;
+            cursor: pointer;
         }
 
         .content-wrapper {
@@ -426,15 +465,20 @@
         <div id="passwordForm" class="password-form">
             <h2>请输入访问密码</h2>
             <input type="password" id="passwordInput" class="password-input" placeholder="请输入密码" maxlength="8">
+            <div class="remember-me">
+                <input type="checkbox" id="rememberMe">
+                <label for="rememberMe">记住登录状态（7天）</label>
+            </div>
             <button onclick="checkPassword()" class="submit-btn">确认</button>
             <div id="errorMessage" class="error-message"></div>
         </div>
 
         <!-- 文档内容 -->
         <div id="content" class="content">
-            <!-- 顶部标题 -->
+            <!-- 顶部标题和退出按钮 -->
             <div class="header">
                 <h1>CashGit India Payment印度统一支付平台</h1>
+                <button onclick="logout()" class="logout-btn">退出登录</button>
             </div>
             
             <!-- 左右分栏内容 -->
@@ -966,8 +1010,17 @@ MD5签名: {计算得到的MD5值}
         function checkPassword() {
             const password = document.getElementById('passwordInput').value;
             const correctPassword = '88888888';
+            const rememberMe = document.getElementById('rememberMe').checked;
             
             if (password === correctPassword) {
+                // 保存登录状态
+                if (rememberMe) {
+                    localStorage.setItem('apiDocsLoggedIn', 'true');
+                    localStorage.setItem('apiDocsTimestamp', Date.now().toString());
+                } else {
+                    sessionStorage.setItem('apiDocsLoggedIn', 'true');
+                }
+                
                 document.getElementById('passwordForm').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
                 document.getElementById('errorMessage').textContent = '';
@@ -976,6 +1029,48 @@ MD5签名: {计算得到的MD5值}
                 document.getElementById('passwordInput').value = '';
                 document.getElementById('passwordInput').focus();
             }
+        }
+
+        function checkLoginStatus() {
+            // 检查localStorage和sessionStorage中的登录状态
+            const isLoggedIn = localStorage.getItem('apiDocsLoggedIn') === 'true' || 
+                              sessionStorage.getItem('apiDocsLoggedIn') === 'true';
+            
+            if (isLoggedIn) {
+                // 如果选择了"记住我"，检查是否过期（7天）
+                const timestamp = localStorage.getItem('apiDocsTimestamp');
+                if (timestamp) {
+                    const loginTime = parseInt(timestamp);
+                    const now = Date.now();
+                    const sevenDays = 7 * 24 * 60 * 60 * 1000; // 7天的毫秒数
+                    
+                    if (now - loginTime > sevenDays) {
+                        // 超过7天，清除登录状态
+                        localStorage.removeItem('apiDocsLoggedIn');
+                        localStorage.removeItem('apiDocsTimestamp');
+                        return false;
+                    }
+                }
+                
+                // 登录状态有效，直接显示内容
+                document.getElementById('passwordForm').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                return true;
+            }
+            return false;
+        }
+
+        function logout() {
+            // 清除登录状态
+            localStorage.removeItem('apiDocsLoggedIn');
+            localStorage.removeItem('apiDocsTimestamp');
+            sessionStorage.removeItem('apiDocsLoggedIn');
+            
+            // 显示登录表单
+            document.getElementById('passwordForm').style.display = 'block';
+            document.getElementById('content').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordInput').focus();
         }
 
         function showSection(index) {
@@ -995,12 +1090,17 @@ MD5签名: {计算得到的MD5值}
             navItems[index].classList.add('active');
         }
 
-        // 页面加载完成后显示第一个内容区域
+        // 页面加载完成后检查登录状态和显示第一个内容区域
         window.addEventListener('load', function() {
-            document.getElementById('passwordInput').focus();
-            // 默认显示第一个内容区域
-            if (document.getElementById('section0')) {
-                document.getElementById('section0').style.display = 'block';
+            // 检查登录状态
+            if (!checkLoginStatus()) {
+                // 如果未登录，聚焦到密码输入框
+                document.getElementById('passwordInput').focus();
+            } else {
+                // 如果已登录，显示第一个内容区域
+                if (document.getElementById('section0')) {
+                    document.getElementById('section0').style.display = 'block';
+                }
             }
         });
 
