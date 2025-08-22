@@ -2,7 +2,8 @@ module.exports = {
   apps: [
     {
       name: 'indian-payment-platform',
-      script: 'server/index.js',
+      script: '/var/www/cashgit.com/server/index.js',  // 使用绝对路径
+      cwd: '/var/www/cashgit.com',  // 设置工作目录
       instances: 1,
       autorestart: true,
       watch: false,
@@ -24,9 +25,9 @@ module.exports = {
       // 移除 --optimize-for-size 标志
       // 添加性能优化标志
       exec_mode: 'fork',
-      error_file: './logs/err.log',
-      out_file: './logs/out.log',
-      log_file: './logs/combined.log',
+      error_file: '/var/www/cashgit.com/logs/err.log',  // 使用绝对路径
+      out_file: '/var/www/cashgit.com/logs/out.log',    // 使用绝对路径
+      log_file: '/var/www/cashgit.com/logs/combined.log', // 使用绝对路径
       time: true
     }
   ]
