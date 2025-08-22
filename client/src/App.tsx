@@ -14,7 +14,7 @@ import Monitoring from './pages/Monitoring';
 import CashGitPaymentTest from './pages/CashGitPaymentTest';
 import PaymentData from './pages/PaymentData';
 import LimitManagement from './pages/LimitManagement';
-import DatabaseOptimization from './pages/DatabaseOptimization';
+
 import { useAuth } from './hooks/useAuth';
 import { Permission } from './types';
 
@@ -181,16 +181,7 @@ function App() {
             }
           />
 
-          <Route
-            path="/database-optimization"
-            element={
-              <ProtectedRoute permissions={[Permission.SYSTEM_MONITORING]}>
-                <Layout>
-                  <DatabaseOptimization />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
+
 
           <Route
             path="/cashgit-payment-test"

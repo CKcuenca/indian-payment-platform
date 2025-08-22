@@ -148,12 +148,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/payment-p
     console.error('❌ payment-state 路由注册失败:', error.message);
   }
   
-  try {
-    app.use('/api/database-optimization', require('./routes/database-optimization'));
-    console.log('✅ database-optimization 路由注册成功');
-  } catch (error) {
-    console.error('❌ database-optimization 路由注册失败:', error.message);
-  }
+  
   
   try {
     app.use('/api/test', require('./routes/test-simple'));

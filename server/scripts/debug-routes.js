@@ -67,9 +67,7 @@ const connectAndTest = async () => {
     }
     
     try {
-      const databaseOptimizationRoute = require('../routes/database-optimization');
-      app.use('/api/database-optimization', databaseOptimizationRoute);
-      console.log('✅ database-optimization 路由注册成功');
+      
     } catch (error) {
       console.log('❌ database-optimization 路由注册失败:', error.message);
     }
