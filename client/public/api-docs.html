@@ -11,16 +11,16 @@
         .logout-btn { background: #e74c3c; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.3s; }
         .logout-btn:hover { background: #c0392b; transform: translateY(-2px); }
         .content-wrapper { display: flex; height: calc(100vh - 100px); width: 1200px; margin: 0 auto; background: #f0f0f0; }
-        .sidebar { width: 20%; background: #f0f0f0; color: #333; overflow-y: auto; }
-        .main-content { width: 60%; padding: 30px; overflow-y: auto; background: #f8f9fa; }
-        .support-sidebar { width: 20%; background: #f0f0f0; padding: 20px; border-left: 1px solid #ddd; }
-        .nav-item { padding: 15px 20px; cursor: pointer; margin: 2px 0; transition: all 0.3s; border-left: 3px solid transparent; }
-        .nav-item:hover { background: #e0e0e0; border-left-color: #3498db; }
-        .nav-item.active { background: white; border-left-color: #3498db; color: #333; }
+        .sidebar { width: 20%; background: white; color: #333; overflow-y: auto; border-right: 1px solid #ddd; }
+        .main-content { width: 60%; padding: 0; overflow-y: auto; background: white; }
+        .support-sidebar { width: 20%; background: white; padding: 0; border-left: 1px solid #ddd; }
+        .nav-item { padding: 15px 20px; cursor: pointer; margin: 2px 0; transition: all 0.3s; border-right: 3px solid transparent; }
+        .nav-item:hover { background: #e0e0e0; border-right-color: #3498db; }
+        .nav-item.active { background: white; border-right-color: #3498db; color: #333; font-weight: bold; }
         .nav-submenu { background: #e8e8e8; margin-left: 20px; }
         .nav-submenu .nav-item { padding: 12px 20px 12px 40px; font-size: 0.9em; }
-        .nav-item.expanded { background: white; }
-        .nav-item.expanded strong { color: #333; }
+        .nav-item.expanded { background: white; border-right-color: #3498db; }
+        .nav-item.expanded strong { color: #333; font-weight: bold; }
         .content-section { display: none; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .content-section.active { display: block; }
         .code-block { background: #f8f9fa; border: 1px solid #e9ecef; padding: 20px; margin: 15px 0; border-radius: 6px; font-family: 'Monaco', 'Menlo', monospace; font-size: 14px; line-height: 1.5; overflow-x: auto; }
