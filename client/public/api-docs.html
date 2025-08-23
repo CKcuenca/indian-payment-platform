@@ -792,8 +792,19 @@ Content-Type: application/x-www-form-urlencoded
 mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&status=2&sign=abc123def456
                         </div>
 
-                        <div class="alert alert-success">
-                            <strong>重要：</strong> 商户必须返回"SUCCESS"字符串，否则平台会重复发送回调。
+                        <h4>回调处理要求</h4>
+                        <div class="alert alert-warning">
+                            <strong>重要：</strong> 商户收到回调后，必须返回"SUCCESS"字符串，否则平台会重复发送回调通知。
+                        </div>
+
+                        <h4>回调重试机制</h4>
+                        <div class="code-block">
+回调重试时间间隔：
+- 第1次：立即发送
+- 第2次：5分钟后重试
+- 第3次：15分钟后重试
+- 第4次：30分钟后重试
+- 最多重试4次，如果仍然失败则停止
                         </div>
                     </div>
                 </div>
@@ -839,6 +850,22 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
                                 </tr>
                             </tbody>
                         </table>
+
+                        <h4>响应示例</h4>
+                        <div class="code-block">
+{
+  "rCode": 200,
+  "message": "查询成功",
+  "data": {
+    "out_trade_no": "ORD1234567890",
+    "trade_no": "TXN_123456",
+    "amount": "100.00",
+    "status": "2",
+    "create_time": "2024-01-15 10:00:00",
+    "update_time": "2024-01-15 10:30:00"
+  }
+}
+                        </div>
 
                         <h4>订单状态说明</h4>
                         <div class="code-block">
