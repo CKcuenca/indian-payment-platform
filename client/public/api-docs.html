@@ -907,6 +907,17 @@ mchid=MERCHANT_001&out_trade_no=Payout_1234567890&trade_no=TXN_789012&amount=500
             const activeNavItem = event.target.closest('.nav-item');
             if (activeNavItem) {
                 activeNavItem.classList.add('active');
+                
+                // 如果选中的是子菜单项，移除对应主菜单的expanded状态
+                const parentSubmenu = activeNavItem.closest('.nav-submenu');
+                if (parentSubmenu) {
+                    // 找到对应的主菜单（代收或代付）
+                    const mainMenuId = parentSubmenu.id.replace('-submenu', '');
+                    const mainMenuItem = document.querySelector(`[onclick="toggleSubmenu('${mainMenuId}')"]`);
+                    if (mainMenuItem) {
+                        mainMenuItem.classList.remove('expanded');
+                    }
+                }
             }
         }
         
