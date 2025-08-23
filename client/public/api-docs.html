@@ -95,7 +95,7 @@
         }
 
         .sidebar {
-            width: 280px;
+            width: 250px;
             background: #f6f8fa;
             color: #24292e;
             border-right: 1px solid #e1e4e8;
@@ -110,6 +110,14 @@
             /* 隐藏滚动条 */
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        .support-sidebar {
+            width: 250px;
+            background: #f6f8fa;
+            border-left: 1px solid #e1e4e8;
+            flex-shrink: 0;
+            padding: 20px;
         }
 
         /* 隐藏Webkit浏览器的滚动条 */
@@ -395,12 +403,11 @@
         }
 
         .contact-info {
-            background: #f6f8fa;
+            background: #ffffff;
             padding: 20px;
             border-radius: 6px;
-            margin-top: 20px;
+            margin-top: 0;
             border: 1px solid #e1e4e8;
-            border-top: 2px solid #e1e4e8;
         }
 
         .contact-info h4 {
@@ -555,7 +562,7 @@
                 <button onclick="logout()" class="logout-btn">退出登录</button>
             </div>
             
-            <!-- 左右分栏内容 -->
+            <!-- 三栏布局内容 -->
             <div class="content-wrapper">
                 <!-- 左侧导航栏 -->
                 <div class="sidebar">
@@ -595,30 +602,9 @@
                             <span class="nav-text">4. 余额查询</span>
                         </div>
                     </div>
-
-                    <!-- 联系信息 -->
-                    <div class="contact-info">
-                        <h4>技术支持</h4>
-                        <div class="contact-item">
-                            <span class="contact-label">技术支持邮箱：</span>
-                            <span>support@cashgit.com</span>
-                        </div>
-                        <div class="contact-item">
-                            <span class="contact-label">商务合作：</span>
-                            <span>business@cashgit.com</span>
-                        </div>
-                        <div class="contact-item">
-                            <span class="contact-label">API文档：</span>
-                            <span>https://api.cashgit.com/docs</span>
-                        </div>
-                        <div class="contact-item">
-                            <span class="contact-label">最后更新：</span>
-                            <span>2024年1月15日</span>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- 右侧主内容区域 -->
+                <!-- 中间主内容区域 -->
                 <div class="main-content">
 
                 <!-- 1. Sign加密 -->
@@ -1300,6 +1286,29 @@ mchid=MERCHANT_001&out_trade_no=Payout_1234567890&trade_no=TXN_789012&amount=500
 
                         <div class="alert alert-success">
                             <strong>提示：</strong> 余额查询接口可以随时调用，用于了解账户资金状况。
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧技术支持栏 -->
+                <div class="support-sidebar">
+                    <div class="contact-info">
+                        <h4>技术支持</h4>
+                        <div class="contact-item">
+                            <span class="contact-label">技术支持邮箱：</span>
+                            <span>support@cashgit.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-label">商务合作：</span>
+                            <span>business@cashgit.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-label">API文档：</span>
+                            <span>https://api.cashgit.com/docs</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-label">最后更新：</span>
+                            <span>2024年1月15日</span>
                         </div>
                     </div>
                 </div>
