@@ -28,6 +28,11 @@
         
         .code-block { background: #1e1e1e; border: 1px solid #3c3c3c; border-radius: 6px; padding: 16px; margin: 16px 0; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace; font-size: 13px; line-height: 1.45; overflow-x: auto; color: #d4d4d4; position: relative; }
         
+        /* 移除highlight.js的默认背景色 */
+        .code-block .hljs { background: transparent !important; }
+        .code-block code.hljs { background: transparent !important; }
+        .code-block pre code { background: transparent !important; }
+        
         .copy-btn { 
             position: absolute; 
             top: 8px; 
