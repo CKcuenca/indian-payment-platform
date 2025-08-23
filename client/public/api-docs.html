@@ -19,7 +19,7 @@
         .nav-item { padding: 15px 20px; cursor: pointer; margin: 2px 0; transition: all 0.3s; border-right: 3px solid transparent; }
         .nav-item:hover { background: #f0f0f0; border-right-color: #3498db; }
         .nav-item.active { background: #f0f0f0; border-right-color: #3498db; color: #333; font-weight: bold; }
-        .nav-submenu { background: white; margin-left: 20px; }
+        .nav-submenu { background: white; margin-left: 20px; display: none; }
         .nav-submenu .nav-item { padding: 12px 20px 12px 40px; font-size: 0.9em; background: white; }
         .nav-item.expanded { background: #f0f0f0; border-right-color: #3498db; }
         .nav-item.expanded strong { color: #333; font-weight: bold; }
@@ -921,7 +921,7 @@ mchid=MERCHANT_001&out_trade_no=Payout_1234567890&trade_no=TXN_789012&amount=500
                 });
                 
                 // 展开当前子菜单
-                submenu.classList.add('expanded');
+                submenu.style.display = 'block';
                 navItem.classList.add('expanded');
             }
         }
