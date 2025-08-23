@@ -1546,28 +1546,7 @@ MD5签名: {计算得到的MD5值}
             if (activeNavItem) {
                 activeNavItem.classList.add('active');
             }
-        }
-            document.getElementById('content').style.display = 'none';
-            document.getElementById('passwordInput').value = '';
-            document.getElementById('passwordInput').focus();
-        }
 
-        function showSection(index) {
-            // 隐藏所有内容区域
-            const sections = document.querySelectorAll('.content-section');
-            sections.forEach(section => section.style.display = 'none');
-            
-            // 移除所有导航项的active状态
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => item.classList.remove('active'));
-            
-            // 显示选中的内容区域
-            const targetSection = document.getElementById('section' + index);
-            if (targetSection) {
-                targetSection.style.display = 'block';
-            }
-            navItems[index].classList.add('active');
-        }
 
         // 页面加载完成后检查登录状态和显示第一个内容区域
         window.addEventListener('load', function() {
@@ -1606,10 +1585,7 @@ MD5签名: {计算得到的MD5值}
             }
         });
 
-        // 页面加载完成后自动聚焦到密码输入框
-        window.addEventListener('load', function() {
-            document.getElementById('passwordInput').focus();
-        });
+
     </script>
 </body>
 </html>
