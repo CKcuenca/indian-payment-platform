@@ -19,6 +19,8 @@
         .nav-item.active { background: #3498db; border-left-color: #2980b9; }
         .nav-submenu { background: #34495e; margin-left: 20px; }
         .nav-submenu .nav-item { padding: 12px 20px 12px 40px; font-size: 0.9em; }
+        .nav-item.expanded { background: #3498db; }
+        .nav-item.expanded strong { color: white; }
         .content-section { display: none; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .content-section.active { display: block; }
         .code-block { background: #f8f9fa; border: 1px solid #e9ecef; padding: 20px; margin: 15px 0; border-radius: 6px; font-family: 'Monaco', 'Menlo', monospace; font-size: 14px; line-height: 1.5; overflow-x: auto; }
@@ -846,20 +848,20 @@ mchid=MERCHANT_001&out_trade_no=Payout_1234567890&trade_no=TXN_789012&amount=500
             const submenu = document.getElementById(menuType + '-submenu');
             const navItem = event.target.closest('.nav-item');
             
-            if (submenu.classList.contains('expanded')) {
-                submenu.classList.remove('expanded');
+            if (submenu.style.display === 'block') {
+                submenu.style.display = 'none';
                 navItem.classList.remove('expanded');
             } else {
                 // 收起其他展开的子菜单
                 document.querySelectorAll('.nav-submenu').forEach(menu => {
-                    menu.classList.remove('expanded');
+                    menu.style.display = 'none';
                 });
-                document.querySelectorAll('.nav-level-1').forEach(item => {
+                document.querySelectorAll('.nav-item').forEach(item => {
                     item.classList.remove('expanded');
                 });
                 
                 // 展开当前子菜单
-                submenu.classList.add('expanded');
+                submenu.style.display = 'block';
                 navItem.classList.add('expanded');
             }
         }
