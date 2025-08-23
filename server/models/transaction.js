@@ -81,7 +81,8 @@ const transactionSchema = new mongoose.Schema({
   // 支付提供者信息
   provider: {
     name: String,
-    transactionId: String
+    transactionId: String,
+    utrNumber: String    // UTR交易号
   },
   
   // 描述信息

@@ -42,7 +42,9 @@ const orderSchema = new mongoose.Schema({
       required: true
     },
     transactionId: String,
-    providerOrderId: String
+    providerOrderId: String,
+    utrNumber: String,    // UTR交易号
+    utrAmount: Number     // UTR金额
   },
   
   // 订单状态
