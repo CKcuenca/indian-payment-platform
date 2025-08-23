@@ -6,22 +6,43 @@
     <title>CashGit India Payment API文档</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; line-height: 1.6; }
-        .header { background: #2c3e50; color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .logout-btn { background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .logout-btn { background: #e74c3c; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: all 0.3s; }
+        .logout-btn:hover { background: #c0392b; transform: translateY(-2px); }
         .content-wrapper { display: flex; height: calc(100vh - 100px); }
-        .sidebar { width: 250px; background: #34495e; color: white; padding: 20px; }
-        .main-content { flex: 1; padding: 20px; overflow-y: auto; }
-        .support-sidebar { width: 250px; background: #ecf0f1; padding: 20px; }
-        .nav-item { padding: 10px; cursor: pointer; margin: 5px 0; border-radius: 5px; }
-        .nav-item:hover { background: #2c3e50; }
-        .nav-item.active { background: #3498db; }
-        .content-section { display: none; }
+        .sidebar { width: 280px; background: #2c3e50; color: white; overflow-y: auto; }
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; background: #f8f9fa; }
+        .support-sidebar { width: 280px; background: #ecf0f1; padding: 20px; border-left: 1px solid #ddd; }
+        .nav-item { padding: 15px 20px; cursor: pointer; margin: 2px 0; transition: all 0.3s; border-left: 3px solid transparent; }
+        .nav-item:hover { background: #34495e; border-left-color: #3498db; }
+        .nav-item.active { background: #3498db; border-left-color: #2980b9; }
+        .nav-submenu { background: #34495e; margin-left: 20px; }
+        .nav-submenu .nav-item { padding: 12px 20px 12px 40px; font-size: 0.9em; }
+        .content-section { display: none; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .content-section.active { display: block; }
-        .code-block { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 5px; }
-        .table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-        .table th, .table td { border: 1px solid #dee2e6; padding: 8px; text-align: left; }
-        .table th { background: #f8f9fa; }
+        .code-block { background: #f8f9fa; border: 1px solid #e9ecef; padding: 20px; margin: 15px 0; border-radius: 6px; font-family: 'Monaco', 'Menlo', monospace; font-size: 14px; line-height: 1.5; overflow-x: auto; }
+        .endpoint { background: #e3f2fd; border: 1px solid #2196f3; padding: 15px; margin: 15px 0; border-radius: 6px; border-left: 4px solid #2196f3; }
+        .table { width: 100%; border-collapse: collapse; margin: 15px 0; border: 1px solid #dee2e6; border-radius: 6px; overflow: hidden; }
+        .table th, .table td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+        .table th { background: #f8f9fa; font-weight: 600; color: #495057; }
+        .table tr:nth-child(even) { background-color: #f8f9fa; }
+        .table tr:hover { background-color: #e3f2fd; }
+        .alert { padding: 15px; border-radius: 6px; margin: 15px 0; border-left: 4px solid; }
+        .alert-info { background: #e3f2fd; border-left-color: #2196f3; color: #0d47a1; }
+        .alert-warning { background: #fff3e0; border-left-color: #ff9800; color: #e65100; }
+        .alert-success { background: #e8f5e8; border-left-color: #4caf50; color: #2e7d32; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-success { background: #d4edda; color: #155724; }
+        .status-failed { background: #f8d7da; color: #721c24; }
+        .status-processing { background: #cce7ff; color: #004085; }
+        h2 { color: #2c3e50; margin-bottom: 20px; font-size: 2em; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h3 { color: #34495e; margin: 25px 0 15px 0; font-size: 1.5em; }
+        h4 { color: #495057; margin: 20px 0 10px 0; font-size: 1.2em; }
+        .contact-info { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .contact-item { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #3498db; }
+        .contact-label { font-weight: 600; color: #2c3e50; }
     </style>
 </head>
 <body>
@@ -32,72 +53,831 @@
     
     <div class="content-wrapper">
         <div class="sidebar">
-            <div class="nav-item active" onclick="showSection('sign')">1. Sign加密</div>
-            <div class="nav-item" onclick="showSection('collection')">2. 代收</div>
-            <div class="nav-item" onclick="showSection('payout')">3. 代付</div>
-            <div class="nav-item" onclick="showSection('balance')">4. 余额查询</div>
+            <div class="nav-item active" onclick="showSection('sign')">
+                <strong>1. Sign加密</strong>
+            </div>
+            
+            <div class="nav-item" onclick="toggleSubmenu('collection')">
+                <strong>2. 代收</strong> <span style="float:right;">▼</span>
+            </div>
+            <div class="nav-submenu" id="collection-submenu" style="display:none;">
+                <div class="nav-item" onclick="showSection('create-collection')">2.1 创建代收订单</div>
+                <div class="nav-item" onclick="showSection('collection-callback')">2.2 代收回调</div>
+                <div class="nav-item" onclick="showSection('query-collection')">2.3 查询代收订单状态</div>
+                <div class="nav-item" onclick="showSection('utr-management')">2.4 UTR补单</div>
+                <div class="nav-item" onclick="showSection('query-upi')">2.5 查询UPI</div>
+            </div>
+            
+            <div class="nav-item" onclick="toggleSubmenu('payout')">
+                <strong>3. 代付</strong> <span style="float:right;">▼</span>
+            </div>
+            <div class="nav-submenu" id="payout-submenu" style="display:none;">
+                <div class="nav-item" onclick="showSection('create-payout')">3.1 创建代付订单</div>
+                <div class="nav-item" onclick="showSection('payout-callback')">3.2 代付回调</div>
+                <div class="nav-item" onclick="showSection('query-payout')">3.3 查询代付订单状态</div>
+            </div>
+            
+            <div class="nav-item" onclick="showSection('balance')">
+                <strong>4. 余额查询</strong>
+            </div>
         </div>
         
         <div class="main-content">
+            <!-- 1. Sign加密 -->
             <div id="sign" class="content-section active">
                 <h2>1. Sign加密</h2>
-                <p>所有API请求都需要进行MD5签名验证</p>
+                <p>所有API请求都需要进行MD5签名验证，确保数据安全和完整性。</p>
+                
+                <h3>签名规则</h3>
                 <div class="code-block">
-                    签名规则：<br>
-                    1. 参数按ASCII码排序<br>
-                    2. 拼接成key=value格式<br>
-                    3. 末尾拼接商户密钥<br>
-                    4. MD5加密（32位小写）
+1. 将所有参数按照参数名ASCII码从小到大排序
+2. 拼接成 key1=value1&key2=value2 格式
+3. 在字符串末尾拼接上商户密钥
+4. 对拼接后的字符串进行MD5加密（32位小写）
+                </div>
+
+                <h3>签名示例</h3>
+                <div class="code-block">
+// 原始参数
+mchid=MERCHANT_001
+amount=100.00
+out_trade_no=ORD1234567890
+notify_url=https://yourgame.com/payment/notify
+
+// 排序后拼接
+amount=100.00&mchid=MERCHANT_001&notify_url=https://yourgame.com/payment/notify&out_trade_no=ORD1234567890
+
+// 拼接密钥
+amount=100.00&mchid=MERCHANT_001&notify_url=https://yourgame.com/payment/notify&out_trade_no=ORD1234567890YOUR_SECRET_KEY
+
+// MD5加密结果
+sign=md5("amount=100.00&mchid=MERCHANT_001&notify_url=https://yourgame.com/payment/notify&out_trade_no=ORD1234567890YOUR_SECRET_KEY")
+                </div>
+
+                <h3>注意事项</h3>
+                <div class="alert alert-warning">
+                    <strong>重要提示：</strong>
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li>签名验证失败会导致API调用失败</li>
+                        <li>请确保签名算法正确实现</li>
+                        <li>参数值不能为空，空值不参与签名</li>
+                        <li>签名不区分大小写，但建议使用小写</li>
+                    </ul>
                 </div>
             </div>
             
-            <div id="collection" class="content-section">
-                <h2>2. 代收</h2>
-                <h3>2.1 创建代收订单</h3>
-                <h3>2.2 代收回调</h3>
-                <h3>2.3 查询代收订单状态</h3>
-                <h3>2.4 UTR补单</h3>
-                <h3>2.5 查询UPI</h3>
+            <!-- 2.1 创建代收订单 -->
+            <div id="create-collection" class="content-section">
+                <h2>2.1 创建代收订单</h2>
+                <p>为玩家创建充值订单，支持UPI支付方式。</p>
+                
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/collection/create
+                </div>
+
+                <h3>请求参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>pay_id</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>支付ID</td>
+                        </tr>
+                        <tr>
+                            <td>out_trade_no</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户订单号，唯一标识</td>
+                        </tr>
+                        <tr>
+                            <td>amount</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>订单金额（保留2位小数）</td>
+                        </tr>
+                        <tr>
+                            <td>notify_url</td>
+                            <td>string</td>
+                            <td>否</td>
+                            <td>异步通知URL</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>请求示例</h3>
+                <div class="code-block">
+{
+  "mchid": "MERCHANT_001",
+  "pay_id": "PAY_001",
+  "out_trade_no": "ORD1234567890",
+  "amount": "100.00",
+  "notify_url": "https://yourgame.com/payment/notify"
+}
+                </div>
+
+                <h3>响应示例</h3>
+                <div class="code-block">
+{
+  "rCode": 200,
+  "message": "订单创建成功",
+  "data": {
+    "trade_no": "TXN_123456",
+    "out_trade_no": "ORD1234567890",
+    "amount": "100.00",
+    "status": "0",
+    "qr_code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+    "payment_url": "https://pay.cashgit.com/pay/TXN_123456"
+  }
+}
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>注意：</strong> 订单创建成功后，玩家可以通过UPI应用扫描二维码或使用支付链接完成支付。
+                </div>
             </div>
             
-            <div id="payout" class="content-section">
-                <h2>3. 代付</h2>
-                <h3>3.1 创建代付订单</h3>
-                <h3>3.2 代付回调</h3>
-                <h3>3.3 查询代付订单状态</h3>
+            <!-- 2.2 代收回调 -->
+            <div id="collection-callback" class="content-section">
+                <h2>2.2 代收回调</h2>
+                <p>支付成功后，平台会向商户指定的notify_url发送异步通知。</p>
+                
+                <h3>回调参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>out_trade_no</td>
+                            <td>string</td>
+                            <td>商户订单号</td>
+                        </tr>
+                        <tr>
+                            <td>trade_no</td>
+                            <td>string</td>
+                            <td>平台交易号</td>
+                        </tr>
+                        <tr>
+                            <td>amount</td>
+                            <td>string</td>
+                            <td>订单金额</td>
+                        </tr>
+                        <tr>
+                            <td>status</td>
+                            <td>string</td>
+                            <td>订单状态</td>
+                        </tr>
+                        <tr>
+                            <td>utr_number</td>
+                            <td>string</td>
+                            <td>UTR交易号</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>回调示例</h3>
+                <div class="code-block">
+POST https://yourgame.com/payment/notify
+Content-Type: application/x-www-form-urlencoded
+
+mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&status=2&utr_number=UTR123456789&sign=abc123def456
+                </div>
+
+                <h3>回调处理要求</h3>
+                <div class="alert alert-warning">
+                    <strong>重要：</strong> 商户收到回调后，必须返回"SUCCESS"字符串，否则平台会重复发送回调通知。
+                </div>
+
+                <h3>回调重试机制</h3>
+                <div class="code-block">
+回调重试时间间隔：
+- 第1次：立即发送
+- 第2次：5分钟后重试
+- 第3次：15分钟后重试
+- 第4次：30分钟后重试
+- 最多重试4次，如果仍然失败则停止
+                </div>
             </div>
             
+            <!-- 2.3 查询代收订单状态 -->
+            <div id="query-collection" class="content-section">
+                <h2>2.3 查询代收订单状态</h2>
+                <p>查询订单的当前状态和详细信息。</p>
+                
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/collection/query
+                </div>
+
+                <h3>请求参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>out_trade_no</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户订单号</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>响应示例</h3>
+                <div class="code-block">
+{
+  "rCode": 200,
+  "message": "查询成功",
+  "data": {
+    "out_trade_no": "ORD1234567890",
+    "trade_no": "TXN_123456",
+    "amount": "100.00",
+    "status": "2",
+    "create_time": "2024-01-15 10:00:00",
+    "update_time": "2024-01-15 10:30:00",
+    "utr_number": "UTR123456789"
+  }
+}
+                </div>
+
+                <h3>订单状态说明</h3>
+                <div class="code-block">
+状态码说明：
+<span class="status-badge status-pending">0 - 待处理 (PENDING)</span>
+<span class="status-badge status-processing">1 - 处理中 (PROCESSING)</span>
+<span class="status-badge status-success">2 - 成功 (SUCCESS)</span>
+<span class="status-badge status-failed">3 - 失败 (FAILED)</span>
+<span class="status-badge status-failed">4 - 取消 (CANCELLED)</span>
+<span class="status-badge status-failed">5 - 过期 (EXPIRED)</span>
+                </div>
+            </div>
+            
+            <!-- 2.4 UTR补单 -->
+            <div id="utr-management" class="content-section">
+                <h2>2.4 UTR补单</h2>
+                <p>当玩家通过UPI支付后，可以通过UTR号进行补单操作。</p>
+                
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/utr/supplement
+                </div>
+
+                <h3>请求参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>utr_number</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>UTR交易号</td>
+                        </tr>
+                        <tr>
+                            <td>amount</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>交易金额</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>UTR状态查询</h3>
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/utr/query
+                </div>
+
+                <div class="code-block">
+// UTR状态查询参数
+{
+  "mchid": "MERCHANT_001",
+  "utr_number": "UTR123456789",
+  "sign": "abc123def456"
+}
+
+// 响应示例
+{
+  "rCode": 200,
+  "message": "查询成功",
+  "data": {
+    "utr_number": "UTR123456789",
+    "status": "SUCCESS",
+    "amount": "100.00",
+    "transaction_time": "2024-01-15 10:30:00"
+  }
+}
+                </div>
+            </div>
+            
+            <!-- 2.5 查询UPI -->
+            <div id="query-upi" class="content-section">
+                <h2>2.5 查询UPI</h2>
+                <p>查询可用的UPI账户信息。</p>
+                
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/upi/query
+                </div>
+
+                <h3>请求参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>响应示例</h3>
+                <div class="code-block">
+{
+  "rCode": 200,
+  "message": "查询成功",
+  "data": [
+    {
+      "upi_id": "upi@cashgit",
+      "name": "CashGit Payment",
+      "status": "ACTIVE",
+      "qr_code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+    },
+    {
+      "upi_id": "pay@cashgit",
+      "name": "CashGit UPI",
+      "status": "ACTIVE",
+      "qr_code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+    }
+  ]
+}
+                </div>
+            </div>
+            
+            <!-- 3.1 创建代付订单 -->
+            <div id="create-payout" class="content-section">
+                <h2>3.1 创建代付订单</h2>
+                <p>为玩家创建提现订单，将资金转入指定银行账户。</p>
+                
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/payout/create
+                </div>
+
+                <h3>请求参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>pay_id</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>支付ID</td>
+                        </tr>
+                        <tr>
+                            <td>out_trade_no</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户订单号</td>
+                        </tr>
+                        <tr>
+                            <td>amount</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>提现金额（保留2位小数）</td>
+                        </tr>
+                        <tr>
+                            <td>account_number</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>银行账户号</td>
+                        </tr>
+                        <tr>
+                            <td>ifsc_code</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>IFSC代码</td>
+                        </tr>
+                        <tr>
+                            <td>account_holder</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>账户持有人姓名</td>
+                        </tr>
+                        <tr>
+                            <td>notify_url</td>
+                            <td>string</td>
+                            <td>否</td>
+                            <td>异步通知URL</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>请求示例</h3>
+                <div class="code-block">
+{
+  "mchid": "MERCHANT_001",
+  "pay_id": "PAY_001",
+  "out_trade_no": "Payout_1234567890",
+  "amount": "500.00",
+  "account_number": "1234567890",
+  "ifsc_code": "SBIN0001234",
+  "account_holder": "Player Name",
+  "notify_url": "https://yourgame.com/payout/notify"
+}
+                </div>
+
+                <h3>响应示例</h3>
+                <div class="code-block">
+{
+  "rCode": 200,
+  "message": "代付订单创建成功",
+  "data": {
+    "trade_no": "TXN_789012",
+    "out_trade_no": "Payout_1234567890",
+    "amount": "500.00",
+    "status": "0"
+  }
+}
+                </div>
+            </div>
+            
+            <!-- 3.2 代付回调 -->
+            <div id="payout-callback" class="content-section">
+                <h2>3.2 代付回调</h2>
+                <p>代付处理完成后，平台会向商户指定的notify_url发送异步通知。</p>
+                
+                <h3>回调参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>out_trade_no</td>
+                            <td>string</td>
+                            <td>商户订单号</td>
+                        </tr>
+                        <tr>
+                            <td>trade_no</td>
+                            <td>string</td>
+                            <td>平台交易号</td>
+                        </tr>
+                        <tr>
+                            <td>amount</td>
+                            <td>string</td>
+                            <td>代付金额</td>
+                        </tr>
+                        <tr>
+                            <td>status</td>
+                            <td>string</td>
+                            <td>代付状态</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>回调示例</h3>
+                <div class="code-block">
+POST https://yourgame.com/payout/notify
+Content-Type: application/x-www-form-urlencoded
+
+mchid=MERCHANT_001&out_trade_no=Payout_1234567890&trade_no=TXN_789012&amount=500.00&status=2&sign=abc123def456
+                </div>
+
+                <h3>代付状态说明</h3>
+                <div class="code-block">
+状态码说明：
+<span class="status-badge status-pending">0 - 待处理 (PENDING)</span>
+<span class="status-badge status-processing">1 - 处理中 (PROCESSING)</span>
+<span class="status-badge status-success">2 - 成功 (SUCCESS)</span>
+<span class="status-badge status-failed">3 - 失败 (FAILED)</span>
+<span class="status-badge status-failed">4 - 取消 (CANCELLED)</span>
+<span class="status-badge status-failed">5 - 拒绝 (REJECTED)</span>
+                </div>
+            </div>
+            
+            <!-- 3.3 查询代付订单状态 -->
+            <div id="query-payout" class="content-section">
+                <h2>3.3 查询代付订单状态</h2>
+                <p>查询代付订单的当前状态。</p>
+                
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/payout/query
+                </div>
+
+                <h3>请求参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>out_trade_no</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户订单号</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>响应示例</h3>
+                <div class="code-block">
+{
+  "rCode": 200,
+  "message": "查询成功",
+  "data": {
+    "out_trade_no": "Payout_1234567890",
+    "trade_no": "TXN_789012",
+    "amount": "500.00",
+    "status": "2",
+    "account_number": "1234567890",
+    "ifsc_code": "SBIN0001234",
+    "account_holder": "Player Name",
+    "create_time": "2024-01-15 10:00:00",
+    "update_time": "2024-01-15 10:30:00"
+  }
+}
+                </div>
+            </div>
+
+            <!-- 4. 余额查询 -->
             <div id="balance" class="content-section">
                 <h2>4. 余额查询</h2>
-                <p>查询商户账户当前余额</p>
+                <p>查询商户账户的当前余额。</p>
+                
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/balance/query
+                </div>
+
+                <h3>请求参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>响应示例</h3>
+                <div class="code-block">
+{
+  "rCode": 200,
+  "message": "查询成功",
+  "data": {
+    "balance": "10000.00",
+    "currency": "INR",
+    "last_update": "2024-01-15 10:30:00",
+    "frozen_amount": "500.00",
+    "available_amount": "9500.00"
+  }
+}
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>提示：</strong> 余额查询接口可以随时调用，用于了解账户资金状况。
+                </div>
             </div>
         </div>
         
+        <!-- 右侧技术支持栏 -->
         <div class="support-sidebar">
-            <h3>技术支持</h3>
-            <p>邮箱：support@cashgit.com</p>
-            <p>商务：business@cashgit.com</p>
+            <div class="contact-info">
+                <h3>技术支持</h3>
+                <div class="contact-item">
+                    <span class="contact-label">技术支持邮箱：</span>
+                    <span>support@cashgit.com</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">商务合作：</span>
+                    <span>business@cashgit.com</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">API文档：</span>
+                    <span>https://api.cashgit.com/docs</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">最后更新：</span>
+                    <span>2024年1月15日</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-label">版本：</span>
+                    <span>v2.1.0</span>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
+        // 显示指定内容区域
         function showSection(sectionId) {
+            // 隐藏所有内容区域
             document.querySelectorAll('.content-section').forEach(section => {
                 section.classList.remove('active');
             });
+            
+            // 移除所有导航项的active状态
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
             });
             
-            document.getElementById(sectionId).classList.add('active');
-            event.target.classList.add('active');
+            // 显示指定的内容区域
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // 设置对应导航项的active状态
+            const activeNavItem = event.target.closest('.nav-item');
+            if (activeNavItem) {
+                activeNavItem.classList.add('active');
+            }
         }
         
+        // 切换子菜单的展开/收起
+        function toggleSubmenu(menuType) {
+            const submenu = document.getElementById(menuType + '-submenu');
+            const navItem = event.target.closest('.nav-item');
+            
+            if (submenu.classList.contains('expanded')) {
+                submenu.classList.remove('expanded');
+                navItem.classList.remove('expanded');
+            } else {
+                // 收起其他展开的子菜单
+                document.querySelectorAll('.nav-submenu').forEach(menu => {
+                    menu.classList.remove('expanded');
+                });
+                document.querySelectorAll('.nav-level-1').forEach(item => {
+                    item.classList.remove('expanded');
+                });
+                
+                // 展开当前子菜单
+                submenu.classList.add('expanded');
+                navItem.classList.add('expanded');
+            }
+        }
+        
+        // 退出登录
         function logout() {
             if(confirm('确定要退出吗？')) {
                 window.close();
             }
         }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', function() {
+            // 默认显示第一个内容区域
+            if (document.getElementById('sign')) {
+                document.getElementById('sign').classList.add('active');
+            }
+        });
     </script>
 </body>
 </html>
