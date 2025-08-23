@@ -74,10 +74,17 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/payment-p
   const PaymentStatusSyncService = require('./services/payment-status-sync');
   const statusSyncService = new PaymentStatusSyncService();
   
+  // 启动PassPay状态同步服务
+  const PassPaySyncService = require('./services/passpay-sync-service');
+  const passpaySyncService = new PassPaySyncService();
+  
   // 延迟5秒启动，确保其他服务已初始化
   setTimeout(() => {
     statusSyncService.start();
     console.log('✅ 支付状态同步服务已启动');
+    
+    passpaySyncService.start();
+    console.log('✅ PassPay状态同步服务已启动');
   }, 5000);
   
 })
@@ -98,6 +105,8 @@ app.use('/api/payment-status', require('./routes/payment-status'));
 app.use('/api/status-sync', require('./routes/status-sync'));
 app.use('/api/passpay', require('./routes/passpay'));
 app.use('/api/heap-optimization', require('./routes/heap-optimization'));
+app.use('/api/callback', require('./routes/passpay-callback'));
+app.use('/api/passpay-sync', require('./routes/passpay-sync'));
 app.use('/api/memory-optimization', require('./routes/memory-optimization'));
 
 // 健康检查
