@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CashGit India Payment API文档</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background: #f0f0f0; }
@@ -105,16 +107,17 @@
                 
                 <h3>签名规则</h3>
                 <div class="code-block">
-/**
+<pre><code class="language-javascript">/**
  * 签名规则说明
  * 1. 将所有参数按照参数名ASCII码从小到大排序
  * 2. 拼接成 key1=value1&key2=value2 格式
  * 3. 在字符串末尾拼接上商户密钥
  * 4. 对拼接后的字符串进行MD5加密（32位小写）
- */</div>
+ */</code></pre></div>
 
                 <h3>签名示例</h3>
-                <div class="code-block">// 原始参数
+                <div class="code-block">
+<pre><code class="language-javascript">// 原始参数
 const params = {
     mchid: 'MERCHANT_001',
     amount: '100.00',
@@ -135,7 +138,7 @@ const signString = sortedParams + secretKey;
 
 // MD5加密结果
 const sign = md5(signString);
-// 最终签名: md5("amount=100.00&mchid=MERCHANT_001&notify_url=https://yourgame.com/payment/notify&out_trade_no=ORD1234567890YOUR_SECRET_KEY")</div>
+// 最终签名: md5("amount=100.00&mchid=MERCHANT_001&notify_url=https://yourgame.com/payment/notify&out_trade_no=ORD1234567890YOUR_SECRET_KEY")</code></pre></div>
 
                 <h3>注意事项</h3>
                 <div class="alert alert-warning">
@@ -900,6 +903,9 @@ mchid=MERCHANT_001&out_trade_no=Payout_1234567890&trade_no=TXN_789012&amount=500
             if (document.getElementById('sign')) {
                 document.getElementById('sign').classList.add('active');
             }
+            
+            // 初始化highlight.js
+            hljs.highlightAll();
         });
     </script>
 </body>
