@@ -107,17 +107,22 @@
             background: #ffffff;
             overflow-y: auto;
             padding: 0;
+            margin-right: 250px;
             /* 隐藏滚动条 */
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none; /* IE and Edge */
         }
 
         .support-sidebar {
+            position: fixed;
+            right: 0;
+            top: 140px;
             width: 250px;
+            height: calc(100vh - 140px);
             background: #f6f8fa;
             border-left: 1px solid #e1e4e8;
-            flex-shrink: 0;
             padding: 20px;
+            overflow-y: auto;
         }
 
         /* 隐藏Webkit浏览器的滚动条 */
@@ -1316,27 +1321,27 @@ mchid=MERCHANT_001&out_trade_no=Payout_1234567890&trade_no=TXN_789012&amount=500
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- 右侧技术支持栏 -->
-                <div class="support-sidebar">
-                    <div class="contact-info">
-                        <h4>技术支持</h4>
-                        <div class="contact-item">
-                            <span class="contact-label">技术支持邮箱：</span>
-                            <span>support@cashgit.com</span>
-                        </div>
-                        <div class="contact-item">
-                            <span class="contact-label">商务合作：</span>
-                            <span>business@cashgit.com</span>
-                        </div>
-                        <div class="contact-item">
-                            <span class="contact-label">API文档：</span>
-                            <span>https://api.cashgit.com/docs</span>
-                        </div>
-                        <div class="contact-item">
-                            <span class="contact-label">最后更新：</span>
-                            <span>2024年1月15日</span>
-                        </div>
+            <!-- 右侧技术支持栏 -->
+            <div class="support-sidebar">
+                <div class="contact-info">
+                    <h4>技术支持</h4>
+                    <div class="contact-item">
+                        <span class="contact-label">技术支持邮箱：</span>
+                        <span>support@cashgit.com</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-label">商务合作：</span>
+                        <span>business@cashgit.com</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-label">API文档：</span>
+                        <span>https://api.cashgit.com/docs</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-label">最后更新：</span>
+                        <span>2024年1月15日</span>
                     </div>
                 </div>
             </div>
