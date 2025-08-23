@@ -15,15 +15,28 @@
         .main-content { width: 60%; padding: 0; overflow-y: auto; background: white; }
         .support-sidebar { width: 20%; background: white; padding: 0; border-left: 1px solid #ddd; }
         .nav-item { padding: 15px 20px; cursor: pointer; margin: 2px 0; transition: all 0.3s; border-right: 3px solid transparent; }
-        .nav-item:hover { background: #e0e0e0; border-right-color: #3498db; }
-        .nav-item.active { background: white; border-right-color: #3498db; color: #333; font-weight: bold; }
+        .nav-item:hover { background: #f0f0f0; border-right-color: #3498db; }
+        .nav-item.active { background: #f0f0f0; border-right-color: #3498db; color: #333; font-weight: bold; }
         .nav-submenu { background: white; margin-left: 20px; }
         .nav-submenu .nav-item { padding: 12px 20px 12px 40px; font-size: 0.9em; background: white; }
-        .nav-item.expanded { background: white; border-right-color: #3498db; }
+        .nav-item.expanded { background: #f0f0f0; border-right-color: #3498db; }
         .nav-item.expanded strong { color: #333; font-weight: bold; }
         .content-section { display: none; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        /* 隐藏滚动条 */
+        .sidebar::-webkit-scrollbar,
+        .main-content::-webkit-scrollbar,
+        .support-sidebar::-webkit-scrollbar {
+            display: none;
+        }
+        .sidebar,
+        .main-content,
+        .support-sidebar {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
         .content-section.active { display: block; }
-        .code-block { background: #f8f9fa; border: 1px solid #e9ecef; padding: 20px; margin: 15px 0; border-radius: 6px; font-family: 'Monaco', 'Menlo', monospace; font-size: 14px; line-height: 1.5; overflow-x: auto; }
+        .code-block { background: #f6f8fa; border: 1px solid #e1e4e8; border-radius: 6px; padding: 16px; margin: 16px 0; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace; font-size: 13px; line-height: 1.45; overflow-x: auto; color: #24292e; }
         .endpoint { background: #e3f2fd; border: 1px solid #2196f3; padding: 15px; margin: 15px 0; border-radius: 6px; border-left: 4px solid #2196f3; }
         .table { width: 100%; border-collapse: collapse; margin: 15px 0; border: 1px solid #dee2e6; border-radius: 6px; overflow: hidden; }
         .table th, .table td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
