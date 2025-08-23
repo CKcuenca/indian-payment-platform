@@ -1225,12 +1225,6 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
                                 <td>商户ID</td>
                             </tr>
                             <tr>
-                                <td>pay_id</td>
-                                <td>string</td>
-                                <td>是</td>
-                                <td>支付ID</td>
-                            </tr>
-                            <tr>
                                 <td>sign</td>
                                 <td>string</td>
                                 <td>是</td>
@@ -1243,55 +1237,23 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
                     <div class="code-block">
 {
   "rCode": 200,
-  "message": "余额查询成功",
+  "message": "查询成功",
   "data": {
-    "balance": "15000.00",
-    "currency": "INR"
+    "balance": "10000.00",
+    "currency": "INR",
+    "last_update": "2024-01-15 10:30:00"
   }
 }
-                    </div>
-                </div>
+                        </div>
 
-                <div class="section">
-                    <h3>2. 查询UPI状态</h3>
-                    <p>查询UPI支付的状态信息</p>
-                    
-                    <div class="endpoint">
-                        <strong>接口地址：</strong> POST https://api.merchant.passpay.cc/api/developer/order/upi/query
-                    </div>
-
-                    <h4>UPI状态说明</h4>
-                    <div class="code-block">
-状态码说明：
-0 - 待处理 (PENDING)
-1 - 成功 (SUCCESS)
-2 - 失败 (FAILED)
-3 - 过期 (EXPIRED)
+                        <div class="alert alert-success">
+                            <strong>提示：</strong> 余额查询接口可以随时调用，用于了解账户资金状况。
+                        </div>
                     </div>
                 </div>
             </div>
-
-                <!-- UTR管理 -->
-                <div id="section3" class="content-section">
-                <div class="section">
-                    <h3>1. 提交UTR</h3>
-                    <p>提交UTR（统一交易参考号）用于验证交易</p>
-                    
-                    <div class="endpoint">
-                        <strong>接口地址：</strong> POST https://api.merchant.passpay.cc/api/developer/order/utr
-                    </div>
-
-                    <h4>请求参数</h4>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>参数名</th>
-                                <th>类型</th>
-                                <th>必填</th>
-                                <th>说明</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+        </div>
+    </div>
                             <tr>
                                 <td>mchid</td>
                                 <td>string</td>
