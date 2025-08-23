@@ -360,7 +360,7 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
 
                 <h3>响应示例</h3>
                 <div class="code-block">
-{
+<pre><code class="language-json">{
   "rCode": 200,
   "message": "查询成功",
   "data": {
@@ -372,19 +372,17 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
     "update_time": "2024-01-15 10:30:00",
     "utr_number": "UTR123456789"
   }
-}
-                </div>
+}</code></pre></div>
 
                 <h3>订单状态说明</h3>
                 <div class="code-block">
-状态码说明：
-<span class="status-badge status-pending">0 - 待处理 (PENDING)</span>
-<span class="status-badge status-processing">1 - 处理中 (PROCESSING)</span>
-<span class="status-badge status-success">2 - 成功 (SUCCESS)</span>
-<span class="status-badge status-failed">3 - 失败 (FAILED)</span>
-<span class="status-badge status-failed">4 - 取消 (CANCELLED)</span>
-<span class="status-badge status-failed">5 - 过期 (EXPIRED)</span>
-                </div>
+<pre><code class="language-text">状态码说明：
+0 - 待处理 (PENDING)
+1 - 处理中 (PROCESSING)
+2 - 成功 (SUCCESS)
+3 - 失败 (FAILED)
+4 - 取消 (CANCELLED)
+5 - 过期 (EXPIRED)</code></pre></div>
             </div>
             
             <!-- 2.4 UTR补单 -->
@@ -440,15 +438,15 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
                 </div>
 
                 <div class="code-block">
-// UTR状态查询参数
+<pre><code class="language-javascript">// UTR状态查询参数
 {
   "mchid": "MERCHANT_001",
   "utr_number": "UTR123456789",
   "sign": "abc123def456"
-}
+}</code></pre>
 
 // 响应示例
-{
+<pre><code class="language-json">{
   "rCode": 200,
   "message": "查询成功",
   "data": {
@@ -457,7 +455,7 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
     "amount": "100.00",
     "transaction_time": "2024-01-15 10:30:00"
   }
-}
+}</code></pre>
                 </div>
             </div>
             
@@ -498,7 +496,7 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
 
                 <h3>响应示例</h3>
                 <div class="code-block">
-{
+<pre><code class="language-json">{
   "rCode": 200,
   "message": "查询成功",
   "data": [
@@ -515,8 +513,7 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
       "qr_code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
     }
   ]
-}
-                </div>
+}</code></pre></div>
             </div>
             
             <!-- 3.1 创建代付订单 -->
