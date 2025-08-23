@@ -213,18 +213,17 @@ const sign = md5(signString);
 
                 <h3>请求示例</h3>
                 <div class="code-block">
-{
+<pre><code class="language-json">{
   "mchid": "MERCHANT_001",
   "pay_id": "PAY_001",
   "out_trade_no": "ORD1234567890",
   "amount": "100.00",
   "notify_url": "https://yourgame.com/payment/notify"
-}
-                </div>
+}</code></pre></div>
 
                 <h3>响应示例</h3>
                 <div class="code-block">
-{
+<pre><code class="language-json">{
   "rCode": 200,
   "message": "订单创建成功",
   "data": {
@@ -298,11 +297,10 @@ const sign = md5(signString);
 
                 <h3>回调示例</h3>
                 <div class="code-block">
-POST https://yourgame.com/payment/notify
+<pre><code class="language-http">POST https://yourgame.com/payment/notify
 Content-Type: application/x-www-form-urlencoded
 
-mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&status=2&utr_number=UTR123456789&sign=abc123def456
-                </div>
+mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&status=2&utr_number=UTR123456789&sign=abc123def456</code></pre></div>
 
                 <h3>回调处理要求</h3>
                 <div class="alert alert-warning">
@@ -311,13 +309,12 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
 
                 <h3>回调重试机制</h3>
                 <div class="code-block">
-回调重试时间间隔：
+<pre><code class="language-text">回调重试时间间隔：
 - 第1次：立即发送
 - 第2次：5分钟后重试
 - 第3次：15分钟后重试
 - 第4次：30分钟后重试
-- 最多重试4次，如果仍然失败则停止
-                </div>
+- 最多重试4次，如果仍然失败则停止</code></pre></div>
             </div>
             
             <!-- 2.3 查询代收订单状态 -->
