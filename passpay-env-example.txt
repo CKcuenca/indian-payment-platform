@@ -1,0 +1,27 @@
+# PassPay配置环境变量
+# 复制此文件为 .env.passpay 并填入真实值
+
+# PassPay商户ID
+PASSPAY_MCHID=your_mchid_here
+
+# PassPay支付ID  
+PASSPAY_PAY_ID=your_pay_id_here
+
+# PassPay密钥
+PASSPAY_SECRET_KEY=your_secret_key_here
+
+# 数据库连接
+MONGODB_URI=mongodb://localhost:27017/payment-platform
+
+# 服务器端口
+PORT=3000
+
+# 回调地址配置
+# 代收回调地址
+COLLECTION_CALLBACK_URL=https://yourdomain.com/api/callback/collection
+
+# 代付回调地址
+PAYOUT_CALLBACK_URL=https://yourdomain.com/api/callback/payout
+
+# 商户通知地址（可选）
+MERCHANT_NOTIFY_URL=https://yourdomain.com/api/merchant/notify

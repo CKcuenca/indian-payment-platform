@@ -1,105 +1,106 @@
-const axios = require('axios');
+const mongoose = require('mongoose');
+const PaymentConfig = require('./server/models/PaymentConfig');
 
-// 配置
-const API_BASE = 'https://cashgit.com/api';
-const TEST_API_KEY = 'test-api-key-12345';
-
-async function initPassPayConfig() {
+// 连接数据库
+async function connectDB() {
   try {
-    console.log('🚀 开始初始化PassPay支付配置...\n');
-
-    // 创建PassPay支付配置
-    const passpayConfig = {
-      accountName: 'PassPay测试账户',
-      provider: {
-        name: 'passpay',
-        accountId: '10000000',
-        apiKey: 'test-passpay-api-key',
-        secretKey: 'test-passpay-secret-key',
-        environment: 'sandbox'
-      },
-      limits: {
-        dailyLimit: 50000000, // 50万卢比
-        monthlyLimit: 500000000, // 500万卢比
-        singleTransactionLimit: 5000000, // 50万卢比
-        minTransactionAmount: 100, // 1卢比
-        maxTransactionAmount: 5000000, // 50万卢比
-        largeAmountThreshold: 100000000, // 1000万卢比
-        maxLargeTransactionsPerDay: 3
-      },
-      status: 'ACTIVE',
-      priority: 1
-    };
-
-    console.log('📋 创建PassPay支付配置...');
-    const createResponse = await axios.post(`${API_BASE}/payment-config`, passpayConfig, {
-      headers: {
-        'X-API-Key': TEST_API_KEY,
-        'Content-Type': 'application/json'
-      }
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/payment-platform', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
-
-    if (createResponse.data.success) {
-      console.log('   ✅ PassPay配置创建成功');
-      console.log(`   📝 配置ID: ${createResponse.data.data._id}`);
-    } else {
-      console.log(`   ❌ 创建失败: ${createResponse.data.error}`);
-      return;
-    }
-
-    // 验证配置是否创建成功
-    console.log('\n📋 验证PassPay配置...');
-    const verifyResponse = await axios.get(`${API_BASE}/payment-config`, {
-      headers: {
-        'X-API-Key': TEST_API_KEY
-      }
-    });
-
-    if (verifyResponse.data.success && verifyResponse.data.data.length > 0) {
-      console.log('   ✅ PassPay配置验证成功');
-      const config = verifyResponse.data.data[0];
-      console.log(`   📝 账户名称: ${config.accountName}`);
-      console.log(`   📝 提供商: ${config.provider.name}`);
-      console.log(`   📝 状态: ${config.status}`);
-      console.log(`   📝 日限额: ${config.limits.dailyLimit / 100} 卢比`);
-      console.log(`   📝 月限额: ${config.limits.monthlyLimit / 100} 卢比`);
-    } else {
-      console.log('   ❌ 配置验证失败');
-    }
-
-    // 测试限额验证
-    console.log('\n📋 测试限额验证功能...');
-    const testResponse = await axios.post(`${API_BASE}/limit-management/pre-check`, {
-      amount: 1000000, // 1万卢比
-      type: 'DEPOSIT',
-      provider: 'passpay'
-    }, {
-      headers: {
-        'X-API-Key': TEST_API_KEY,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (testResponse.data.success) {
-      console.log('   ✅ 限额验证测试成功');
-      const result = testResponse.data.data.preCheck;
-      console.log(`   📊 验证结果: ${result.valid ? '通过' : '失败'}`);
-      
-      if (testResponse.data.data.stats) {
-        const stats = testResponse.data.data.stats;
-        console.log(`   📊 今日限额: ${stats.today.total.toLocaleString()} / ${stats.today.limit.toLocaleString()} 卢比 (${stats.today.usage}%)`);
-        console.log(`   📊 本月限额: ${stats.month.total.toLocaleString()} / ${stats.month.limit.toLocaleString()} 卢比 (${stats.month.usage}%)`);
-      }
-    } else {
-      console.log(`   ❌ 限额验证测试失败: ${testResponse.data.error}`);
-    }
-
-    console.log('\n🎉 PassPay支付配置初始化完成！');
-
+    console.log('✅ 数据库连接成功');
   } catch (error) {
-    console.error('❌ 初始化失败:', error.response?.data?.error || error.message);
+    console.error('❌ 数据库连接失败:', error);
+    process.exit(1);
   }
 }
 
-// 运行初始化
-initPassPayConfig();
+// 初始化PassPay配置
+async function initPassPayConfig() {
+  try {
+    console.log('🔧 开始初始化PassPay配置...');
+
+    // 检查是否已存在PassPay配置
+    const existingConfig = await PaymentConfig.findOne({
+      'provider.name': 'passpay'
+    });
+
+    if (existingConfig) {
+      console.log('⚠️ PassPay配置已存在，更新配置...');
+      
+      // 更新现有配置
+      existingConfig.provider = {
+        name: 'passpay',
+        accountId: process.env.PASSPAY_MCHID || 'your_mchid_here',
+        payId: process.env.PASSPAY_PAY_ID || 'your_pay_id_here',
+        secretKey: process.env.PASSPAY_SECRET_KEY || 'your_secret_key_here'
+      };
+      existingConfig.enabled = true;
+      existingConfig.updatedAt = new Date();
+      
+      await existingConfig.save();
+      console.log('✅ PassPay配置更新成功');
+    } else {
+      console.log('📝 创建新的PassPay配置...');
+      
+      // 创建新配置
+      const newConfig = new PaymentConfig({
+        provider: {
+          name: 'passpay',
+          accountId: process.env.PASSPAY_MCHID || 'your_mchid_here',
+          payId: process.env.PASSPAY_PAY_ID || 'your_pay_id_here',
+          secretKey: process.env.PASSPAY_SECRET_KEY || 'your_secret_key_here'
+        },
+        enabled: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+      
+      await newConfig.save();
+      console.log('✅ PassPay配置创建成功');
+    }
+
+    // 显示当前配置
+    const config = await PaymentConfig.findOne({
+      'provider.name': 'passpay'
+    });
+    
+    console.log('\n📋 当前PassPay配置:');
+    console.log(`   商户ID: ${config.provider.accountId}`);
+    console.log(`   支付ID: ${config.provider.payId}`);
+    console.log(`   密钥: ${config.provider.secretKey.substring(0, 8)}...`);
+    console.log(`   状态: ${config.enabled ? '启用' : '禁用'}`);
+    console.log(`   创建时间: ${config.createdAt}`);
+    console.log(`   更新时间: ${config.updatedAt}`);
+
+  } catch (error) {
+    console.error('❌ 初始化PassPay配置失败:', error);
+  }
+}
+
+// 主函数
+async function main() {
+  try {
+    await connectDB();
+    await initPassPayConfig();
+    
+    console.log('\n🎉 PassPay配置初始化完成！');
+    console.log('\n📝 下一步操作:');
+    console.log('   1. 设置环境变量或直接修改配置');
+    console.log('   2. 重启服务器使配置生效');
+    console.log('   3. 运行测试验证功能');
+    
+  } catch (error) {
+    console.error('❌ 初始化失败:', error);
+  } finally {
+    await mongoose.disconnect();
+    console.log('🔌 数据库连接已关闭');
+  }
+}
+
+// 运行脚本
+if (require.main === module) {
+  main();
+}
+
+module.exports = { initPassPayConfig };
