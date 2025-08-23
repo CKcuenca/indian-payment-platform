@@ -266,6 +266,587 @@ const sign = md5(signString);
                     <strong>注意：</strong> 订单创建成功后，玩家可以通过UPI应用扫描二维码或使用支付链接完成支付。
                 </div>
             </div>
+            
+            <!-- 2.2 代收回调 -->
+            <div id="collection-callback" class="content-section">
+                <h2>2.2 代收回调</h2>
+                <p>支付成功后，平台会向商户指定的notify_url发送异步通知。</p>
+                
+                <h3>回调参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>out_trade_no</td>
+                            <td>string</td>
+                            <td>商户订单号</td>
+                        </tr>
+                        <tr>
+                            <td>trade_no</td>
+                            <td>string</td>
+                            <td>平台交易号</td>
+                        </tr>
+                        <tr>
+                            <td>amount</td>
+                            <td>string</td>
+                            <td>订单金额</td>
+                        </tr>
+                        <tr>
+                            <td>status</td>
+                            <td>string</td>
+                            <td>订单状态</td>
+                        </tr>
+                        <tr>
+                            <td>utr_number</td>
+                            <td>string</td>
+                            <td>UTR交易号</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>回调示例</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-http">POST https://yourgame.com/payment/notify
+Content-Type: application/x-www-form-urlencoded
+
+mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&status=2&utr_number=UTR123456789&sign=abc123def456</code></pre>
+                </div>
+
+                <h3>回调处理要求</h3>
+                <div class="alert alert-warning">
+                    <strong>重要：</strong> 商户收到回调后，必须返回"SUCCESS"字符串，否则平台会重复发送回调通知。
+                </div>
+
+                <h3>回调重试机制</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-text">回调重试时间间隔：
+- 第1次：立即发送
+- 第2次：5分钟后重试
+- 第3次：15分钟后重试
+- 第4次：30分钟后重试
+- 最多重试4次，如果仍然失败则停止</code></pre>
+                </div>
+            </div>
+            
+            <!-- 2.3 查询代收订单状态 -->
+            <div id="query-collection" class="content-section">
+                <h2>2.3 查询代收订单状态</h2>
+                <p>查询订单的当前状态和详细信息。</p>
+                
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/collection/query
+                </div>
+
+                <h3>请求参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>out_trade_no</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户订单号</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>响应示例</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-json">{
+  "rCode": 200,
+  "message": "查询成功",
+  "data": {
+    "out_trade_no": "ORD1234567890",
+    "trade_no": "TXN_123456",
+    "amount": "100.00",
+    "status": "2",
+    "create_time": "2024-01-15 10:00:00",
+    "update_time": "2024-01-15 10:30:00",
+    "utr_number": "UTR123456789"
+  }
+}</code></pre>
+                </div>
+
+                <h3>订单状态说明</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-text">状态码说明：
+0 - 待处理 (PENDING)
+1 - 处理中 (PROCESSING)
+2 - 成功 (SUCCESS)
+3 - 失败 (FAILED)
+4 - 取消 (CANCELLED)
+5 - 过期 (EXPIRED)</code></pre>
+                </div>
+            </div>
+            
+            <!-- 2.4 UTR补单 -->
+            <div id="utr-management" class="content-section">
+                <h2>2.4 UTR补单</h2>
+                <p>当玩家通过UPI支付后，可以通过UTR号进行补单操作。</p>
+                
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/utr/supplement
+                </div>
+
+                <h3>请求参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>utr_number</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>UTR交易号</td>
+                        </tr>
+                        <tr>
+                            <td>amount</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>交易金额</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>UTR状态查询</h3>
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/utr/query
+                </div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-javascript">// UTR状态查询参数
+{
+  "mchid": "MERCHANT_001",
+  "utr_number": "UTR123456789",
+  "sign": "abc123def456"
+}
+
+// 响应示例
+{
+  "rCode": 200,
+  "message": "查询成功",
+  "data": {
+    "utr_number": "UTR123456789",
+    "status": "SUCCESS",
+    "amount": "100.00",
+    "transaction_time": "2024-01-15 10:30:00"
+  }
+}</code></pre>
+                </div>
+            </div>
+            
+            <!-- 2.5 查询UPI -->
+            <div id="query-upi" class="content-section">
+                <h2>2.5 查询UPI</h2>
+                <p>查询可用的UPI账户信息。</p>
+                
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/upi/query
+                </div>
+
+                <h3>请求参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>响应示例</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-json">{
+  "rCode": 200,
+  "message": "查询成功",
+  "data": [
+    {
+      "upi_id": "upi@cashgit",
+      "name": "CashGit Payment",
+      "status": "ACTIVE",
+      "qr_code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+    },
+    {
+      "upi_id": "pay@cashgit",
+      "name": "CashGit UPI",
+      "status": "ACTIVE",
+      "qr_code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+    }
+  ]
+}</code></pre>
+                </div>
+            </div>
+            
+            <!-- 3.1 创建代付订单 -->
+            <div id="create-payout" class="content-section">
+                <h2>3.1 创建代付订单</h2>
+                <p>为玩家创建提现订单，将资金转入指定银行账户。</p>
+                
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/payout/create
+                </div>
+
+                <h3>请求参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>pay_id</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>支付ID</td>
+                        </tr>
+                        <tr>
+                            <td>out_trade_no</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户订单号</td>
+                        </tr>
+                        <tr>
+                            <td>amount</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>提现金额（保留2位小数）</td>
+                        </tr>
+                        <tr>
+                            <td>account_number</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>银行账户号</td>
+                        </tr>
+                        <tr>
+                            <td>ifsc_code</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>IFSC代码</td>
+                        </tr>
+                        <tr>
+                            <td>account_holder</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>账户持有人姓名</td>
+                        </tr>
+                        <tr>
+                            <td>notify_url</td>
+                            <td>string</td>
+                            <td>否</td>
+                            <td>异步通知URL</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>请求示例</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-json">{
+  "mchid": "MERCHANT_001",
+  "pay_id": "PAY_001",
+  "out_trade_no": "Payout_1234567890",
+  "amount": "500.00",
+  "account_number": "1234567890",
+  "ifsc_code": "SBIN0001234",
+  "account_holder": "Player Name",
+  "notify_url": "https://yourgame.com/payout/notify"
+}</code></pre>
+                </div>
+
+                <h3>响应示例</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-json">{
+  "rCode": 200,
+  "message": "代付订单创建成功",
+  "data": {
+    "trade_no": "TXN_789012",
+    "out_trade_no": "Payout_1234567890",
+    "amount": "500.00",
+    "status": "0"
+  }
+}</code></pre>
+                </div>
+            </div>
+            
+            <!-- 3.2 代付回调 -->
+            <div id="payout-callback" class="content-section">
+                <h2>3.2 代付回调</h2>
+                <p>代付处理完成后，平台会向商户指定的notify_url发送异步通知。</p>
+                
+                <h3>回调参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>out_trade_no</td>
+                            <td>string</td>
+                            <td>商户订单号</td>
+                        </tr>
+                        <tr>
+                            <td>trade_no</td>
+                            <td>string</td>
+                            <td>平台交易号</td>
+                        </tr>
+                        <tr>
+                            <td>amount</td>
+                            <td>string</td>
+                            <td>代付金额</td>
+                        </tr>
+                        <tr>
+                            <td>status</td>
+                            <td>string</td>
+                            <td>代付状态</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>回调示例</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-http">POST https://yourgame.com/payout/notify
+Content-Type: application/x-www-form-urlencoded
+
+mchid=MERCHANT_001&out_trade_no=Payout_1234567890&trade_no=TXN_789012&amount=500.00&status=2&sign=abc123def456</code></pre>
+                </div>
+
+                <h3>代付状态说明</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-text">状态码说明：
+0 - 待处理 (PENDING)
+1 - 处理中 (PROCESSING)
+2 - 成功 (SUCCESS)
+3 - 失败 (FAILED)
+4 - 取消 (CANCELLED)
+5 - 拒绝 (REJECTED)</code></pre>
+                </div>
+            </div>
+            
+            <!-- 3.3 查询代付订单状态 -->
+            <div id="query-payout" class="content-section">
+                <h2>3.3 查询代付订单状态</h2>
+                <p>查询代付订单的当前状态。</p>
+                
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/payout/query
+                </div>
+
+                <h3>请求参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>out_trade_no</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户订单号</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>响应示例</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-json">{
+  "rCode": 200,
+  "message": "查询成功",
+  "data": {
+    "out_trade_no": "Payout_1234567890",
+    "trade_no": "TXN_789012",
+    "amount": "500.00",
+    "status": "2",
+    "account_number": "1234567890",
+    "ifsc_code": "SBIN0001234",
+    "account_holder": "Player Name",
+    "create_time": "2024-01-15 10:00:00",
+    "update_time": "2024-01-15 10:30:00"
+  }
+}</code></pre>
+                </div>
+            </div>
+            
+            <!-- 4. 余额查询 -->
+            <div id="balance" class="content-section">
+                <h2>4. 余额查询</h2>
+                <p>查询商户账户的当前余额。</p>
+                
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/balance/query
+                </div>
+
+                <h3>请求参数</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>mchid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户ID</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>响应示例</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-json">{
+  "rCode": 200,
+  "message": "查询成功",
+  "data": {
+    "balance": "10000.00",
+    "currency": "INR",
+    "last_update": "2024-01-15 10:30:00",
+    "frozen_amount": "500.00",
+    "available_amount": "9500.00"
+  }
+}</code></pre>
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>提示：</strong> 余额查询接口可以随时调用，用于了解账户资金状况。
+                </div>
+            </div>
         </div>
         
         <!-- 右侧技术支持栏 -->
