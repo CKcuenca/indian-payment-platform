@@ -111,12 +111,10 @@
  * 2. 拼接成 key1=value1&key2=value2 格式
  * 3. 在字符串末尾拼接上商户密钥
  * 4. 对拼接后的字符串进行MD5加密（32位小写）
- */
-                </div>
+ */</div>
 
                 <h3>签名示例</h3>
-                <div class="code-block">
-// 原始参数
+                <div class="code-block">// 原始参数
 const params = {
     mchid: 'MERCHANT_001',
     amount: '100.00',
@@ -137,8 +135,7 @@ const signString = sortedParams + secretKey;
 
 // MD5加密结果
 const sign = md5(signString);
-// 最终签名: md5("amount=100.00&mchid=MERCHANT_001&notify_url=https://yourgame.com/payment/notify&out_trade_no=ORD1234567890YOUR_SECRET_KEY")
-                </div>
+// 最终签名: md5("amount=100.00&mchid=MERCHANT_001&notify_url=https://yourgame.com/payment/notify&out_trade_no=ORD1234567890YOUR_SECRET_KEY")</div>
 
                 <h3>注意事项</h3>
                 <div class="alert alert-warning">
