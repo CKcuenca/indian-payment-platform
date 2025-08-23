@@ -125,6 +125,10 @@
             <div class="nav-item" onclick="showSection('balance')">
                 <strong>4. 余额查询</strong>
             </div>
+            
+            <div class="nav-item" onclick="showSection('sync-management')">
+                <strong>5. 状态同步管理</strong>
+            </div>
         </div>
         
         <div class="main-content">
@@ -599,10 +603,10 @@ EXPIRED - 过期</code></pre>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>mchid</td>
+                            <td>appid</td>
                             <td>string</td>
                             <td>是</td>
-                            <td>商户ID</td>
+                            <td>商户应用ID</td>
                         </tr>
                         <tr>
                             <td>sign</td>
@@ -617,22 +621,13 @@ EXPIRED - 过期</code></pre>
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode(this)">复制</button>
                     <pre><code class="language-json">{
-  "rCode": 200,
+  "success": true,
   "message": "查询成功",
-  "data": [
-    {
-      "upi_id": "upi@cashgit",
-      "name": "CashGit Payment",
-      "status": "ACTIVE",
-      "qr_code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
-    },
-    {
-      "upi_id": "pay@cashgit",
-      "name": "CashGit UPI",
-      "status": "ACTIVE",
-      "qr_code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
-    }
-  ]
+  "data": {
+    "upi_id": "upi@cashgit",
+    "upi_status": "ACTIVE",
+    "message": "UPI查询成功"
+  }
 }</code></pre>
                 </div>
             </div>
@@ -658,19 +653,13 @@ EXPIRED - 过期</code></pre>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>mchid</td>
+                            <td>appid</td>
                             <td>string</td>
                             <td>是</td>
-                            <td>商户ID</td>
+                            <td>商户应用ID</td>
                         </tr>
                         <tr>
-                            <td>pay_id</td>
-                            <td>string</td>
-                            <td>是</td>
-                            <td>支付ID</td>
-                        </tr>
-                        <tr>
-                            <td>out_trade_no</td>
+                            <td>orderid</td>
                             <td>string</td>
                             <td>是</td>
                             <td>商户订单号</td>
@@ -718,9 +707,8 @@ EXPIRED - 过期</code></pre>
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode(this)">复制</button>
                     <pre><code class="language-json">{
-  "mchid": "MERCHANT_001",
-  "pay_id": "PAY_001",
-  "out_trade_no": "Payout_1234567890",
+  "appid": "MERCHANT_001",
+  "orderid": "Payout_1234567890",
   "amount": "500.00",
   "account_number": "1234567890",
   "ifsc_code": "SBIN0001234",
@@ -733,13 +721,13 @@ EXPIRED - 过期</code></pre>
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode(this)">复制</button>
                     <pre><code class="language-json">{
-  "rCode": 200,
+  "success": true,
   "message": "代付订单创建成功",
   "data": {
+    "orderid": "Payout_1234567890",
     "trade_no": "TXN_789012",
-    "out_trade_no": "Payout_1234567890",
     "amount": "500.00",
-    "status": "0"
+    "status": "pending"
   }
 }</code></pre>
                 </div>
@@ -761,12 +749,7 @@ EXPIRED - 过期</code></pre>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>mchid</td>
-                            <td>string</td>
-                            <td>商户ID</td>
-                        </tr>
-                        <tr>
-                            <td>out_trade_no</td>
+                            <td>orderid</td>
                             <td>string</td>
                             <td>商户订单号</td>
                         </tr>
@@ -786,6 +769,11 @@ EXPIRED - 过期</code></pre>
                             <td>代付状态</td>
                         </tr>
                         <tr>
+                            <td>message</td>
+                            <td>string</td>
+                            <td>状态消息</td>
+                        </tr>
+                        <tr>
                             <td>sign</td>
                             <td>string</td>
                             <td>MD5签名</td>
@@ -797,21 +785,27 @@ EXPIRED - 过期</code></pre>
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode(this)">复制</button>
                     <pre><code class="language-http">POST https://yourgame.com/payout/notify
-Content-Type: application/x-www-form-urlencoded
+Content-Type: application/json
 
-mchid=MERCHANT_001&out_trade_no=Payout_1234567890&trade_no=TXN_789012&amount=500.00&status=2&sign=abc123def456</code></pre>
+{
+  "orderid": "Payout_1234567890",
+  "trade_no": "TXN_789012",
+  "amount": "500.00",
+  "status": "SUCCESS",
+  "message": "代付成功"
+}</code></pre>
                 </div>
 
                 <h3>代付状态说明</h3>
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode(this)">复制</button>
                     <pre><code class="language-text">状态码说明：
-0 - 待处理 (PENDING)
-1 - 处理中 (PROCESSING)
-2 - 成功 (SUCCESS)
-3 - 失败 (FAILED)
-4 - 取消 (CANCELLED)
-5 - 拒绝 (REJECTED)</code></pre>
+PENDING - 待处理
+PROCESSING - 处理中
+SUCCESS - 成功
+FAILED - 失败
+CANCELLED - 取消
+REJECTED - 拒绝</code></pre>
                 </div>
             </div>
             
@@ -898,10 +892,10 @@ mchid=MERCHANT_001&out_trade_no=Payout_1234567890&trade_no=TXN_789012&amount=500
                     </thead>
                     <tbody>
                         <tr>
-                            <td>mchid</td>
+                            <td>appid</td>
                             <td>string</td>
                             <td>是</td>
-                            <td>商户ID</td>
+                            <td>商户应用ID</td>
                         </tr>
                         <tr>
                             <td>sign</td>
@@ -916,20 +910,123 @@ mchid=MERCHANT_001&out_trade_no=Payout_1234567890&trade_no=TXN_789012&amount=500
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode(this)">复制</button>
                     <pre><code class="language-json">{
-  "rCode": 200,
+  "success": true,
   "message": "查询成功",
   "data": {
     "balance": "10000.00",
     "currency": "INR",
-    "last_update": "2024-01-15 10:30:00",
-    "frozen_amount": "500.00",
-    "available_amount": "9500.00"
+    "last_update": "2024-01-15 10:30:00"
   }
 }</code></pre>
                 </div>
 
                 <div class="alert alert-success">
                     <strong>提示：</strong> 余额查询接口可以随时调用，用于了解账户资金状况。
+                </div>
+            </div>
+
+            <!-- 5. 状态同步管理 -->
+            <div id="sync-management" class="content-section">
+                <h2>5. 状态同步管理</h2>
+                <p>提供订单状态同步管理功能，支持手动同步和状态查询。</p>
+                
+                <h3>5.1 手动同步指定订单</h3>
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.cashgit.com/api/passpay-sync/sync-order
+                </div>
+
+                <h4>请求参数</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>appid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户应用ID</td>
+                        </tr>
+                        <tr>
+                            <td>orderid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>订单号</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>响应示例</h4>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-json">{
+  "success": true,
+  "message": "订单同步成功",
+  "data": {
+    "orderid": "ORD1234567890",
+    "message": "同步完成"
+  }
+}</code></pre>
+                </div>
+
+                <h3>5.2 查询同步服务状态</h3>
+                <div class="endpoint">
+                    <strong>接口地址：</strong> POST https://api.cashgit.com/api/passpay-sync/status
+                </div>
+
+                <h4>请求参数</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>appid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>商户应用ID</td>
+                        </tr>
+                        <tr>
+                            <td>sign</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>MD5签名</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>响应示例</h4>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-json">{
+  "success": true,
+  "message": "获取同步服务状态成功",
+  "data": {
+    "is_running": true,
+    "sync_interval_seconds": 300,
+    "last_sync": "2024-01-15 10:30:00"
+  }
+}</code></pre>
+                </div>
+
+                <div class="alert alert-info">
+                    <strong>说明：</strong> 同步服务会自动同步订单状态，商户也可以通过手动同步接口立即同步指定订单。
                 </div>
             </div>
         </div>
