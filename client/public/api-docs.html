@@ -1108,6 +1108,22 @@ MD5签名: {计算得到的MD5值}
             }
         });
 
+        // 全局滚动事件监听器
+        document.addEventListener('wheel', function(e) {
+            // 阻止默认的页面滚动
+            e.preventDefault();
+            
+            // 获取main-content元素
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                // 计算滚动距离（可以调整滚动灵敏度）
+                const scrollAmount = e.deltaY;
+                
+                // 控制main-content的滚动
+                mainContent.scrollTop += scrollAmount;
+            }
+        }, { passive: false });
+
         // 支持回车键提交密码
         document.getElementById('passwordInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
