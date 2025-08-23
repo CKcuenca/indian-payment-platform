@@ -92,6 +92,7 @@
 <body>
     <div class="header">
         <h1>CashGit India Payment印度统一支付平台</h1>
+        <p style="margin: 0; font-size: 0.9em; opacity: 0.8;">专业印度支付平台</p>
         <button onclick="logout()" class="logout-btn">退出登录</button>
     </div>
     
@@ -127,8 +128,80 @@
         </div>
         
         <div class="main-content">
+            <!-- 0. 系统架构 -->
+            <div id="architecture" class="content-section active">
+                <h2>系统架构</h2>
+                <p>CashGit India Payment 是一个专业的印度支付平台，为商户提供完整的支付解决方案，支持UPI、银行转账等多种支付方式。</p>
+                
+                <h3>系统架构图</h3>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                    <pre><code class="language-text">商户 → CashGit支付系统 → 银行/UPI网络
+
+数据流向：
+1. 商户发起支付请求
+2. CashGit验证请求并处理支付
+3. 系统与银行/UPI网络交互
+4. 支付结果实时同步
+5. 自动通知商户支付结果</code></pre>
+                </div>
+
+                <h3>核心优势</h3>
+                <div class="alert alert-success">
+                    <ul style="margin: 10px 0 0 20px;">
+                        <li><strong>专业服务：</strong>专注于印度市场，深度理解本地支付需求</li>
+                        <li><strong>实时同步：</strong>订单状态实时更新，确保数据一致性</li>
+                        <li><strong>安全可靠：</strong>完整的签名验证和回调处理机制</li>
+                        <li><strong>功能完整：</strong>支持代收、代付、UTR、UPI、余额查询等</li>
+                    </ul>
+                </div>
+
+                <h3>支持功能</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>功能模块</th>
+                            <th>说明</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>代收支付</td>
+                            <td>创建充值订单，支持UPI支付</td>
+                            <td><span class="status-badge status-success">已实现</span></td>
+                        </tr>
+                        <tr>
+                            <td>UTR管理</td>
+                            <td>UTR补单提交和状态查询</td>
+                            <td><span class="status-badge status-success">已实现</span></td>
+                        </tr>
+                        <tr>
+                            <td>UPI查询</td>
+                            <td>查询UPI状态和可用性</td>
+                            <td><span class="status-badge status-success">已实现</span></td>
+                        </tr>
+                        <tr>
+                            <td>代付功能</td>
+                            <td>创建代付订单和状态查询</td>
+                            <td><span class="status-badge status-success">已实现</span></td>
+                        </tr>
+                        <tr>
+                            <td>余额查询</td>
+                            <td>实时查询账户余额</td>
+                            <td><span class="status-badge status-success">已实现</span></td>
+                        </tr>
+                        <tr>
+                            <td>状态同步</td>
+                            <td>自动同步订单状态</td>
+                            <td><span class="status-badge status-success">已实现</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
             <!-- 1. Sign加密 -->
-            <div id="sign" class="content-section active">
+            <div id="sign" class="content-section">
                 <h2>1. Sign加密</h2>
                 <p>所有API请求都需要进行MD5签名验证，确保数据安全和完整性。</p>
                 
@@ -189,7 +262,7 @@ const sign = md5(signString);
                 <p>为玩家创建充值订单，支持UPI支付方式。</p>
                 
                 <div class="endpoint">
-                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/collection/create
+                    <strong>接口地址：</strong> POST https://api.cashgit.com/api/pay
                 </div>
 
                 <h3>请求参数</h3>
@@ -204,19 +277,13 @@ const sign = md5(signString);
                     </thead>
                     <tbody>
                         <tr>
-                            <td>mchid</td>
+                            <td>appid</td>
                             <td>string</td>
                             <td>是</td>
-                            <td>商户ID</td>
+                            <td>商户应用ID</td>
                         </tr>
                         <tr>
-                            <td>pay_id</td>
-                            <td>string</td>
-                            <td>是</td>
-                            <td>支付ID</td>
-                        </tr>
-                        <tr>
-                            <td>out_trade_no</td>
+                            <td>orderid</td>
                             <td>string</td>
                             <td>是</td>
                             <td>商户订单号，唯一标识</td>
@@ -226,6 +293,12 @@ const sign = md5(signString);
                             <td>string</td>
                             <td>是</td>
                             <td>订单金额（保留2位小数）</td>
+                        </tr>
+                        <tr>
+                            <td>desc</td>
+                            <td>string</td>
+                            <td>否</td>
+                            <td>订单描述</td>
                         </tr>
                         <tr>
                             <td>notify_url</td>
@@ -246,10 +319,10 @@ const sign = md5(signString);
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode(this)">复制</button>
                     <pre><code class="language-json">{
-  "mchid": "MERCHANT_001",
-  "pay_id": "PAY_001",
-  "out_trade_no": "ORD1234567890",
+  "appid": "MERCHANT_001",
+  "orderid": "ORD1234567890",
   "amount": "100.00",
+  "desc": "游戏充值订单",
   "notify_url": "https://yourgame.com/payment/notify"
 }</code></pre>
                 </div>
@@ -258,21 +331,19 @@ const sign = md5(signString);
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode(this)">复制</button>
                     <pre><code class="language-json">{
-  "rCode": 200,
+  "success": true,
   "message": "订单创建成功",
   "data": {
-    "trade_no": "TXN_123456",
-    "out_trade_no": "ORD1234567890",
+    "orderid": "ORD1234567890",
     "amount": "100.00",
-    "status": "0",
-    "qr_code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
-    "payment_url": "https://pay.cashgit.com/pay/TXN_123456"
+    "trade_no": "TXN_123456",
+    "status": "success"
   }
 }</code></pre>
                 </div>
 
                 <div class="alert alert-info">
-                    <strong>注意：</strong> 订单创建成功后，玩家可以通过UPI应用扫描二维码或使用支付链接完成支付。
+                    <strong>注意：</strong> 订单创建成功后，系统会返回交易号，商户可以通过查询接口获取订单状态。
                 </div>
             </div>
             
@@ -361,7 +432,7 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
                 <p>查询订单的当前状态和详细信息。</p>
                 
                 <div class="endpoint">
-                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/collection/query
+                    <strong>接口地址：</strong> POST https://api.cashgit.com/api/query
                 </div>
 
                 <h3>请求参数</h3>
@@ -400,16 +471,15 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode(this)">复制</button>
                     <pre><code class="language-json">{
-  "rCode": 200,
+  "success": true,
   "message": "查询成功",
   "data": {
-    "out_trade_no": "ORD1234567890",
-    "trade_no": "TXN_123456",
+    "orderid": "ORD1234567890",
     "amount": "100.00",
-    "status": "2",
-    "create_time": "2024-01-15 10:00:00",
-    "update_time": "2024-01-15 10:30:00",
-    "utr_number": "UTR123456789"
+    "status": "SUCCESS",
+    "paytime": 1705296600000,
+    "desc": "游戏充值订单",
+    "utr": "UTR123456789"
   }
 }</code></pre>
                 </div>
@@ -418,12 +488,12 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode(this)">复制</button>
                     <pre><code class="language-text">状态码说明：
-0 - 待处理 (PENDING)
-1 - 处理中 (PROCESSING)
-2 - 成功 (SUCCESS)
-3 - 失败 (FAILED)
-4 - 取消 (CANCELLED)
-5 - 过期 (EXPIRED)</code></pre>
+PENDING - 待处理
+PROCESSING - 处理中
+SUCCESS - 成功
+FAILED - 失败
+CANCELLED - 取消
+EXPIRED - 过期</code></pre>
                 </div>
             </div>
             
@@ -433,7 +503,7 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
                 <p>当玩家通过UPI支付后，可以通过UTR号进行补单操作。</p>
                 
                 <div class="endpoint">
-                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/utr/supplement
+                    <strong>接口地址：</strong> POST https://api.cashgit.com/api/utr/submit
                 </div>
 
                 <h3>请求参数</h3>
@@ -448,10 +518,16 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
                     </thead>
                     <tbody>
                         <tr>
-                            <td>mchid</td>
+                            <td>appid</td>
                             <td>string</td>
                             <td>是</td>
-                            <td>商户ID</td>
+                            <td>商户应用ID</td>
+                        </tr>
+                        <tr>
+                            <td>orderid</td>
+                            <td>string</td>
+                            <td>是</td>
+                            <td>订单号</td>
                         </tr>
                         <tr>
                             <td>utr_number</td>
@@ -476,26 +552,26 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
 
                 <h3>UTR状态查询</h3>
                 <div class="endpoint">
-                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/utr/query
+                    <strong>接口地址：</strong> POST https://api.cashgit.com/api/utr/query
                 </div>
 
                 <div class="code-block">
                     <button class="copy-btn" onclick="copyCode(this)">复制</button>
                     <pre><code class="language-javascript">// UTR状态查询参数
 {
-  "mchid": "MERCHANT_001",
-  "utr_number": "UTR123456789",
+  "appid": "MERCHANT_001",
+  "orderid": "ORD1234567890",
   "sign": "abc123def456"
 }
 
 // 响应示例
 {
-  "rCode": 200,
+  "success": true,
   "message": "查询成功",
   "data": {
-    "utr_number": "UTR123456789",
-    "status": "SUCCESS",
-    "amount": "100.00",
+    "orderid": "ORD1234567890",
+    "utr_status": "VERIFIED",
+    "message": "UTR验证成功"
     "transaction_time": "2024-01-15 10:30:00"
   }
 }</code></pre>
@@ -508,7 +584,7 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
                 <p>查询可用的UPI账户信息。</p>
                 
                 <div class="endpoint">
-                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/upi/query
+                    <strong>接口地址：</strong> POST https://api.cashgit.com/api/upi/query
                 </div>
 
                 <h3>请求参数</h3>
@@ -567,7 +643,7 @@ mchid=MERCHANT_001&out_trade_no=ORD1234567890&trade_no=TXN_123456&amount=100.00&
                 <p>为玩家创建提现订单，将资金转入指定银行账户。</p>
                 
                 <div class="endpoint">
-                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/payout/create
+                    <strong>接口地址：</strong> POST https://api.cashgit.com/api/payout/create
                 </div>
 
                 <h3>请求参数</h3>
@@ -745,7 +821,7 @@ mchid=MERCHANT_001&out_trade_no=Payout_1234567890&trade_no=TXN_789012&amount=500
                 <p>查询代付订单的当前状态。</p>
                 
                 <div class="endpoint">
-                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/payout/query
+                    <strong>接口地址：</strong> POST https://api.cashgit.com/api/payout/query
                 </div>
 
                 <h3>请求参数</h3>
@@ -807,7 +883,7 @@ mchid=MERCHANT_001&out_trade_no=Payout_1234567890&trade_no=TXN_789012&amount=500
                 <p>查询商户账户的当前余额。</p>
                 
                 <div class="endpoint">
-                    <strong>接口地址：</strong> POST https://api.merchant.cashgit.com/api/balance/query
+                    <strong>接口地址：</strong> POST https://api.cashgit.com/api/balance/query
                 </div>
 
                 <h3>请求参数</h3>
