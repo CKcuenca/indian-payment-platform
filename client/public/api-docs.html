@@ -396,33 +396,37 @@
 
         .contact-info {
             background: #f6f8fa;
-            padding: 24px;
+            padding: 20px;
             border-radius: 6px;
-            margin-top: 32px;
+            margin-top: 20px;
             border: 1px solid #e1e4e8;
+            border-top: 2px solid #e1e4e8;
         }
 
         .contact-info h4 {
             color: #24292e;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
+            margin-bottom: 16px;
+            font-size: 1.1rem;
             font-weight: 600;
+            text-align: center;
         }
 
         .contact-item {
-            margin: 12px 0;
+            margin: 8px 0;
             display: flex;
             align-items: center;
-            padding: 12px;
+            padding: 10px;
             background: white;
-            border-radius: 6px;
+            border-radius: 4px;
             border: 1px solid #e1e4e8;
+            font-size: 0.9rem;
         }
 
         .contact-label {
             font-weight: 600;
-            min-width: 140px;
+            min-width: 120px;
             color: #0366d6;
+            font-size: 0.85rem;
         }
 
         .signature-example {
@@ -589,6 +593,27 @@
                         
                         <div class="nav-item nav-level-1" onclick="showSection('balance-query')">
                             <span class="nav-text">4. 余额查询</span>
+                        </div>
+                    </div>
+
+                    <!-- 联系信息 -->
+                    <div class="contact-info">
+                        <h4>技术支持</h4>
+                        <div class="contact-item">
+                            <span class="contact-label">技术支持邮箱：</span>
+                            <span>support@cashgit.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-label">商务合作：</span>
+                            <span>business@cashgit.com</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-label">API文档：</span>
+                            <span>https://api.cashgit.com/docs</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-label">最后更新：</span>
+                            <span>2024年1月15日</span>
                         </div>
                     </div>
                 </div>
@@ -1284,29 +1309,7 @@ mchid=MERCHANT_001&out_trade_no=Payout_1234567890&trade_no=TXN_789012&amount=500
 
 
 
-                <!-- 联系信息 -->
-                <div class="contact-info">
-                    <h4>技术支持</h4>
-                    <div class="contact-item">
-                        <span class="contact-label">技术支持邮箱：</span>
-                        <span>support@cashgit.com</span>
-                    </div>
-                    <div class="contact-item">
-                        <span class="contact-label">商务合作：</span>
-                        <span>business@cashgit.com</span>
-                    </div>
-                    <div class="contact-item">
-                        <span class="contact-label">API文档：</span>
-                        <span>https://api.cashgit.com/docs</span>
-                    </div>
-                    <div class="contact-item">
-                        <span class="contact-label">最后更新：</span>
-                        <span>2024年1月15日</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <script>
         function checkPassword() {
