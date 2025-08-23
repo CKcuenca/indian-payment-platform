@@ -98,7 +98,11 @@
     
     <div class="content-wrapper">
         <div class="sidebar">
-            <div class="nav-item active" onclick="showSection('sign')">
+            <div class="nav-item active" onclick="showSection('architecture')">
+                <strong>首页</strong>
+            </div>
+            
+            <div class="nav-item" onclick="showSection('sign')">
                 <strong>1. Sign加密</strong>
             </div>
             
@@ -1163,9 +1167,9 @@ REJECTED - 拒绝</code></pre>
         
         // 页面加载完成后初始化
         window.addEventListener('load', function() {
-            // 默认显示第一个内容区域
-            if (document.getElementById('sign')) {
-                document.getElementById('sign').classList.add('active');
+            // 默认显示系统架构页面
+            if (document.getElementById('architecture')) {
+                document.getElementById('architecture').classList.add('active');
             }
             
             // 初始化highlight.js
