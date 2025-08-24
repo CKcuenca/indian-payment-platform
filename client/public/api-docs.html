@@ -1160,7 +1160,16 @@ REJECTED - 拒绝</code></pre>
             const correctPassword = '88888888';
             
             if (password === correctPassword) {
-                // 密码正确，隐藏密码界面，显示主内容
+                // 密码正确，保存登录状态（24小时）
+                const loginTime = new Date().getTime();
+                const expireTime = loginTime + (24 * 60 * 60 * 1000); // 24小时后过期
+                localStorage.setItem('apiDocsLogin', JSON.stringify({
+                    loginTime: loginTime,
+                    expireTime: expireTime,
+                    isLoggedIn: true
+                }));
+                
+                // 隐藏密码界面，显示主内容
                 document.getElementById('passwordOverlay').style.display = 'none';
                 document.getElementById('mainContent').classList.remove('hidden');
                 document.getElementById('contentWrapper').classList.remove('hidden');
@@ -1180,6 +1189,36 @@ REJECTED - 拒绝</code></pre>
             if (event.key === 'Enter') {
                 checkPassword();
             }
+        }
+        
+        // 检查登录状态
+        function checkLoginStatus() {
+            const loginData = localStorage.getItem('apiDocsLogin');
+            if (loginData) {
+                try {
+                    const data = JSON.parse(loginData);
+                    const currentTime = new Date().getTime();
+                    
+                    // 检查是否在24小时内且已登录
+                    if (data.isLoggedIn && currentTime < data.expireTime) {
+                        // 登录状态有效，直接显示主内容
+                        document.getElementById('passwordOverlay').style.display = 'none';
+                        document.getElementById('mainContent').classList.remove('hidden');
+                        document.getElementById('contentWrapper').classList.remove('hidden');
+                        
+                        // 初始化页面内容
+                        initializePage();
+                        return true;
+                    } else {
+                        // 登录已过期，清除存储的数据
+                        localStorage.removeItem('apiDocsLogin');
+                    }
+                } catch (e) {
+                    // 数据格式错误，清除存储的数据
+                    localStorage.removeItem('apiDocsLogin');
+                }
+            }
+            return false;
         }
         
         // 初始化页面内容
@@ -1315,17 +1354,24 @@ REJECTED - 拒绝</code></pre>
         // 退出登录
         function logout() {
             if(confirm('确定要退出吗？')) {
-                window.close();
+                // 清除登录状态
+                localStorage.removeItem('apiDocsLogin');
+                // 重新加载页面，显示密码界面
+                location.reload();
             }
         }
         
         // 页面加载完成后初始化
         window.addEventListener('load', function() {
-            // 为密码输入框添加回车键事件监听器
-            document.getElementById('passwordInput').addEventListener('keypress', handlePasswordKeyPress);
-            
-            // 密码输入框自动聚焦
-            document.getElementById('passwordInput').focus();
+            // 首先检查登录状态
+            if (!checkLoginStatus()) {
+                // 如果没有有效的登录状态，显示密码界面
+                // 为密码输入框添加回车键事件监听器
+                document.getElementById('passwordInput').addEventListener('keypress', handlePasswordKeyPress);
+                
+                // 密码输入框自动聚焦
+                document.getElementById('passwordInput').focus();
+            }
         });
     </script>
 </body>
