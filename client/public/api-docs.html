@@ -87,16 +87,108 @@
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none; /* IE and Edge */
         }
+        
+        /* 密码保护样式 */
+        .password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .password-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .password-container h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .password-container p {
+            color: #7f8c8d;
+            margin-bottom: 25px;
+            font-size: 1.0em;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        
+        .password-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .password-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .password-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .password-error {
+            color: #e74c3c;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
-            <div class="header">
+            <!-- 密码保护界面 -->
+            <div class="password-overlay" id="passwordOverlay">
+                <div class="password-container">
+                    <h2>🔒 文档访问控制</h2>
+                    <p>请输入访问密码以查看API文档</p>
+                    <input type="password" class="password-input" id="passwordInput" placeholder="请输入密码" maxlength="8">
+                    <button class="password-btn" onclick="checkPassword()">确认访问</button>
+                    <div class="password-error" id="passwordError">密码错误，请重新输入</div>
+                </div>
+            </div>
+            
+            <div class="header hidden" id="mainContent">
                 <h1>CashGit India Payment印度统一支付平台</h1>
         <p style="margin: 0; font-size: 0.9em; opacity: 0.8;">专业印度支付平台</p>
                 <button onclick="logout()" class="logout-btn">退出登录</button>
             </div>
             
-            <div class="content-wrapper">
+            <div class="content-wrapper hidden" id="contentWrapper">
                 <div class="sidebar">
             <div class="nav-item active" onclick="showSection('architecture')">
                 <strong>系统架构</strong>
@@ -1062,6 +1154,68 @@ REJECTED - 拒绝</code></pre>
     </div>
 
     <script>
+        // 密码验证功能
+        function checkPassword() {
+            const password = document.getElementById('passwordInput').value;
+            const correctPassword = '88888888';
+            
+            if (password === correctPassword) {
+                // 密码正确，隐藏密码界面，显示主内容
+                document.getElementById('passwordOverlay').style.display = 'none';
+                document.getElementById('mainContent').classList.remove('hidden');
+                document.getElementById('contentWrapper').classList.remove('hidden');
+                
+                // 初始化页面内容
+                initializePage();
+            } else {
+                // 密码错误，显示错误信息
+                document.getElementById('passwordError').style.display = 'block';
+                document.getElementById('passwordInput').value = '';
+                document.getElementById('passwordInput').focus();
+            }
+        }
+        
+        // 回车键提交密码
+        function handlePasswordKeyPress(event) {
+            if (event.key === 'Enter') {
+                checkPassword();
+            }
+        }
+        
+        // 初始化页面内容
+        function initializePage() {
+            // 默认显示系统架构页面
+            if (document.getElementById('architecture')) {
+                document.getElementById('architecture').classList.add('active');
+            }
+            
+            // 初始化highlight.js
+            hljs.highlightAll();
+            
+            // 监听整个页面的滚动事件，同步到main-content
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                // 监听鼠标滚轮事件
+                document.addEventListener('wheel', function(event) {
+                    // 如果鼠标不在main-content区域内，也允许滚动
+                    if (mainContent && !mainContent.contains(event.target)) {
+                        event.preventDefault();
+                        const scrollAmount = event.deltaY;
+                        mainContent.scrollTop += scrollAmount;
+                    }
+                }, { passive: false });
+
+                // 监听键盘上下键
+                document.addEventListener('keydown', function(event) {
+                    if (mainContent && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+                        event.preventDefault();
+                        const scrollAmount = event.key === 'ArrowUp' ? -50 : 50;
+                        mainContent.scrollTop += scrollAmount;
+                    }
+                });
+            }
+        }
+        
         // 显示指定内容区域
         function showSection(sectionId) {
             // 隐藏所有内容区域
@@ -1167,36 +1321,11 @@ REJECTED - 拒绝</code></pre>
         
         // 页面加载完成后初始化
         window.addEventListener('load', function() {
-            // 默认显示系统架构页面
-            if (document.getElementById('architecture')) {
-                document.getElementById('architecture').classList.add('active');
-            }
+            // 为密码输入框添加回车键事件监听器
+            document.getElementById('passwordInput').addEventListener('keypress', handlePasswordKeyPress);
             
-            // 初始化highlight.js
-            hljs.highlightAll();
-            
-            // 监听整个页面的滚动事件，同步到main-content
-            const mainContent = document.querySelector('.main-content');
-            if (mainContent) {
-                // 监听鼠标滚轮事件
-                document.addEventListener('wheel', function(event) {
-                    // 如果鼠标不在main-content区域内，也允许滚动
-                    if (mainContent && !mainContent.contains(event.target)) {
-                        event.preventDefault();
-                        const scrollAmount = event.deltaY;
-                mainContent.scrollTop += scrollAmount;
-            }
-        }, { passive: false });
-
-                // 监听键盘上下键
-                document.addEventListener('keydown', function(event) {
-                    if (mainContent && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
-                        event.preventDefault();
-                        const scrollAmount = event.key === 'ArrowUp' ? -50 : 50;
-                        mainContent.scrollTop += scrollAmount;
-                    }
-                });
-            }
+            // 密码输入框自动聚焦
+            document.getElementById('passwordInput').focus();
         });
     </script>
 </body>
