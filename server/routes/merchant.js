@@ -438,7 +438,9 @@ router.get('/test-info', (req, res) => {
 });
 
 // 公开演示端点 - 用于前端展示（生产环境安全）
+// 注意：这些端点不需要任何认证，应该可以公开访问
 router.get('/demo-info', (req, res) => {
+  console.log('Demo info endpoint accessed - no auth required');
   res.json({
     success: true,
     data: {
@@ -456,7 +458,9 @@ router.get('/demo-info', (req, res) => {
 });
 
 // 公开演示交易历史端点 - 用于前端展示（生产环境安全）
+// 注意：这些端点不需要任何认证，应该可以公开访问
 router.get('/demo-transactions', (req, res) => {
+  console.log('Demo transactions endpoint accessed - no auth required');
   try {
     const { page = 1, limit = 10, type, status } = req.query;
     
@@ -483,7 +487,9 @@ router.get('/demo-transactions', (req, res) => {
 });
 
 // 公开演示订单历史端点 - 用于前端展示（生产环境安全）
+// 注意：这些端点不需要任何认证，应该可以公开访问
 router.get('/demo-orders', (req, res) => {
+  console.log('Demo orders endpoint accessed - no auth required');
   try {
     const { page = 1, limit = 10, type, status } = req.query;
     
