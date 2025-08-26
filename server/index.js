@@ -40,17 +40,6 @@ const strictLimiter = rateLimit({
   message: 'Too many requests to sensitive API, please try again later.'
 });
 
-// 对演示端点使用更宽松的限流
-const demoLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15分钟
-  max: 1000, // 限制每个IP 15分钟内最多1000个请求
-  message: 'Too many requests to demo endpoints, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-  skipSuccessfulRequests: false,
-  skipFailedRequests: false
-});
-
 // 先注册数据库相关路由，再连接数据库
 console.log('🔧 预注册数据库相关路由...');
 
@@ -117,7 +106,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/payment-p
 app.use('/api/auth', strictLimiter, require('./routes/auth'));
 app.use('/api/users', strictLimiter, require('./routes/users'));
 app.use('/api/payment', strictLimiter, require('./routes/payment'));
-app.use('/api/merchant', demoLimiter, require('./routes/merchant')); // 使用更宽松的限流
+app.use('/api/merchant', limiter, require('./routes/merchant')); // 恢复原来的限流
 app.use('/api/providers', limiter, require('./routes/providers'));
 app.use('/api/admin', strictLimiter, require('./routes/admin'));
 app.use('/api/payment-config', strictLimiter, require('./routes/payment-config'));
