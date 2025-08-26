@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -55,6 +55,7 @@ const mockPaymentAccounts = [
       secretKey: 'sk_test_987654321',
       environment: 'sandbox'
     },
+    type: 'native', // 原生支付
     limits: {
       dailyLimit: 5000000,
       monthlyLimit: 50000000,
@@ -88,6 +89,7 @@ const mockPaymentAccounts = [
       secretKey: 'cf_sk_test_987654321',
       environment: 'sandbox'
     },
+    type: 'native', // 原生支付
     limits: {
       dailyLimit: 3000000,
       monthlyLimit: 30000000,
@@ -121,6 +123,7 @@ const mockPaymentAccounts = [
       secretKey: 'ws_test_987654321',
       environment: 'production'
     },
+    type: 'wakeup', // 唤醒支付
     limits: {
       dailyLimit: 1000000,
       monthlyLimit: 10000000,
@@ -154,6 +157,7 @@ const mockPaymentAccounts = [
       secretKey: 'us_test_987654321',
       environment: 'production'
     },
+    type: 'wakeup', // 唤醒支付
     limits: {
       dailyLimit: 1000000,
       monthlyLimit: 10000000,
@@ -190,6 +194,7 @@ export default function PaymentManagement() {
   const [formData, setFormData] = useState({
     accountName: '',
     providerName: '',
+    type: 'native',
     accountId: '',
     apiKey: '',
     secretKey: '',
@@ -212,6 +217,7 @@ export default function PaymentManagement() {
     setFormData({
       accountName: '',
       providerName: '',
+      type: 'native',
       accountId: '',
       apiKey: '',
       secretKey: '',
@@ -236,6 +242,7 @@ export default function PaymentManagement() {
     setFormData({
       accountName: account.accountName,
       providerName: account.provider.name,
+      type: account.type || 'native',
       accountId: account.provider.accountId,
       apiKey: account.provider.apiKey,
       secretKey: account.provider.secretKey,
@@ -255,6 +262,17 @@ export default function PaymentManagement() {
     setDialogOpen(true);
   };
 
+  // 当支付商改变时，自动设置对应的类型
+  useEffect(() => {
+    if (formData.providerName) {
+      const isWakeupProvider = ['wakeup', 'unispay'].includes(formData.providerName);
+      setFormData(prev => ({
+        ...prev,
+        type: isWakeupProvider ? 'wakeup' : 'native'
+      }));
+    }
+  }, [formData.providerName]);
+
   const handleDeleteAccount = async (id: string) => {
     if (window.confirm('确定要删除这个支付账户吗？')) {
       setAccounts(prev => prev.filter(account => account._id !== id));
@@ -268,6 +286,7 @@ export default function PaymentManagement() {
     try {
       const accountData = {
         accountName: formData.accountName,
+        type: formData.type,
         provider: {
           name: formData.providerName,
           accountId: formData.accountId,
@@ -335,9 +354,27 @@ export default function PaymentManagement() {
       'razorpay': 'success',
       'paytm': 'warning',
       'phonepe': 'info',
-      'passpay': 'error'
+      'passpay': 'error',
+      'wakeup': 'info',
+      'unispay': 'info'
     };
     return colors[providerName.toLowerCase()] || 'default';
+  };
+
+  const getTypeLabel = (type: string) => {
+    const labels: {[key: string]: string} = {
+      'native': '原生',
+      'wakeup': '唤醒'
+    };
+    return labels[type] || type;
+  };
+
+  const getTypeColor = (type: string) => {
+    const colors: {[key: string]: string} = {
+      'native': 'primary',
+      'wakeup': 'secondary'
+    };
+    return colors[type] || 'default';
   };
 
   const getStatusColor = (status: string) => {
@@ -382,7 +419,7 @@ export default function PaymentManagement() {
       )}
 
       {/* 统计卡片 */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3, mb: 3 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(6, 1fr)' }, gap: 3, mb: 3 }}>
         <Card>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -443,6 +480,36 @@ export default function PaymentManagement() {
             </Box>
           </CardContent>
         </Card>
+        <Card>
+          <CardContent>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box>
+                <Typography color="textSecondary" gutterBottom>
+                  原生支付
+                </Typography>
+                <Typography variant="h4">
+                  {accounts.filter(a => a.type === 'native').length}
+                </Typography>
+              </Box>
+              <AccountBalance color="primary" sx={{ fontSize: 40 }} />
+            </Box>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box>
+                <Typography color="textSecondary" gutterBottom>
+                  唤醒支付
+                </Typography>
+                <Typography variant="h4">
+                  {accounts.filter(a => a.type === 'wakeup').length}
+                </Typography>
+              </Box>
+              <Speed color="secondary" sx={{ fontSize: 40 }} />
+            </Box>
+          </CardContent>
+        </Card>
       </Box>
 
       {/* 操作按钮 */}
@@ -466,6 +533,7 @@ export default function PaymentManagement() {
             <TableRow sx={{ backgroundColor: 'grey.100' }}>
               <TableCell sx={{ fontWeight: 'bold' }}>账户名称</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>支付商</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>类型</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>账户ID</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>API Key</TableCell>
               <TableCell sx={{ fontWeight: 'bold' }}>限额使用</TableCell>
@@ -478,7 +546,7 @@ export default function PaymentManagement() {
           <TableBody>
             {accounts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
                   <Typography variant="body1" color="text.secondary">
                     暂无支付账户
                   </Typography>
@@ -502,6 +570,14 @@ export default function PaymentManagement() {
                       label={account.provider.name.toUpperCase()}
                       color={getProviderColor(account.provider.name) as any}
                       size="small"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={getTypeLabel(account.type)}
+                      color={getTypeColor(account.type) as any}
+                      size="small"
+                      variant="outlined"
                     />
                   </TableCell>
                   <TableCell>{account.provider.accountId}</TableCell>
@@ -643,6 +719,19 @@ export default function PaymentManagement() {
                       <MenuItem value="paytm">Paytm</MenuItem>
                       <MenuItem value="phonepe">PhonePe</MenuItem>
                       <MenuItem value="passpay">PassPay</MenuItem>
+                      <MenuItem value="wakeup">唤醒支付</MenuItem>
+                      <MenuItem value="unispay">UNISPAY</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <FormControl fullWidth required>
+                    <InputLabel>支付类型</InputLabel>
+                    <Select
+                      value={formData.type || 'native'}
+                      label="支付类型"
+                      onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
+                    >
+                      <MenuItem value="native">原生支付</MenuItem>
+                      <MenuItem value="wakeup">唤醒支付</MenuItem>
                     </Select>
                   </FormControl>
                   <TextField
