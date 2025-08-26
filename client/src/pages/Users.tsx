@@ -40,97 +40,11 @@ import { User, UserRole } from '../types';
 import { PermissionGuard } from '../components/PermissionGuard';
 import { Permission } from '../types';
 
-// 模拟用户数据
-const mockUsers: User[] = [
-  {
-    id: '1',
-    username: 'admin',
-    displayName: '系统管理员',
-    email: 'admin@example.com',
-    role: UserRole.ADMIN,
-    isActive: true,
-    lastLoginAt: '2024-01-15T10:30:00Z',
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-15T10:30:00Z',
-    permissions: [
-      Permission.VIEW_ALL_MERCHANTS,
-      Permission.MANAGE_MERCHANTS,
-      Permission.VIEW_PAYMENT_CONFIG,
-      Permission.MANAGE_PAYMENT_CONFIG,
-      Permission.VIEW_ALL_ORDERS,
-      Permission.VIEW_ALL_TRANSACTIONS,
-      Permission.MANAGE_USERS,
-
-    ],
-  },
-  {
-    id: '2',
-    username: 'operator1',
-    displayName: '运营人员A',
-    email: 'operator1@example.com',
-    role: UserRole.OPERATOR,
-    isActive: true,
-    lastLoginAt: '2024-01-14T15:20:00Z',
-    createdAt: '2024-01-02T00:00:00Z',
-    updatedAt: '2024-01-14T15:20:00Z',
-    permissions: [
-      Permission.VIEW_ALL_MERCHANTS,
-      Permission.VIEW_ALL_ORDERS,
-      Permission.VIEW_ALL_TRANSACTIONS
-    ],
-  },
-  {
-    id: '3',
-    username: 'operator2',
-    displayName: '运营人员B',
-    email: 'operator2@example.com',
-    role: UserRole.OPERATOR,
-    isActive: false,
-    lastLoginAt: '2024-01-10T09:15:00Z',
-    createdAt: '2024-01-03T00:00:00Z',
-    updatedAt: '2024-01-10T09:15:00Z',
-    permissions: [
-      Permission.VIEW_ALL_MERCHANTS,
-      Permission.VIEW_ALL_ORDERS,
-      Permission.VIEW_ALL_TRANSACTIONS
-    ],
-  },
-  {
-    id: '4',
-    username: 'merchant1',
-    displayName: '游戏公司A',
-    email: 'merchant1@game.com',
-    role: UserRole.MERCHANT,
-    isActive: true,
-    merchantId: 'MERCHANT001',
-    lastLoginAt: '2024-01-13T14:45:00Z',
-    createdAt: '2024-01-04T00:00:00Z',
-    updatedAt: '2024-01-13T14:45:00Z',
-    permissions: [
-      Permission.VIEW_OWN_ORDERS,
-      Permission.VIEW_OWN_TRANSACTIONS
-    ],
-  },
-  {
-    id: '5',
-    username: 'merchant2',
-    displayName: '游戏公司B',
-    email: 'merchant2@game.com',
-    role: UserRole.MERCHANT,
-    isActive: true,
-    merchantId: 'MERCHANT002',
-    lastLoginAt: '2024-01-12T11:30:00Z',
-    createdAt: '2024-01-05T00:00:00Z',
-    updatedAt: '2024-01-12T11:30:00Z',
-    permissions: [
-      Permission.VIEW_OWN_ORDERS,
-      Permission.VIEW_OWN_TRANSACTIONS
-    ],
-  },
-];
+// 模拟用户数据 - 已清理，改为从API获取
+const mockUsers: User[] = [];
 
 export default function Users() {
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -149,9 +63,26 @@ export default function Users() {
   });
 
   useEffect(() => {
-    // 在实际项目中，这里会从API获取用户数据
-    setLoading(false);
+    // 从API获取用户数据
+    fetchUsers();
   }, []);
+
+  // 获取用户数据
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      // TODO: 替换为实际的API调用
+      // const response = await api.get('/users');
+      // setUsers(response.data);
+      
+      // 临时设置为空数组，等待API集成
+      setUsers([]);
+    } catch (err: any) {
+      setError(err.message || '获取用户数据失败');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddNew = () => {
     setEditingUser(null);

@@ -188,7 +188,7 @@ const UnispayPaymentTest: React.FC = () => {
         
         <Alert severity="info" sx={{ mb: 3 }}>
           UNISPAY 唤醒支付是一种特殊的支付方式，玩家通过 UPI 转账到指定印度人的私人银行卡，
-          第三方支付公司通过网银查询转账是否完成，然后通知游戏公司支付结果。
+          第三方支付公司通过网银查询转账是否完成，然后通知商户支付结果。
         </Alert>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>

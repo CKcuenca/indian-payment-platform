@@ -225,7 +225,7 @@ const ApiDocs = () => {
   "merchantId": "MERCHANT_001",
   "amount": 10000,
   "currency": "INR",
-  "customerEmail": "player@example.com",
+  "customerEmail": "customer@merchant.com",
   "customerPhone": "919876543210",
   "returnUrl": "https://yourgame.com/payment/return",
   "notifyUrl": "https://yourgame.com/payment/notify",
@@ -341,7 +341,7 @@ const ApiDocs = () => {
     "accountHolderName": "Player Name",
     "bankName": "State Bank of India"
   },
-  "customerEmail": "player@example.com",
+  "customerEmail": "customer@merchant.com",
   "customerPhone": "919876543210",
   "notifyUrl": "https://yourgame.com/withdraw/notify"
 }`}
@@ -762,7 +762,7 @@ const cashgit = new CashGitAPI('your_api_key_here');
 cashgit.createOrder({
   merchantId: 'MERCHANT_001',
   amount: 10000,
-  customerEmail: 'player@example.com',
+  customerEmail: 'customer@merchant.com',
   customerPhone: '919876543210',
   returnUrl: 'https://yourgame.com/payment/return'
 }).then(result => {
@@ -819,7 +819,7 @@ try {
     $result = $cashgit->createOrder([
         'merchantId' => 'MERCHANT_001',
         'amount' => 10000,
-        'customerEmail' => 'player@example.com',
+        'customerEmail' => 'customer@merchant.com',
         'customerPhone' => '919876543210',
         'returnUrl' => 'https://yourgame.com/payment/return'
     ]);

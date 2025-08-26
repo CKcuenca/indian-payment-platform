@@ -146,15 +146,13 @@ function Transactions() {
   // 获取商户列表
   const fetchMerchants = useCallback(async () => {
     try {
-      // 模拟商户数据，实际应该从API获取
-      const merchantList = [
-        { merchantId: 'MERCH001', name: '游戏公司A' },
-        { merchantId: 'MERCH002', name: '游戏公司B' },
-        { merchantId: 'MERCH003', name: '游戏公司C' },
-        { merchantId: 'MERCH004', name: '游戏公司D' },
-        { merchantId: 'MERCH005', name: '游戏公司E' },
-      ];
-      setMerchants(merchantList);
+      // 从API获取商户数据，已清理模拟数据
+      // TODO: 替换为实际的API调用
+      // const response = await api.get('/merchants');
+      // setMerchants(response.data);
+      
+      // 临时设置为空数组，等待API集成
+      setMerchants([]);
     } catch (err) {
       console.error('获取商户列表失败:', err);
     }
@@ -163,14 +161,13 @@ function Transactions() {
   // 获取支付商列表
   const fetchProviders = useCallback(async () => {
     try {
-      // 模拟支付商数据，实际应该从API获取
-      const providerList = [
-        { name: 'airpay', displayName: 'AirPay' },
-        { name: 'cashfree', displayName: 'Cashfree' },
-        { name: 'razorpay', displayName: 'Razorpay' },
-        { name: 'paytm', displayName: 'Paytm' },
-      ];
-      setProviders(providerList);
+      // 从API获取支付商数据，已清理模拟数据
+      // TODO: 替换为实际的API调用
+      // const response = await api.get('/providers');
+      // setProviders(response.data);
+      
+      // 临时设置为空数组，等待API集成
+      setProviders([]);
     } catch (err) {
       console.error('获取支付商列表失败:', err);
     }

@@ -44,93 +44,11 @@ import { PermissionGuard } from '../components/PermissionGuard';
 import { Permission } from '../types';
 import { formatAmount, formatDate as formatDateUtil } from '../utils/formatters';
 
-// 模拟商户数据
-const mockMerchants: Merchant[] = [
-  {
-    merchantId: 'MERCHANT001',
-    name: '游戏公司A',
-    email: 'gamea@example.com',
-    phone: '+91 9876543210',
-    status: 'ACTIVE',
-    balance: 140000.50,
-    defaultProvider: 'AirPay',
-    depositFee: 0.5,
-    withdrawalFee: 1.0,
-    minDeposit: 100,
-    maxDeposit: 100000,
-    minWithdrawal: 500,
-    maxWithdrawal: 50000,
-    limits: {
-      dailyLimit: 100000000,      // 100万
-      monthlyLimit: 1000000000,   // 1000万
-      singleTransactionLimit: 10000000,  // 10万
-    },
-    usage: {
-      dailyUsed: 25000000,        // 25万
-      monthlyUsed: 350000000,     // 350万
-      lastResetDate: '2025-08-08T00:00:00Z',
-    },
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-15T10:30:00Z',
-  },
-  {
-    merchantId: 'MERCHANT002',
-    name: '游戏公司B',
-    email: 'gameb@example.com',
-    phone: '+91 9876543211',
-    status: 'ACTIVE',
-    balance: 97000.00,
-    defaultProvider: 'Cashfree',
-    depositFee: 0.3,
-    withdrawalFee: 0.8,
-    minDeposit: 200,
-    maxDeposit: 200000,
-    minWithdrawal: 1000,
-    maxWithdrawal: 100000,
-    limits: {
-      dailyLimit: 200000000,      // 200万
-      monthlyLimit: 2000000000,   // 2000万
-      singleTransactionLimit: 20000000,  // 20万
-    },
-    usage: {
-      dailyUsed: 45000000,        // 45万
-      monthlyUsed: 680000000,     // 680万
-      lastResetDate: '2025-08-08T00:00:00Z',
-    },
-    createdAt: '2024-01-02T00:00:00Z',
-    updatedAt: '2024-01-14T15:20:00Z',
-  },
-  {
-    merchantId: 'MERCHANT003',
-    name: '游戏公司C',
-    email: 'gamec@example.com',
-    phone: '+91 9876543212',
-    status: 'SUSPENDED',
-    balance: 25000.00,
-    defaultProvider: 'AirPay',
-    depositFee: 0.4,
-    withdrawalFee: 0.9,
-    minDeposit: 150,
-    maxDeposit: 150000,
-    minWithdrawal: 750,
-    maxWithdrawal: 75000,
-    limits: {
-      dailyLimit: 50000000,       // 50万
-      monthlyLimit: 500000000,    // 500万
-      singleTransactionLimit: 5000000,   // 5万
-    },
-    usage: {
-      dailyUsed: 0,             // 0
-      monthlyUsed: 0,           // 0
-      lastResetDate: '2025-08-08T00:00:00Z',
-    },
-    createdAt: '2024-01-03T00:00:00Z',
-    updatedAt: '2024-01-10T09:15:00Z',
-  },
-];
+// 模拟商户数据 - 已清理，改为从API获取
+const mockMerchants: Merchant[] = [];
 
 export default function Merchants() {
-  const [merchants, setMerchants] = useState<Merchant[]>(mockMerchants);
+  const [merchants, setMerchants] = useState<Merchant[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -158,9 +76,26 @@ export default function Merchants() {
   });
 
   useEffect(() => {
-    // 在实际项目中，这里会从API获取商户数据
-    setLoading(false);
+    // 从API获取商户数据
+    fetchMerchants();
   }, []);
+
+  // 获取商户数据
+  const fetchMerchants = async () => {
+    try {
+      setLoading(true);
+      // TODO: 替换为实际的API调用
+      // const response = await api.get('/merchants');
+      // setMerchants(response.data);
+      
+      // 临时设置为空数组，等待API集成
+      setMerchants([]);
+    } catch (err: any) {
+      setError(err.message || '获取商户数据失败');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddNew = () => {
     setEditingMerchant(null);

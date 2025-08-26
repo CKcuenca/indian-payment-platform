@@ -25,8 +25,8 @@ const CashGitPaymentTest: React.FC = () => {
     orderid: `cashgit_${Date.now()}`,
     amount: '100.50',
     desc: 'CashGit测试支付订单',
-    notify_url: 'http://example.com/notify',
-    return_url: 'http://example.com/return'
+    notify_url: 'https://yourgame.com/notify',
+    return_url: 'https://yourgame.com/return'
   });
 
   // 查询参数

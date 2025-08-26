@@ -527,7 +527,7 @@ export default function WakeupPaymentTest() {
                 <ListItemIcon>
                   <CheckCircle color="primary" />
                 </ListItemIcon>
-                <ListItemText primary="4. 确认完成后通知游戏公司支付结果" />
+                <ListItemText primary="4. 确认完成后通知商户支付结果" />
               </ListItem>
             </List>
             
