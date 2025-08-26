@@ -3,6 +3,7 @@ const { body, validationResult } = require('express-validator');
 const { apiKeyAuth } = require('../middleware/auth');
 const { getIndianTimeISO } = require('../utils/timeUtils');
 const mongoose = require('mongoose');
+const Merchant = require('../models/merchant');
 
 const router = express.Router();
 
@@ -11,12 +12,376 @@ const validateRequest = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ 
+      success: false,
       error: 'Validation failed',
       details: errors.array()
     });
   }
   next();
 };
+
+// 获取商户列表（需要管理员权限）
+router.get('/', apiKeyAuth, async (req, res) => {
+  try {
+    const { page = 1, limit = 10, status, search } = req.query;
+    
+    // 构建查询条件
+    const query = {};
+    if (status) query.status = status;
+    if (search) {
+      query.$or = [
+        { merchantId: { $regex: search, $options: 'i' } },
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 10));
+
+    const merchants = await Merchant.find(query)
+      .sort({ createdAt: -1 })
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum);
+
+    const total = await Merchant.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: {
+        merchants,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total,
+          pages: Math.ceil(total / limitNum)
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Get merchants error:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取商户列表失败'
+    });
+  }
+});
+
+// 创建新商户
+router.post('/', [
+  body('merchantId').isString().notEmpty().withMessage('商户ID不能为空'),
+  body('name').isString().notEmpty().withMessage('商户名称不能为空'),
+  body('email').isEmail().withMessage('邮箱格式无效'),
+  body('phone').isString().notEmpty().withMessage('手机号不能为空'),
+  body('status').optional().isIn(['ACTIVE', 'INACTIVE', 'SUSPENDED']).withMessage('状态值无效'),
+  body('defaultProvider').optional().isString().withMessage('默认支付商必须是字符串'),
+  body('depositFee').optional().isFloat({ min: 0 }).withMessage('充值费率必须是非负数'),
+  body('withdrawalFee').optional().isFloat({ min: 0 }).withMessage('提现费率必须是非负数'),
+  body('minDeposit').optional().isInt({ min: 1 }).withMessage('最小充值金额必须是正整数'),
+  body('maxDeposit').optional().isInt({ min: 1 }).withMessage('最大充值金额必须是正整数'),
+  body('minWithdrawal').optional().isInt({ min: 1 }).withMessage('最小提现金额必须是正整数'),
+  body('maxWithdrawal').optional().isInt({ min: 1 }).withMessage('最大提现金额必须是正整数'),
+  body('dailyLimit').optional().isInt({ min: 1 }).withMessage('日限额必须是正整数'),
+  body('monthlyLimit').optional().isInt({ min: 1 }).withMessage('月限额必须是正整数'),
+  body('singleTransactionLimit').optional().isInt({ min: 1 }).withMessage('单笔交易限额必须是正整数')
+], validateRequest, async (req, res) => {
+  try {
+    const {
+      merchantId,
+      name,
+      email,
+      phone,
+      status = 'ACTIVE',
+      defaultProvider = 'airpay',
+      depositFee = 0.5,
+      withdrawalFee = 1.0,
+      minDeposit = 100,
+      maxDeposit = 100000,
+      minWithdrawal = 500,
+      maxWithdrawal = 50000,
+      dailyLimit = 100000000,
+      monthlyLimit = 1000000000,
+      singleTransactionLimit = 10000000
+    } = req.body;
+
+    // 检查商户ID是否已存在
+    const existingMerchant = await Merchant.findOne({ merchantId });
+    if (existingMerchant) {
+      return res.status(400).json({
+        success: false,
+        error: '商户ID已存在'
+      });
+    }
+
+    // 检查邮箱是否已存在
+    const existingEmail = await Merchant.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({
+        success: false,
+        error: '邮箱已被使用'
+      });
+    }
+
+    // 验证限额逻辑
+    if (maxDeposit <= minDeposit) {
+      return res.status(400).json({
+        success: false,
+        error: '最大充值金额必须大于最小充值金额'
+      });
+    }
+
+    if (maxWithdrawal <= minWithdrawal) {
+      return res.status(400).json({
+        success: false,
+        error: '最大提现金额必须大于最小提现金额'
+      });
+    }
+
+    if (monthlyLimit < dailyLimit) {
+      return res.status(400).json({
+        success: false,
+        error: '月限额必须大于或等于日限额'
+      });
+    }
+
+    if (dailyLimit < singleTransactionLimit) {
+      return res.status(400).json({
+        success: false,
+        error: '日限额必须大于或等于单笔交易限额'
+      });
+    }
+
+    // 生成API密钥
+    const apiKey = Merchant.generateApiKey();
+    const secretKey = Merchant.generateSecretKey();
+
+    // 创建新商户
+    const newMerchant = new Merchant({
+      merchantId,
+      name,
+      email,
+      phone,
+      status,
+      apiKey,
+      secretKey,
+      paymentConfig: {
+        defaultProvider,
+        providers: [
+          { name: 'airpay', enabled: true },
+          { name: 'cashfree', enabled: true },
+          { name: 'razorpay', enabled: true },
+          { name: 'paytm', enabled: true }
+        ],
+        fees: {
+          deposit: depositFee / 100, // 转换为小数
+          withdrawal: withdrawalFee / 100
+        },
+        limits: {
+          minDeposit,
+          maxDeposit,
+          minWithdrawal,
+          maxWithdrawal,
+          dailyLimit,
+          monthlyLimit,
+          singleTransactionLimit
+        }
+      },
+      balance: {
+        available: 0,
+        frozen: 0
+      }
+    });
+
+    await newMerchant.save();
+
+    res.status(201).json({
+      success: true,
+      data: {
+        message: '商户创建成功',
+        merchant: {
+          merchantId: newMerchant.merchantId,
+          name: newMerchant.name,
+          email: newMerchant.email,
+          status: newMerchant.status,
+          apiKey: newMerchant.apiKey,
+          secretKey: newMerchant.secretKey
+        }
+      }
+    });
+
+  } catch (error) {
+    console.error('Create merchant error:', error);
+    res.status(500).json({
+      success: false,
+      error: '创建商户失败'
+    });
+  }
+});
+
+// 获取单个商户信息
+router.get('/:merchantId', apiKeyAuth, async (req, res) => {
+  try {
+    const { merchantId } = req.params;
+    
+    const merchant = await Merchant.findOne({ merchantId });
+
+    if (!merchant) {
+      return res.status(404).json({
+        success: false,
+        error: '商户不存在'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: { merchant }
+    });
+
+  } catch (error) {
+    console.error('Get merchant error:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取商户信息失败'
+    });
+  }
+});
+
+// 更新商户信息
+router.put('/:merchantId', [
+  body('name').optional().isString().notEmpty().withMessage('商户名称不能为空'),
+  body('email').optional().isEmail().withMessage('邮箱格式无效'),
+  body('phone').optional().isString().notEmpty().withMessage('手机号不能为空'),
+  body('status').optional().isIn(['ACTIVE', 'INACTIVE', 'SUSPENDED']).withMessage('状态值无效'),
+  body('defaultProvider').optional().isString().withMessage('默认支付商必须是字符串'),
+  body('depositFee').optional().isFloat({ min: 0 }).withMessage('充值费率必须是非负数'),
+  body('withdrawalFee').optional().isFloat({ min: 0 }).withMessage('提现费率必须是非负数'),
+  body('minDeposit').optional().isInt({ min: 1 }).withMessage('最小充值金额必须是正整数'),
+  body('maxDeposit').optional().isInt({ min: 1 }).withMessage('最大充值金额必须是正整数'),
+  body('minWithdrawal').optional().isInt({ min: 1 }).withMessage('最小提现金额必须是正整数'),
+  body('maxWithdrawal').optional().isInt({ min: 1 }).withMessage('最大提现金额必须是正整数'),
+  body('dailyLimit').optional().isInt({ min: 1 }).withMessage('日限额必须是正整数'),
+  body('monthlyLimit').optional().isInt({ min: 1 }).withMessage('月限额必须是正整数'),
+  body('singleTransactionLimit').optional().isInt({ min: 1 }).withMessage('单笔交易限额必须是正整数')
+], validateRequest, async (req, res) => {
+  try {
+    const { merchantId } = req.params;
+    const updateData = req.body;
+
+    // 查找商户
+    const merchant = await Merchant.findOne({ merchantId });
+    if (!merchant) {
+      return res.status(404).json({
+        success: false,
+        error: '商户不存在'
+      });
+    }
+
+    // 如果更新邮箱，检查是否与其他商户重复
+    if (updateData.email && updateData.email !== merchant.email) {
+      const existingEmail = await Merchant.findOne({ email: updateData.email });
+      if (existingEmail) {
+        return res.status(400).json({
+          success: false,
+          error: '邮箱已被其他商户使用'
+        });
+      }
+    }
+
+    // 验证限额逻辑
+    if (updateData.maxDeposit && updateData.minDeposit && updateData.maxDeposit <= updateData.minDeposit) {
+      return res.status(400).json({
+        success: false,
+        error: '最大充值金额必须大于最小充值金额'
+      });
+    }
+
+    if (updateData.maxWithdrawal && updateData.minWithdrawal && updateData.maxWithdrawal <= updateData.minWithdrawal) {
+      return res.status(400).json({
+        success: false,
+        error: '最大提现金额必须大于最小提现金额'
+      });
+    }
+
+    if (updateData.monthlyLimit && updateData.dailyLimit && updateData.monthlyLimit < updateData.dailyLimit) {
+      return res.status(400).json({
+        success: false,
+        error: '月限额必须大于或等于日限额'
+      });
+    }
+
+    if (updateData.dailyLimit && updateData.singleTransactionLimit && updateData.dailyLimit < updateData.singleTransactionLimit) {
+      return res.status(400).json({
+        success: false,
+        error: '日限额必须大于或等于单笔交易限额'
+      });
+    }
+
+    // 更新商户信息
+    const updatedMerchant = await Merchant.findOneAndUpdate(
+      { merchantId },
+      { 
+        ...updateData,
+        updatedAt: new Date()
+      },
+      { new: true, runValidators: true }
+    );
+
+    res.json({
+      success: true,
+      data: {
+        message: '商户信息更新成功',
+        merchant: updatedMerchant
+      }
+    });
+
+  } catch (error) {
+    console.error('Update merchant error:', error);
+    res.status(500).json({
+      success: false,
+      error: '更新商户信息失败'
+    });
+  }
+});
+
+// 删除商户
+router.delete('/:merchantId', apiKeyAuth, async (req, res) => {
+  try {
+    const { merchantId } = req.params;
+    
+    const merchant = await Merchant.findOne({ merchantId });
+    if (!merchant) {
+      return res.status(404).json({
+        success: false,
+        error: '商户不存在'
+      });
+    }
+
+    // 检查商户是否有余额
+    if (merchant.balance.available > 0 || merchant.balance.frozen > 0) {
+      return res.status(400).json({
+        success: false,
+        error: '商户还有余额，无法删除'
+      });
+    }
+
+    await Merchant.deleteOne({ merchantId });
+
+    res.json({
+      success: true,
+      data: {
+        message: '商户删除成功'
+      }
+    });
+
+  } catch (error) {
+    console.error('Delete merchant error:', error);
+    res.status(500).json({
+      success: false,
+      error: '删除商户失败'
+    });
+  }
+});
 
 // 获取商户信息（需要认证）
 router.get('/info', apiKeyAuth, (req, res) => {
@@ -89,311 +454,65 @@ router.get('/transactions', (req, res) => {
     
     console.log('Received filter params:', { type, status, merchantId, providerName, startDate, endDate, transactionId, page: pageNum, limit: limitNum });
 
-  // 返回模拟交易数据，符合前端Transaction接口
-  let mockTransactions = [
-    {
-      transactionId: 'TXN001',
-      orderId: 'ORD001',
-      merchantId: 'MERCH001',
-      type: 'DEPOSIT',
-      amount: 100000, // 以分为单位
-      fee: 1000,
-      netAmount: 99000,
-      currency: 'INR',
-      balanceChange: 99000,
-      balanceSnapshot: {
-        before: 500000,
-        after: 599000
+    // 返回模拟交易数据，符合前端Transaction接口
+    let mockTransactions = [
+      {
+        transactionId: 'TXN001',
+        orderId: 'ORD001',
+        merchantId: 'MERCH001',
+        type: 'DEPOSIT',
+        amount: 100000, // 以分为单位
+        fee: 1000,
+        status: 'SUCCESS',
+        providerName: 'airpay',
+        customerEmail: 'customer1@example.com',
+        customerPhone: '919876543210',
+        createdAt: '2025-01-26T10:00:00Z',
+        updatedAt: '2025-01-26T10:00:00Z'
       },
-      status: 'SUCCESS',
-      orderStatus: 'SUCCESS',
-      provider: {
-        name: 'airpay',
-        refId: 'AP_REF_001'
-      },
-      upiPayment: {
-        upiId: 'user@bank',
-        phoneNumber: '+919876543210',
-        accountName: 'Test User',
-        bankName: 'Test Bank',
-        ifscCode: 'TEST0001234',
-        accountNumber: '1234567890'
-      },
-      beneficiaryAccount: '1234567890',
-      beneficiaryName: 'Test User',
-      createdAt: getIndianTimeISO(),
-      updatedAt: getIndianTimeISO()
-    },
-    {
-      transactionId: 'TXN002',
-      orderId: 'ORD002',
-      merchantId: 'MERCH002',
-      type: 'WITHDRAWAL',
-      amount: 50000, // 以分为单位
-      fee: 500,
-      netAmount: 49500,
-      currency: 'INR',
-      balanceChange: -50000,
-      balanceSnapshot: {
-        before: 599000,
-        after: 549000
-      },
-      status: 'SUCCESS',
-      orderStatus: 'SUCCESS',
-      provider: {
-        name: 'cashfree',
-        refId: 'CF_REF_002'
-      },
-      upiPayment: {
-        upiId: 'merchant@bank',
-        phoneNumber: '+919876543211',
-        accountName: 'Merchant User',
-        bankName: 'Merchant Bank',
-        ifscCode: 'MERCH0001234',
-        accountNumber: '0987654321'
-      },
-      beneficiaryAccount: '0987654321',
-      beneficiaryName: 'Merchant User',
-      createdAt: getIndianTimeISO(),
-      updatedAt: getIndianTimeISO()
-    },
-    {
-      transactionId: 'TXN003',
-      orderId: 'ORD003',
-      merchantId: 'MERCH001',
-      type: 'DEPOSIT',
-      amount: 200000, // 以分为单位
-      fee: 2000,
-      netAmount: 198000,
-      currency: 'INR',
-      balanceChange: 198000,
-      balanceSnapshot: {
-        before: 549000,
-        after: 747000
-      },
-      status: 'PENDING',
-      orderStatus: 'PENDING',
-      provider: {
-        name: 'razorpay',
-        refId: 'RP_REF_003'
-      },
-      createdAt: getIndianTimeISO(),
-      updatedAt: getIndianTimeISO()
-    },
-    {
-      transactionId: 'TXN004',
-      orderId: 'ORD004',
-      merchantId: 'MERCH003',
-      type: 'REFUND',
-      amount: 25000, // 以分为单位
-      fee: 0,
-      netAmount: 25000,
-      currency: 'INR',
-      balanceChange: 25000,
-      balanceSnapshot: {
-        before: 747000,
-        after: 772000
-      },
-      status: 'SUCCESS',
-      orderStatus: 'SUCCESS',
-      provider: {
-        name: 'paytm',
-        refId: 'PT_REF_004'
-      },
-      createdAt: getIndianTimeISO(),
-      updatedAt: getIndianTimeISO()
-    },
-    {
-      transactionId: 'TXN005',
-      orderId: 'ORD005',
-      merchantId: 'MERCH001',
-      type: 'ADJUSTMENT',
-      amount: 10000, // 以分为单位
-      fee: 0,
-      netAmount: 10000,
-      currency: 'INR',
-      balanceChange: 10000,
-      balanceSnapshot: {
-        before: 772000,
-        after: 782000
-      },
-      status: 'SUCCESS',
-      orderStatus: 'SUCCESS',
-      createdAt: getIndianTimeISO(),
-      updatedAt: getIndianTimeISO()
-    },
-    {
-      transactionId: 'TXN006',
-      orderId: 'ORD006',
-      merchantId: 'MERCH002',
-      type: 'DEPOSIT',
-      amount: 150000, // 以分为单位
-      fee: 1500,
-      netAmount: 148500,
-      currency: 'INR',
-      balanceChange: 148500,
-      balanceSnapshot: {
-        before: 782000,
-        after: 930500
-      },
-      status: 'PENDING',
-      orderStatus: 'PENDING',
-      provider: {
-        name: 'airpay',
-        refId: 'AP_REF_006'
-      },
-      createdAt: getIndianTimeISO(),
-      updatedAt: getIndianTimeISO()
-    },
-    {
-      transactionId: 'TXN007',
-      orderId: 'ORD007',
-      merchantId: 'MERCH001',
-      type: 'WITHDRAWAL',
-      amount: 75000, // 以分为单位
-      fee: 750,
-      netAmount: 74250,
-      currency: 'INR',
-      balanceChange: -75000,
-      balanceSnapshot: {
-        before: 930500,
-        after: 855500
-      },
-      status: 'FAILED',
-      orderStatus: 'FAILED',
-      provider: {
-        name: 'cashfree',
-        refId: 'CF_REF_007'
-      },
-      createdAt: getIndianTimeISO(),
-      updatedAt: getIndianTimeISO()
-    }
-  ];
-
-  // 应用筛选条件
-  let filteredTransactions = mockTransactions;
-
-  if (type) {
-    filteredTransactions = filteredTransactions.filter(t => t.type === type);
-  }
-
-  if (status) {
-    filteredTransactions = filteredTransactions.filter(t => t.status === status);
-  }
-
-  if (merchantId) {
-    filteredTransactions = filteredTransactions.filter(t => t.merchantId === merchantId);
-  }
-
-  if (providerName) {
-    filteredTransactions = filteredTransactions.filter(t => t.provider.name === providerName);
-  }
-
-  if (transactionId) {
-    filteredTransactions = filteredTransactions.filter(t => 
-      t.transactionId.toLowerCase().includes(transactionId.toLowerCase())
-    );
-  }
-
-  if (startDate || endDate) {
-    filteredTransactions = filteredTransactions.filter(t => {
-      const transactionDate = new Date(t.createdAt);
-      const start = startDate ? new Date(startDate) : null;
-      const end = endDate ? new Date(endDate + 'T23:59:59') : null;
-      
-      if (start && end) {
-        return transactionDate >= start && transactionDate <= end;
-      } else if (start) {
-        return transactionDate >= start;
-      } else if (end) {
-        return transactionDate <= end;
+      {
+        transactionId: 'TXN002',
+        orderId: 'ORD002',
+        merchantId: 'MERCH001',
+        type: 'WITHDRAWAL',
+        amount: 50000,
+        fee: 500,
+        status: 'PENDING',
+        providerName: 'cashfree',
+        customerEmail: 'customer2@example.com',
+        customerPhone: '919876543211',
+        createdAt: '2025-01-26T11:00:00Z',
+        updatedAt: '2025-01-26T11:00:00Z'
       }
-      return true;
-    });
-  }
+    ];
 
-  console.log('Filtered transactions count:', filteredTransactions.length);
-
-  // 分页
-  const startIndex = (pageNum - 1) * limitNum;
-  const endIndex = startIndex + limitNum;
-  const paginatedTransactions = filteredTransactions.slice(startIndex, endIndex);
-
-  res.json({
-    success: true,
-    data: {
-      data: paginatedTransactions,
-      pagination: {
-        page: pageNum,
-        limit: limitNum,
-        total: filteredTransactions.length,
-        pages: Math.ceil(filteredTransactions.length / limitNum)
-      }
+    // 应用筛选条件
+    if (type) {
+      mockTransactions = mockTransactions.filter(t => t.type === type);
     }
-  });
-  } catch (error) {
-    console.error('Error in /transactions:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: '获取交易记录失败',
-      message: process.env.NODE_ENV === 'development' ? error.message : '服务器内部错误'
-    });
-  }
-});
-
-// 获取订单历史
-router.get('/orders', apiKeyAuth, async (req, res) => {
-  try {
-    const { page = 1, limit = 10, status, type, startDate, endDate } = req.query;
-    const merchantId = req.merchant.merchantId; // 从认证中间件获取商户ID
-    
-    // 构建查询条件
-    const query = { merchantId };
-    if (status) query.status = status;
-    if (type) query.type = type;
-    if (startDate || endDate) {
-      query.createdAt = {};
-      if (startDate) query.createdAt.$gte = new Date(startDate);
-      if (endDate) query.createdAt.$lte = new Date(endDate);
+    if (status) {
+      mockTransactions = mockTransactions.filter(t => t.status === status);
     }
-    
-    // 分页参数
-    const pageNum = Math.max(1, parseInt(page) || 1);
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 10));
-    const skip = (pageNum - 1) * limitNum;
-    
-    // 查询订单
-    const Order = mongoose.model('Order');
-    const [orders, total] = await Promise.all([
-      Order.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limitNum)
-        .lean(),
-      Order.countDocuments(query)
-    ]);
-    
-    // 格式化响应数据
-    const formattedOrders = orders.map(order => ({
-      orderId: order.orderId,
-      merchantId: order.merchantId,
-      type: order.type,
-      amount: order.amount,
-      currency: order.currency,
-      status: order.status,
-      fee: order.fee || 0,
-      netAmount: order.amount - (order.fee || 0),
-      customer: order.customer || {},
-      provider: order.provider || {},
-      returnUrl: order.callback?.successUrl,
-      createdAt: order.createdAt,
-      updatedAt: order.updatedAt
-    }));
-    
+    if (merchantId) {
+      mockTransactions = mockTransactions.filter(t => t.merchantId === merchantId);
+    }
+    if (providerName) {
+      mockTransactions = mockTransactions.filter(t => t.providerName === providerName);
+    }
+    if (transactionId) {
+      mockTransactions = mockTransactions.filter(t => t.transactionId.includes(transactionId));
+    }
+
+    // 分页处理
+    const total = mockTransactions.length;
+    const startIndex = (pageNum - 1) * limitNum;
+    const endIndex = startIndex + limitNum;
+    const paginatedTransactions = mockTransactions.slice(startIndex, endIndex);
+
     res.json({
       success: true,
       data: {
-        data: formattedOrders,
+        transactions: paginatedTransactions,
         pagination: {
           page: pageNum,
           limit: limitNum,
@@ -402,12 +521,12 @@ router.get('/orders', apiKeyAuth, async (req, res) => {
         }
       }
     });
-    
+
   } catch (error) {
-    console.error('Error fetching orders:', error);
+    console.error('Get transactions error:', error);
     res.status(500).json({
       success: false,
-      error: '获取订单列表失败'
+      error: '获取交易历史失败'
     });
   }
 });

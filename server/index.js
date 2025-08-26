@@ -97,6 +97,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/payment', require('./routes/payment'));
 app.use('/api/merchant', require('./routes/merchant'));
+app.use('/api/providers', require('./routes/providers'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/payment-config', require('./routes/payment-config'));
 app.use('/api', require('./routes/cashgitPayment'));

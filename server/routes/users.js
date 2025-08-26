@@ -68,6 +68,94 @@ router.get('/', apiKeyAuth, async (req, res) => {
   }
 });
 
+// 创建新用户
+router.post('/', [
+  body('username').isString().isLength({ min: 3, max: 30 }).matches(/^[a-zA-Z0-9_]+$/).withMessage('用户名必须是3-30个字符，只能包含字母、数字和下划线'),
+  body('email').isEmail().withMessage('邮箱格式无效'),
+  body('password').isString().isLength({ min: 8 }).withMessage('密码至少8个字符'),
+  body('fullName').isString().isLength({ min: 1, max: 100 }).withMessage('姓名不能为空且不能超过100个字符'),
+  body('phone').optional().matches(/^\+?[1-9]\d{1,14}$/).withMessage('手机号格式无效'),
+  body('role').isIn(['admin', 'operator', 'merchant', 'user']).withMessage('角色值无效'),
+  body('merchantId').optional().isMongoId().withMessage('商户ID格式无效'),
+  body('status').optional().isIn(['active', 'inactive', 'suspended', 'pending']).withMessage('状态值无效')
+], validateRequest, async (req, res) => {
+  try {
+    const {
+      username,
+      email,
+      password,
+      fullName,
+      phone,
+      role = 'user',
+      merchantId,
+      status = 'pending'
+    } = req.body;
+
+    // 检查用户名是否已存在
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return res.status(400).json({
+        success: false,
+        error: '用户名已存在'
+      });
+    }
+
+    // 检查邮箱是否已存在
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res.status(400).json({
+        success: false,
+        error: '邮箱已被使用'
+      });
+    }
+
+    // 验证商户角色必须关联商户ID
+    if (role === 'merchant' && !merchantId) {
+      return res.status(400).json({
+        success: false,
+        error: '商户角色必须关联商户ID'
+      });
+    }
+
+    // 获取默认权限
+    const defaultPermissions = User.getDefaultPermissions(role);
+
+    // 创建新用户
+    const newUser = new User({
+      username,
+      email,
+      password,
+      fullName,
+      phone,
+      role,
+      merchantId: role === 'merchant' ? merchantId : undefined,
+      status,
+      permissions: defaultPermissions
+    });
+
+    await newUser.save();
+
+    // 返回用户信息（不包含密码）
+    const userResponse = newUser.toObject();
+    delete userResponse.password;
+
+    res.status(201).json({
+      success: true,
+      data: {
+        message: '用户创建成功',
+        user: userResponse
+      }
+    });
+
+  } catch (error) {
+    console.error('Create user error:', error);
+    res.status(500).json({
+      success: false,
+      error: '创建用户失败'
+    });
+  }
+});
+
 // 获取单个用户信息
 router.get('/:userId', apiKeyAuth, async (req, res) => {
   try {
@@ -98,109 +186,21 @@ router.get('/:userId', apiKeyAuth, async (req, res) => {
   }
 });
 
-// 创建新用户（需要管理员权限）
-router.post('/', [
-  apiKeyAuth,
-  body('username')
-    .isLength({ min: 3, max: 30 })
-    .matches(/^[a-zA-Z0-9_]+$/)
-    .withMessage('用户名必须是3-30个字符，只能包含字母、数字和下划线'),
-  body('email')
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('请输入有效的邮箱地址'),
-  body('password')
-    .isLength({ min: 8 })
-    .withMessage('密码至少8个字符'),
-  body('fullName')
-    .isLength({ min: 2, max: 100 })
-    .withMessage('姓名必须是2-100个字符'),
-  body('role')
-    .isIn(['admin', 'operator', 'merchant', 'user'])
-    .withMessage('无效的用户角色'),
-  body('status')
-    .optional()
-    .isIn(['active', 'inactive', 'suspended', 'pending'])
-    .withMessage('无效的用户状态'),
-  validateRequest
-], async (req, res) => {
-  try {
-    const { username, email, password, fullName, role, phone, merchantId, status = 'pending' } = req.body;
-
-    // 检查用户名是否已存在
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return res.status(400).json({
-        success: false,
-        error: '用户名已存在'
-      });
-    }
-
-    // 检查邮箱是否已存在
-    const existingEmail = await User.findOne({ email });
-    if (existingEmail) {
-      return res.status(400).json({
-        success: false,
-        error: '邮箱已存在'
-      });
-    }
-
-    // 创建新用户
-    const user = new User({
-      username,
-      email,
-      password,
-      fullName,
-      role,
-      phone,
-      merchantId: role === 'merchant' ? merchantId : undefined,
-      permissions: User.getDefaultPermissions(role),
-      status,
-      createdBy: req.user.id
-    });
-
-    await user.save();
-
-    // 返回用户信息（不包含密码）
-    const userResponse = user.toObject();
-    delete userResponse.password;
-
-    res.status(201).json({
-      success: true,
-      data: { user: userResponse },
-      message: '用户创建成功'
-    });
-
-  } catch (error) {
-    console.error('Create user error:', error);
-    res.status(500).json({
-      success: false,
-      error: '创建用户失败'
-    });
-  }
-});
-
 // 更新用户信息
 router.put('/:userId', [
-  apiKeyAuth,
-  body('fullName')
-    .optional()
-    .isLength({ min: 2, max: 100 })
-    .withMessage('姓名必须是2-100个字符'),
-  body('role')
-    .optional()
-    .isIn(['admin', 'operator', 'merchant', 'user'])
-    .withMessage('无效的用户角色'),
-  body('status')
-    .optional()
-    .isIn(['active', 'inactive', 'suspended', 'pending'])
-    .withMessage('无效的用户状态'),
-  validateRequest
-], async (req, res) => {
+  body('email').optional().isEmail().withMessage('邮箱格式无效'),
+  body('fullName').optional().isString().isLength({ min: 1, max: 100 }).withMessage('姓名不能为空且不能超过100个字符'),
+  body('phone').optional().matches(/^\+?[1-9]\d{1,14}$/).withMessage('手机号格式无效'),
+  body('role').optional().isIn(['admin', 'operator', 'merchant', 'user']).withMessage('角色值无效'),
+  body('merchantId').optional().isMongoId().withMessage('商户ID格式无效'),
+  body('status').optional().isIn(['active', 'inactive', 'suspended', 'pending']).withMessage('状态值无效'),
+  body('permissions').optional().isArray().withMessage('权限必须是数组')
+], validateRequest, async (req, res) => {
   try {
     const { userId } = req.params;
-    const { fullName, role, phone, merchantId, status, permissions } = req.body;
+    const updateData = req.body;
 
+    // 查找用户
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -209,30 +209,66 @@ router.put('/:userId', [
       });
     }
 
-    // 更新用户信息
-    const updateData = {};
-    if (fullName !== undefined) updateData.fullName = fullName;
-    if (role !== undefined) {
-      updateData.role = role;
-      updateData.permissions = User.getDefaultPermissions(role);
+    // 如果更新邮箱，检查是否与其他用户重复
+    if (updateData.email && updateData.email !== user.email) {
+      const existingEmail = await User.findOne({ email: updateData.email });
+      if (existingEmail) {
+        return res.status(400).json({
+          success: false,
+          error: '邮箱已被其他用户使用'
+        });
+      }
     }
-    if (phone !== undefined) updateData.phone = phone;
-    if (merchantId !== undefined) updateData.merchantId = role === 'merchant' ? merchantId : undefined;
-    if (status !== undefined) updateData.status = status;
-    if (permissions !== undefined) updateData.permissions = permissions;
-    
-    updateData.updatedBy = req.user.id;
 
+    // 如果更新角色，验证商户角色必须关联商户ID
+    if (updateData.role === 'merchant' && !updateData.merchantId && !user.merchantId) {
+      return res.status(400).json({
+        success: false,
+        error: '商户角色必须关联商户ID'
+      });
+    }
+
+    // 如果更新权限，验证权限格式
+    if (updateData.permissions) {
+      const validPermissions = [
+        'VIEW_ALL_MERCHANTS',
+        'MANAGE_MERCHANTS',
+        'VIEW_PAYMENT_CONFIG',
+        'MANAGE_PAYMENT_CONFIG',
+        'VIEW_ALL_ORDERS',
+        'VIEW_OWN_ORDERS',
+        'VIEW_ALL_TRANSACTIONS',
+        'VIEW_OWN_TRANSACTIONS',
+        'MANAGE_USERS',
+        'SYSTEM_MONITORING',
+        'VIEW_OWN_MERCHANT_DATA'
+      ];
+      
+      const invalidPermissions = updateData.permissions.filter(p => !validPermissions.includes(p));
+      if (invalidPermissions.length > 0) {
+        return res.status(400).json({
+          success: false,
+          error: `无效的权限: ${invalidPermissions.join(', ')}`
+        });
+      }
+    }
+
+    // 更新用户信息
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      updateData,
+      { 
+        ...updateData,
+        updatedAt: new Date()
+      },
       { new: true, runValidators: true }
-    ).select('-password');
+    ).select('-password').populate('merchantId', 'name email');
 
     res.json({
       success: true,
-      data: { user: updatedUser },
-      message: '用户信息更新成功'
+      data: {
+        message: '用户信息更新成功',
+        user: updatedUser
+      }
     });
 
   } catch (error) {
@@ -248,8 +284,7 @@ router.put('/:userId', [
 router.delete('/:userId', apiKeyAuth, async (req, res) => {
   try {
     const { userId } = req.params;
-
-    // 检查用户是否存在
+    
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({
@@ -258,23 +293,32 @@ router.delete('/:userId', apiKeyAuth, async (req, res) => {
       });
     }
 
-    // 不能删除自己
-    if (userId === req.user.id) {
+    // 不允许删除自己
+    if (userId === req.user?.id) {
       return res.status(400).json({
         success: false,
         error: '不能删除自己的账户'
       });
     }
 
-    // 软删除：将状态改为inactive
-    await User.findByIdAndUpdate(userId, {
-      status: 'inactive',
-      updatedBy: req.user.id
-    });
+    // 不允许删除最后一个管理员
+    if (user.role === 'admin') {
+      const adminCount = await User.countDocuments({ role: 'admin' });
+      if (adminCount <= 1) {
+        return res.status(400).json({
+          success: false,
+          error: '不能删除最后一个管理员'
+        });
+      }
+    }
+
+    await User.findByIdAndDelete(userId);
 
     res.json({
       success: true,
-      message: '用户已停用'
+      data: {
+        message: '用户删除成功'
+      }
     });
 
   } catch (error) {
@@ -288,12 +332,8 @@ router.delete('/:userId', apiKeyAuth, async (req, res) => {
 
 // 重置用户密码
 router.post('/:userId/reset-password', [
-  apiKeyAuth,
-  body('newPassword')
-    .isLength({ min: 8 })
-    .withMessage('新密码至少8个字符'),
-  validateRequest
-], async (req, res) => {
+  body('newPassword').isString().isLength({ min: 8 }).withMessage('新密码至少8个字符')
+], validateRequest, async (req, res) => {
   try {
     const { userId } = req.params;
     const { newPassword } = req.body;
@@ -312,7 +352,9 @@ router.post('/:userId/reset-password', [
 
     res.json({
       success: true,
-      message: '密码重置成功'
+      data: {
+        message: '密码重置成功'
+      }
     });
 
   } catch (error) {
@@ -324,10 +366,13 @@ router.post('/:userId/reset-password', [
   }
 });
 
-// 解锁用户账户
-router.post('/:userId/unlock', apiKeyAuth, async (req, res) => {
+// 更新用户状态
+router.patch('/:userId/status', [
+  body('status').isIn(['active', 'inactive', 'suspended', 'pending']).withMessage('状态值无效')
+], validateRequest, async (req, res) => {
   try {
     const { userId } = req.params;
+    const { status } = req.body;
 
     const user = await User.findById(userId);
     if (!user) {
@@ -337,19 +382,45 @@ router.post('/:userId/unlock', apiKeyAuth, async (req, res) => {
       });
     }
 
-    // 解锁账户
-    await user.resetLoginAttempts();
+    // 不允许停用自己
+    if (userId === req.user?.id && status !== 'active') {
+      return res.status(400).json({
+        success: false,
+        error: '不能停用自己的账户'
+      });
+    }
+
+    // 不允许停用最后一个管理员
+    if (user.role === 'admin' && status !== 'active') {
+      const activeAdminCount = await User.countDocuments({ role: 'admin', status: 'active' });
+      if (activeAdminCount <= 1) {
+        return res.status(400).json({
+          success: false,
+          error: '不能停用最后一个管理员'
+        });
+      }
+    }
+
+    user.status = status;
+    await user.save();
 
     res.json({
       success: true,
-      message: '账户已解锁'
+      data: {
+        message: '用户状态更新成功',
+        user: {
+          id: user._id,
+          username: user.username,
+          status: user.status
+        }
+      }
     });
 
   } catch (error) {
-    console.error('Unlock user error:', error);
+    console.error('Update user status error:', error);
     res.status(500).json({
       success: false,
-      error: '解锁账户失败'
+      error: '更新用户状态失败'
     });
   }
 });
