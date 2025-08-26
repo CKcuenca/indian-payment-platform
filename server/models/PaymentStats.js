@@ -84,7 +84,7 @@ const paymentStatsSchema = new mongoose.Schema({
   },
   
   // 错误统计
-  errors: {
+  errorStats: {
     total: {
       type: Number,
       default: 0

@@ -16,19 +16,33 @@ const PORT = process.env.PORT || 3001;
 app.use(helmet());
 app.use(cors());
 
-// 信任代理设置 - 解决X-Forwarded-For头问题
-app.set('trust proxy', true);
+// 信任代理设置 - 只信任本地和私有网络
+app.set('trust proxy', ['127.0.0.1', '::1', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16']);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// 限流中间件
+// 限流中间件 - 更严格的配置
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15分钟
   max: 100, // 限制每个IP 15分钟内最多100个请求
-  message: 'Too many requests from this IP, please try again later.'
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true, // 返回标准限流头
+  legacyHeaders: false, // 不返回旧版限流头
+  skipSuccessfulRequests: false, // 成功请求也计入限流
+  skipFailedRequests: false // 失败请求也计入限流
 });
+
+// 对敏感API使用更严格的限流
+const strictLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5分钟
+  max: 20, // 限制每个IP 5分钟内最多20个请求
+  message: 'Too many requests to sensitive API, please try again later.'
+});
+
 app.use('/api', limiter);
+app.use('/api/auth', strictLimiter); // 认证API使用更严格的限流
+app.use('/api/payment', strictLimiter); // 支付API使用更严格的限流
 
 // 先注册数据库相关路由，再连接数据库
 console.log('🔧 预注册数据库相关路由...');
@@ -124,6 +138,18 @@ app.get('/health', (req, res) => {
   });
 });
 
+// API健康检查端点
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    service: 'Indian Payment Platform API',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'production',
+    version: '1.0.0'
+  });
+});
+
 // 系统状态监控
 app.get('/system/status', async (req, res) => {
   try {
@@ -171,9 +197,10 @@ app.use('*', (req, res) => {
 app.use(globalErrorHandler);
 
 // 启动服务器
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'production'}`);
+  console.log(`⏰ Started at: ${new Date().toISOString()}`);
   
   // 启动定时任务服务
   const SchedulerService = require('./services/scheduler-service');
@@ -182,6 +209,32 @@ app.listen(PORT, () => {
   
   // 将scheduler实例添加到app中，以便其他地方可以访问
   app.set('scheduler', scheduler);
+});
+
+// 服务器错误处理
+server.on('error', (error) => {
+  console.error('❌ Server error:', error);
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use`);
+    process.exit(1);
+  }
+});
+
+// 优雅关闭
+process.on('SIGTERM', () => {
+  console.log('🔄 SIGTERM received, shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('🔄 SIGINT received, shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
 });
 
 module.exports = app;
