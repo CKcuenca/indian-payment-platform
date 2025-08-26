@@ -39,7 +39,7 @@ async function initUnispayConfig() {
         accountId: process.env.UNISPAY_MCH_NO || 'UNISPAY001',
         apiKey: process.env.UNISPAY_API_KEY || 'uk_test_123456789',
         secretKey: process.env.UNISPAY_SECRET_KEY || 'us_test_987654321',
-        environment: process.env.UNISPAY_ENV || 'test'
+        environment: process.env.UNISPAY_ENV || 'sandbox'
       },
       limits: {
         dailyLimit: 1000000,        // 日限额：100万卢比

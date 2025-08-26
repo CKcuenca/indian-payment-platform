@@ -10,7 +10,7 @@ class UnispayProvider extends BaseProvider {
     super(config);
     this.providerName = 'unispay';
     this.baseUrl = config.environment === 'production' 
-      ? 'https://api.unispay.com' 
+      ? 'https://asia666.unispay.xyz' 
       : 'https://test-api.unispay.com';
     this.mchNo = config.accountId;
     this.apiKey = config.apiKey;
@@ -37,11 +37,16 @@ class UnispayProvider extends BaseProvider {
       }
     });
     
-    // 添加密钥
-    signStr += `key=${this.secretKey}`;
+    // 移除最后的&，然后添加密钥
+    signStr = signStr.slice(0, -1) + `&key=${this.secretKey}`;
     
-    // 生成MD5签名
-    return crypto.createHash('md5').update(signStr).digest('hex').toUpperCase();
+    // 添加调试日志
+    console.log('🔍 签名生成 - 排序后的键:', sortedKeys);
+    console.log('🔍 签名生成 - 签名字符串:', signStr);
+    console.log('🔍 签名生成 - 密钥:', this.secretKey ? '***' : 'undefined');
+    
+    // 生成SHA-256签名（16进制小写，符合UNISPAY文档要求）
+    return crypto.createHash('sha256').update(signStr).digest('hex');
   }
 
   /**
@@ -64,29 +69,33 @@ class UnispayProvider extends BaseProvider {
     try {
       const { orderId, amount, currency = 'INR', customerPhone, description, notifyUrl, returnUrl } = orderData;
       
-      // 构建请求参数
+      // 根据成功的直接API调用，使用正确的参数格式
       const requestParams = {
         mchNo: this.mchNo,
         mchOrderId: orderId,
-        payType: '9111', // 印度一类唤醒
-        amount: Math.round(amount * 100), // 转换为分
-        currency: currency,
-        subject: description || '游戏充值',
-        body: `订单${orderId}充值`,
+        payType: 9111, // 印度一类（唤醒）- 根据UNISPAY文档
+        amount: amount.toString(), // 直接使用字符串格式，不除以100
         notifyUrl: notifyUrl,
         returnUrl: returnUrl,
-        clientIp: '127.0.0.1', // 客户端IP
-        reqTime: Math.floor(Date.now() / 1000), // 请求时间戳
-        version: '1.0'
+        timestamp: Date.now() // 时间戳（毫秒）
       };
+
+      // 添加调试日志
+      console.log('🔍 UNISPAY请求参数:', JSON.stringify(requestParams, null, 2));
+      console.log('🔍 UNISPAY商户号:', this.mchNo);
+      console.log('🔍 UNISPAY密钥:', this.secretKey ? '***' : 'undefined');
 
       // 生成签名
       requestParams.sign = this.generateSignature(requestParams);
+      console.log('🔍 UNISPAY签名:', requestParams.sign);
 
       // 发送请求到UNISPAY
       const response = await this.makeRequest('/api/order/create', requestParams);
       
-      if (response.code === 0) {
+      console.log('🔍 UNISPAY响应:', JSON.stringify(response, null, 2));
+      
+      // 修复：UNISPAY返回code: 200表示成功，不是0
+      if (response.code === 200) {
         return {
           success: true,
           orderId: orderId,
@@ -131,20 +140,20 @@ class UnispayProvider extends BaseProvider {
       const requestParams = {
         mchNo: this.mchNo,
         mchOrderId: orderId,
-        reqTime: Math.floor(Date.now() / 1000),
-        version: '1.0'
+        timestamp: Date.now() // 时间戳（毫秒）
       };
 
       requestParams.sign = this.generateSignature(requestParams);
 
       const response = await this.makeRequest('/api/order/query', requestParams);
       
-      if (response.code === 0) {
+      // 修复：UNISPAY返回code: 200表示成功，不是0
+      if (response.code === 200) {
         return {
           success: true,
           orderId: orderId,
           status: this.mapUnispayStatus(response.data.state),
-          amount: response.data.amount / 100, // 转换回元
+          amount: response.data.amount, // 不除以100，直接使用
           providerOrderId: response.data.orderNo,
           paidTime: response.data.successTime,
           message: response.data.msg || '查询成功'
@@ -198,7 +207,7 @@ class UnispayProvider extends BaseProvider {
         orderId: dataWithoutSign.mchOrderId,
         providerOrderId: dataWithoutSign.orderNo,
         status: this.mapUnispayStatus(dataWithoutSign.state),
-        amount: dataWithoutSign.amount / 100,
+        amount: dataWithoutSign.amount, // 不除以100，直接使用
         paidTime: dataWithoutSign.successTime,
         currency: dataWithoutSign.currency || 'INR'
       };
@@ -245,6 +254,183 @@ class UnispayProvider extends BaseProvider {
       } else {
         throw new Error(error.message);
       }
+    }
+  }
+
+  /**
+   * 发起代付（出款）
+   * @param {Object} params 代付参数
+   * @param {string} params.orderId 订单ID
+   * @param {number} params.amount 金额（分）
+   * @param {string} params.currency 货币代码
+   * @param {Object} params.bankAccount 银行账户信息
+   * @param {string} params.customerName 客户姓名
+   * @param {Object} params.extra 额外参数
+   * @returns {Promise<Object>} 代付结果
+   */
+  async payout(params) {
+    try {
+      const { orderId, amount, currency = 'INR', bankAccount, customerName, extra = {} } = params;
+      
+      // 构建出款请求参数
+      const requestParams = {
+        mchNo: this.mchNo,
+        mchOrderId: orderId,
+        payType: 9111, // 印度一类（唤醒）
+        paymentMethod: bankAccount.bankCode || 'IMPS', // 银行代码
+        accNumber: bankAccount.accountNumber, // 账户号
+        accName: bankAccount.accountHolderName || customerName, // 账户名
+        amount: (amount / 100).toFixed(2), // 转换为卢比格式
+        ifsc: bankAccount.ifscCode, // IFSC代码
+        notifyUrl: extra.notifyUrl || `${process.env.BASE_URL || 'https://cashgit.com'}/api/webhook/unispay/withdraw`,
+        timestamp: Date.now()
+      };
+
+      // 添加调试日志
+      console.log('🔍 UNISPAY出款请求参数:', JSON.stringify(requestParams, null, 2));
+
+      // 生成签名
+      console.log('🔍 UNISPAY出款签名生成前的参数:', JSON.stringify(requestParams, null, 2));
+      requestParams.sign = this.generateSignature(requestParams);
+      console.log('🔍 UNISPAY出款签名:', requestParams.sign);
+
+      // 发送出款请求到UNISPAY
+      const response = await this.makeRequest('/api/payout/create', requestParams);
+      
+      console.log('🔍 UNISPAY出款响应:', JSON.stringify(response, null, 2));
+      
+      // UNISPAY返回code: 200表示成功
+      if (response.code === 200) {
+        return {
+          success: true,
+          data: {
+            orderId: orderId,
+            payoutId: response.data?.orderNo || response.data?.payoutId || `UNISPAY_${Date.now()}`,
+            status: 'PROCESSING',
+            amount: amount,
+            currency: currency,
+            providerOrderId: response.data?.orderNo,
+            message: '出款申请成功，等待处理'
+          }
+        };
+      } else {
+        throw new Error(response.msg || '出款申请失败');
+      }
+    } catch (error) {
+      console.error('UNISPAY出款失败:', error);
+      return {
+        success: false,
+        error: error.message,
+        code: error.response?.data?.code || 'UNISPAY_PAYOUT_ERROR'
+      };
+    }
+  }
+
+  /**
+   * 查询代付状态
+   * @param {string} orderId 订单ID
+   * @returns {Promise<Object>} 代付状态
+   */
+  async queryPayout(orderId) {
+    try {
+      const requestParams = {
+        mchNo: this.mchNo,
+        mchOrderId: orderId,
+        timestamp: Date.now()
+      };
+
+      // 生成签名
+      requestParams.sign = this.generateSignature(requestParams);
+
+      console.log('🔍 UNISPAY查询出款状态参数:', JSON.stringify(requestParams, null, 2));
+
+      // 发送查询请求到UNISPAY
+      const response = await this.makeRequest('/api/withdraw/query', requestParams);
+      
+      console.log('🔍 UNISPAY查询出款状态响应:', JSON.stringify(response, null, 2));
+      
+      // UNISPAY返回code: 200表示成功
+      if (response.code === 200) {
+        const payoutData = response.data;
+        return {
+          success: true,
+          data: {
+            orderId: orderId,
+            status: this.mapUnispayPayoutStatus(payoutData.state),
+            amount: payoutData.amount ? Math.round(parseFloat(payoutData.amount) * 100) : null, // 转换为分
+            currency: payoutData.currency || 'INR',
+            providerOrderId: payoutData.orderNo,
+            paidTime: payoutData.successTime,
+            message: payoutData.msg || '查询成功'
+          }
+        };
+      } else {
+        throw new Error(response.msg || '查询出款状态失败');
+      }
+    } catch (error) {
+      console.error('UNISPAY查询出款状态失败:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  /**
+   * 映射UNISPAY出款状态到系统状态
+   * @param {string} unispayStatus UNISPAY出款状态
+   * @returns {string} 系统状态
+   */
+  mapUnispayPayoutStatus(unispayStatus) {
+    const statusMap = {
+      '0': 'PENDING',      // 待处理
+      '1': 'PROCESSING',   // 处理中
+      '2': 'SUCCESS',      // 出款成功
+      '3': 'FAILED',       // 出款失败
+      '4': 'CANCELLED',    // 已取消
+      '5': 'REJECTED'      // 已拒绝
+    };
+    return statusMap[unispayStatus] || 'UNKNOWN';
+  }
+
+  /**
+   * 处理出款异步通知
+   * @param {Object} notificationData 通知数据
+   * @returns {Object} 处理结果
+   */
+  async handlePayoutNotification(notificationData) {
+    try {
+      const { sign, ...dataWithoutSign } = notificationData;
+      
+      // 验证签名
+      if (!this.verifySignature(notificationData, sign)) {
+        console.error('UNISPAY出款通知签名验证失败');
+        return { success: false, message: '签名验证失败' };
+      }
+
+      // 解析通知数据
+      const payoutInfo = {
+        orderId: dataWithoutSign.mchOrderId,
+        providerOrderId: dataWithoutSign.orderNo,
+        status: this.mapUnispayPayoutStatus(dataWithoutSign.state),
+        amount: dataWithoutSign.amount ? Math.round(parseFloat(dataWithoutSign.amount) * 100) : null, // 转换为分
+        paidTime: dataWithoutSign.successTime,
+        currency: dataWithoutSign.currency || 'INR',
+        message: dataWithoutSign.msg || '出款通知'
+      };
+
+      return {
+        success: true,
+        data: payoutInfo,
+        message: '出款通知处理成功'
+      };
+    } catch (error) {
+      console.error('UNISPAY出款通知处理失败:', error);
+      return {
+        success: false,
+        error: error.message,
+        message: '出款通知处理失败'
+      };
     }
   }
 }

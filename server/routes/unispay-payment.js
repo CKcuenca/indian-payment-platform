@@ -28,7 +28,6 @@ router.post('/create', mgAuthMiddleware, async (req, res) => {
     // 获取UNISPAY支付配置
     const paymentConfig = await PaymentConfig.findOne({
       'provider.name': 'unispay',
-      'merchantId': merchant._id,
       'status': 'ACTIVE'
     });
     
@@ -107,7 +106,6 @@ router.post('/query', mgAuthMiddleware, async (req, res) => {
     // 获取UNISPAY支付配置
     const paymentConfig = await PaymentConfig.findOne({
       'provider.name': 'unispay',
-      'merchantId': merchant._id,
       'status': 'ACTIVE'
     });
     
@@ -205,7 +203,6 @@ router.get('/config', mgAuthMiddleware, async (req, res) => {
     
     const paymentConfig = await PaymentConfig.findOne({
       'provider.name': 'unispay',
-      'merchantId': merchant._id,
       'status': 'ACTIVE'
     });
     

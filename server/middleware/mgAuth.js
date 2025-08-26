@@ -39,11 +39,17 @@ const mgAuthMiddleware = async (req, res, next) => {
     
     // 验证签名
     const allParams = { appid, ...otherParams };
+    console.log('🔍 签名验证调试信息:');
+    console.log('接收到的参数:', allParams);
+    console.log('商户密钥:', merchant.secretKey);
+    console.log('接收到的签名:', sign);
+    
     const isValidSignature = SignatureUtil.verifySignature(allParams, merchant.secretKey, sign);
+    console.log('签名验证结果:', isValidSignature);
     
     if (!isValidSignature) {
       return res.status(401).json({
-        code: 401,
+        code: 400,
         message: '签名验证失败',
         data: null
       });

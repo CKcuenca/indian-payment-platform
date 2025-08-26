@@ -65,12 +65,20 @@ class ConcurrencyService {
         transactionId: `TXN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         orderId: order.orderId,
         merchantId,
-        type: 'DEPOSIT',
+        type: orderData.type || 'DEPOSIT',
         amount: orderData.amount,
         fee: orderData.fee,
         currency: orderData.currency,
         status: 'PENDING',
         provider: orderData.provider,
+        // 添加必需的余额字段
+        balanceChange: orderData.type === 'WITHDRAWAL' ? -orderData.amount : orderData.amount,
+        balanceSnapshot: {
+          before: merchant.balance.available,
+          after: orderData.type === 'WITHDRAWAL' ? 
+            merchant.balance.available - orderData.amount : 
+            merchant.balance.available + orderData.amount
+        },
         createdAt: getIndianTimeISO(),
         updatedAt: getIndianTimeISO()
       });
