@@ -173,7 +173,7 @@ export default function WakeupPaymentTest() {
   };
 
   return (
-    <PermissionGuard permission={Permission.TEST_PAYMENT}>
+    <PermissionGuard permissions={[Permission.MANAGE_PAYMENT_CONFIG]}>
       <Box sx={{ p: 3 }}>
         <Typography variant="h4" gutterBottom>
           唤醒支付测试
@@ -183,9 +183,9 @@ export default function WakeupPaymentTest() {
           测试唤醒支付功能 - 玩家通过UPI转账到指定印度人的私人银行卡
         </Typography>
 
-        <Grid container spacing={3}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {/* 创建支付订单 */}
-          <Grid item xs={12} md={6}>
+          <Box sx={{ flex: 1 }}>
             <Paper sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom>
                 创建唤醒支付订单
@@ -258,10 +258,10 @@ export default function WakeupPaymentTest() {
                 {loading ? '创建中...' : '创建支付订单'}
               </Button>
             </Paper>
-          </Grid>
+          </Box>
 
           {/* 支付结果 */}
-          <Grid item xs={12} md={6}>
+          <Box sx={{ flex: 1 }}>
             <Paper sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom>
                 支付结果
@@ -414,8 +414,8 @@ export default function WakeupPaymentTest() {
                 </Box>
               )}
             </Paper>
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
 
         {/* 手动验证部分 */}
         {paymentResult && paymentResult.status === 'PENDING_VERIFICATION' && (
@@ -429,8 +429,8 @@ export default function WakeupPaymentTest() {
                 如果自动验证失败，可以手动输入UTR号码和转账信息进行验证
               </Typography>
               
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={4}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                <Box sx={{ minWidth: '200px', flex: '1 1 200px' }}>
                   <TextField
                     fullWidth
                     label="UTR号码"
@@ -439,9 +439,9 @@ export default function WakeupPaymentTest() {
                     placeholder="例如: 123456789012"
                     helperText="银行转账的唯一标识号"
                   />
-                </Grid>
+                </Box>
                 
-                <Grid item xs={12} md={4}>
+                <Box sx={{ minWidth: '200px', flex: '1 1 200px' }}>
                   <TextField
                     fullWidth
                     label="转账金额"
@@ -451,9 +451,9 @@ export default function WakeupPaymentTest() {
                     type="number"
                     helperText="实际转账金额"
                   />
-                </Grid>
+                </Box>
                 
-                <Grid item xs={12} md={4}>
+                <Box sx={{ minWidth: '200px', flex: '1 1 200px' }}>
                   <TextField
                     fullWidth
                     label="转账日期"
@@ -463,8 +463,8 @@ export default function WakeupPaymentTest() {
                     type="date"
                     helperText="转账完成日期"
                   />
-                </Grid>
-              </Grid>
+                </Box>
+              </Box>
               
               <Box sx={{ mt: 2 }}>
                 <Button
@@ -519,7 +519,7 @@ export default function WakeupPaymentTest() {
               <ListItem>
                 <ListItemIcon>
                   <CheckCircle color="primary" />
-                </ListItemText>
+                </ListItemIcon>
                 <ListItemText primary="3. 系统通过网银API查询转账状态" />
               </ListItem>
               

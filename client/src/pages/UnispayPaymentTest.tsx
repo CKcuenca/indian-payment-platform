@@ -27,9 +27,7 @@ import {
   Schedule,
   Info,
   Warning,
-  ExpandMore,
-  UpiIcon,
-  BankIcon
+  ExpandMore
 } from '@mui/icons-material';
 import { PermissionGuard } from '../components/PermissionGuard';
 import { Permission } from '../types';
@@ -182,7 +180,7 @@ const UnispayPaymentTest: React.FC = () => {
   };
 
   return (
-    <PermissionGuard permission={Permission.ADMIN}>
+    <PermissionGuard permissions={[Permission.MANAGE_USERS]}>
       <Box sx={{ p: 3 }}>
         <Typography variant="h4" gutterBottom>
           UNISPAY 唤醒支付测试
@@ -193,9 +191,9 @@ const UnispayPaymentTest: React.FC = () => {
           第三方支付公司通过网银查询转账是否完成，然后通知游戏公司支付结果。
         </Alert>
 
-        <Grid container spacing={3}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           {/* 创建订单表单 */}
-          <Grid item xs={12} md={6}>
+          <Box sx={{ flex: 1 }}>
             <Paper sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom>
                 创建唤醒支付订单
@@ -269,10 +267,10 @@ const UnispayPaymentTest: React.FC = () => {
                 </Button>
               </Box>
             </Paper>
-          </Grid>
+          </Box>
 
           {/* 支付结果展示 */}
-          <Grid item xs={12} md={6}>
+          <Box sx={{ flex: 1 }}>
             <Paper sx={{ p: 3 }}>
               <Typography variant="h6" gutterBottom>
                 支付结果
@@ -312,28 +310,28 @@ const UnispayPaymentTest: React.FC = () => {
                   </Card>
 
                   <Accordion>
-                    <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Typography variant="h6">
-                        <UpiIcon sx={{ mr: 1 }} />
-                        UPI 转账信息
-                      </Typography>
-                    </AccordionSummary>
+                                         <AccordionSummary expandIcon={<ExpandMore />}>
+                       <Typography variant="h6">
+                         <Payment sx={{ mr: 1 }} />
+                         UPI 转账信息
+                       </Typography>
+                     </AccordionSummary>
                     <AccordionDetails>
                       <List dense>
-                        <ListItem>
-                          <ListItemIcon><BankIcon /></ListItemIcon>
-                          <ListItemText 
-                            primary="收款人姓名" 
-                            secondary={paymentResult.upi_transfer_info.beneficiaryName} 
-                          />
-                        </ListItem>
-                        <ListItem>
-                          <ListItemIcon><UpiIcon /></ListItemIcon>
-                          <ListItemText 
-                            primary="UPI ID" 
-                            secondary={paymentResult.upi_transfer_info.beneficiaryUPI || 'N/A'} 
-                          />
-                        </ListItem>
+                                                 <ListItem>
+                           <ListItemIcon><AccountBalance /></ListItemIcon>
+                           <ListItemText 
+                             primary="收款人姓名" 
+                             secondary={paymentResult.upi_transfer_info.beneficiaryName} 
+                           />
+                         </ListItem>
+                                                 <ListItem>
+                           <ListItemIcon><Payment /></ListItemIcon>
+                           <ListItemText 
+                             primary="UPI ID" 
+                             secondary={paymentResult.upi_transfer_info.beneficiaryUPI || 'N/A'} 
+                           />
+                         </ListItem>
                         <ListItem>
                           <ListItemIcon><AccountBalance /></ListItemIcon>
                           <ListItemText 
@@ -348,13 +346,13 @@ const UnispayPaymentTest: React.FC = () => {
                             secondary={paymentResult.upi_transfer_info.ifscCode} 
                           />
                         </ListItem>
-                        <ListItem>
-                          <ListItemIcon><BankIcon /></ListItemIcon>
-                          <ListItemText 
-                            primary="银行名称" 
-                            secondary={paymentResult.upi_transfer_info.bankName} 
-                          />
-                        </ListItem>
+                                                 <ListItem>
+                           <ListItemIcon><AccountBalance /></ListItemIcon>
+                           <ListItemText 
+                             primary="银行名称" 
+                             secondary={paymentResult.upi_transfer_info.bankName} 
+                           />
+                         </ListItem>
                         <ListItem>
                           <ListItemIcon><Payment /></ListItemIcon>
                           <ListItemText 
@@ -392,11 +390,11 @@ const UnispayPaymentTest: React.FC = () => {
                 </Box>
               )}
             </Paper>
-          </Grid>
+          </Box>
 
           {/* 订单状态查询结果 */}
           {orderStatus && (
-            <Grid item xs={12}>
+            <Box>
               <Paper sx={{ p: 3 }}>
                 <Typography variant="h6" gutterBottom>
                   订单状态查询结果
@@ -404,17 +402,17 @@ const UnispayPaymentTest: React.FC = () => {
                 
                 <Card>
                   <CardContent>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                      <Box sx={{ minWidth: '200px', flex: '1 1 200px' }}>
                         <Typography variant="subtitle2" color="textSecondary">
                           订单ID
                         </Typography>
                         <Typography variant="body1">
                           {orderStatus.orderid}
                         </Typography>
-                      </Grid>
+                      </Box>
                       
-                      <Grid item xs={12} sm={6}>
+                      <Box sx={{ minWidth: '200px', flex: '1 1 200px' }}>
                         <Typography variant="subtitle2" color="textSecondary">
                           状态
                         </Typography>
@@ -427,53 +425,53 @@ const UnispayPaymentTest: React.FC = () => {
                             sx={{ ml: 1 }}
                           />
                         </Box>
-                      </Grid>
+                      </Box>
                       
-                      <Grid item xs={12} sm={6}>
+                      <Box sx={{ minWidth: '200px', flex: '1 1 200px' }}>
                         <Typography variant="subtitle2" color="textSecondary">
                           支付金额
                         </Typography>
                         <Typography variant="body1">
                           {orderStatus.amount} 卢比
                         </Typography>
-                      </Grid>
+                      </Box>
                       
-                      <Grid item xs={12} sm={6}>
+                      <Box sx={{ minWidth: '200px', flex: '1 1 200px' }}>
                         <Typography variant="subtitle2" color="textSecondary">
                           UNISPAY订单号
                         </Typography>
                         <Typography variant="body1">
                           {orderStatus.order_no}
                         </Typography>
-                      </Grid>
+                      </Box>
                       
                       {orderStatus.paid_time && (
-                        <Grid item xs={12} sm={6}>
+                        <Box sx={{ minWidth: '200px', flex: '1 1 200px' }}>
                           <Typography variant="subtitle2" color="textSecondary">
                             支付时间
                           </Typography>
                           <Typography variant="body1">
                             {new Date(orderStatus.paid_time * 1000).toLocaleString()}
                           </Typography>
-                        </Grid>
+                        </Box>
                       )}
                       
-                      <Grid item xs={12}>
+                      <Box sx={{ minWidth: '100%', flex: '1 1 100%' }}>
                         <Typography variant="subtitle2" color="textSecondary">
                           消息
                         </Typography>
                         <Typography variant="body1">
                           {orderStatus.message}
                         </Typography>
-                      </Grid>
-                    </Grid>
+                      </Box>
+                    </Box>
                   </CardContent>
                 </Card>
               </Paper>
-            </Grid>
+            </Box>
           )}
-        </Grid>
-      </Box>
+                  </Box>
+        </Box>
     </PermissionGuard>
   );
 };
