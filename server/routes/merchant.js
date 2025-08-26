@@ -411,8 +411,16 @@ router.get('/info', apiKeyAuth, (req, res) => {
   }
 });
 
-// 获取测试商户信息（无需认证，仅用于开发测试）
+// 获取测试商户信息（仅用于开发测试，生产环境应移除）
 router.get('/test-info', (req, res) => {
+  // 生产环境检查
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(403).json({
+      success: false,
+      error: '测试端点在生产环境中已禁用'
+    });
+  }
+  
   res.json({
     success: true,
     data: {
@@ -454,65 +462,50 @@ router.get('/transactions', (req, res) => {
     
     console.log('Received filter params:', { type, status, merchantId, providerName, startDate, endDate, transactionId, page: pageNum, limit: limitNum });
 
-    // 返回模拟交易数据，符合前端Transaction接口
-    let mockTransactions = [
-      {
-        transactionId: 'TXN001',
-        orderId: 'ORD001',
-        merchantId: 'MERCH001',
-        type: 'DEPOSIT',
-        amount: 100000, // 以分为单位
-        fee: 1000,
-        status: 'SUCCESS',
-        providerName: 'airpay',
-        customerEmail: 'customer1@example.com',
-        customerPhone: '919876543210',
-        createdAt: '2025-01-26T10:00:00Z',
-        updatedAt: '2025-01-26T10:00:00Z'
-      },
-      {
-        transactionId: 'TXN002',
-        orderId: 'ORD002',
-        merchantId: 'MERCH001',
-        type: 'WITHDRAWAL',
-        amount: 50000,
-        fee: 500,
-        status: 'PENDING',
-        providerName: 'cashfree',
-        customerEmail: 'customer2@example.com',
-        customerPhone: '919876543211',
-        createdAt: '2025-01-26T11:00:00Z',
-        updatedAt: '2025-01-26T11:00:00Z'
-      }
-    ];
-
-    // 应用筛选条件
-    if (type) {
-      mockTransactions = mockTransactions.filter(t => t.type === type);
-    }
-    if (status) {
-      mockTransactions = mockTransactions.filter(t => t.status === status);
-    }
-    if (merchantId) {
-      mockTransactions = mockTransactions.filter(t => t.merchantId === merchantId);
-    }
-    if (providerName) {
-      mockTransactions = mockTransactions.filter(t => t.providerName === providerName);
-    }
-    if (transactionId) {
-      mockTransactions = mockTransactions.filter(t => t.transactionId.includes(transactionId));
+    // 构建查询条件
+    const query = {};
+    
+    if (type) query.type = type;
+    if (status) query.status = status;
+    if (merchantId) query.merchantId = merchantId;
+    if (providerName) query.providerName = providerName;
+    if (transactionId) query.transactionId = { $regex: transactionId, $options: 'i' };
+    
+    if (startDate || endDate) {
+      query.createdAt = {};
+      if (startDate) query.createdAt.$gte = new Date(startDate);
+      if (endDate) query.createdAt.$lte = new Date(endDate);
     }
 
-    // 分页处理
-    const total = mockTransactions.length;
-    const startIndex = (pageNum - 1) * limitNum;
-    const endIndex = startIndex + limitNum;
-    const paginatedTransactions = mockTransactions.slice(startIndex, endIndex);
+    // 从数据库查询真实交易数据
+    const Transaction = require('../models/transaction');
+    const total = await Transaction.countDocuments(query);
+    const transactions = await Transaction.find(query)
+      .sort({ createdAt: -1 })
+      .skip(startIndex)
+      .limit(limitNum)
+      .lean();
+
+    // 如果没有真实数据，返回空结果
+    if (transactions.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          transactions: [],
+          pagination: {
+            page: pageNum,
+            limit: limitNum,
+            total: 0,
+            pages: 0
+          }
+        }
+      });
+    }
 
     res.json({
       success: true,
       data: {
-        transactions: paginatedTransactions,
+        transactions: transactions,
         pagination: {
           page: pageNum,
           limit: limitNum,
