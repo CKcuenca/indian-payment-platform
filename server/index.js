@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
 const { globalErrorHandler } = require('./middleware/error-handler');
 require('dotenv').config();
@@ -21,24 +20,6 @@ app.set('trust proxy', ['127.0.0.1', '::1', '10.0.0.0/8', '172.16.0.0/12', '192.
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// 限流中间件 - 更严格的配置
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15分钟
-  max: 100, // 限制每个IP 15分钟内最多100个请求
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true, // 返回标准限流头
-  legacyHeaders: false, // 不返回旧版限流头
-  skipSuccessfulRequests: false, // 成功请求也计入限流
-  skipFailedRequests: false // 失败请求也计入限流
-});
-
-// 对敏感API使用更严格的限流
-const strictLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000, // 5分钟
-  max: 20, // 限制每个IP 5分钟内最多20个请求
-  message: 'Too many requests to sensitive API, please try again later.'
-});
 
 // 先注册数据库相关路由，再连接数据库
 console.log('🔧 预注册数据库相关路由...');
@@ -103,26 +84,26 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/payment-p
 });
 
 // 基础路由（不依赖数据库）
-app.use('/api/auth', strictLimiter, require('./routes/auth'));
-app.use('/api/users', strictLimiter, require('./routes/users'));
-app.use('/api/payment', strictLimiter, require('./routes/payment'));
-app.use('/api/merchant', limiter, require('./routes/merchant')); // 恢复原来的限流
-app.use('/api/providers', limiter, require('./routes/providers'));
-app.use('/api/admin', strictLimiter, require('./routes/admin'));
-app.use('/api/payment-config', strictLimiter, require('./routes/payment-config'));
-app.use('/api', limiter, require('./routes/cashgitPayment'));
-app.use('/api/webhook', limiter, require('./routes/webhook'));
-app.use('/api/payment-status', limiter, require('./routes/payment-status'));
-app.use('/api/status-sync', limiter, require('./routes/status-sync'));
-app.use('/api/passpay', limiter, require('./routes/passpay'));
-app.use('/api/heap-optimization', limiter, require('./routes/heap-optimization'));
-app.use('/api/callback', limiter, require('./routes/passpay-callback'));
-app.use('/api/passpay-sync', limiter, require('./routes/passpay-sync'));
-app.use('/api/memory-optimization', limiter, require('./routes/memory-optimization'));
-app.use('/api/wakeup', limiter, require('./routes/wakeup-payment'));
-app.use('/api/unispay', limiter, require('./routes/unispay-payment'));
-app.use('/api/withdraw', limiter, require('./routes/withdraw'));
-app.use('/api/webhook', limiter, require('./routes/withdraw-callback'));
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/payment', require('./routes/payment'));
+app.use('/api/merchant', require('./routes/merchant')); // 无限流
+app.use('/api/providers', require('./routes/providers'));
+app.use('/api/admin', require('./routes/admin'));
+app.use('/api/payment-config', require('./routes/payment-config'));
+app.use('/api', require('./routes/cashgitPayment'));
+app.use('/api/webhook', require('./routes/webhook'));
+app.use('/api/payment-status', require('./routes/payment-status'));
+app.use('/api/status-sync', require('./routes/status-sync'));
+app.use('/api/passpay', require('./routes/passpay'));
+app.use('/api/heap-optimization', require('./routes/heap-optimization'));
+app.use('/api/callback', require('./routes/passpay-callback'));
+app.use('/api/passpay-sync', require('./routes/passpay-sync'));
+app.use('/api/memory-optimization', require('./routes/memory-optimization'));
+app.use('/api/wakeup', require('./routes/wakeup-payment'));
+app.use('/api/unispay', require('./routes/unispay-payment'));
+app.use('/api/withdraw', require('./routes/withdraw'));
+app.use('/api/webhook', require('./routes/withdraw-callback'));
 
 // 健康检查
 app.get('/health', (req, res) => {
