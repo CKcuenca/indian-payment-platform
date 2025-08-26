@@ -4,8 +4,8 @@ import { Merchant, ApiResponse, PaginationResponse, Transaction, Order } from '.
 export const merchantService = {
   // 获取商户信息
   getMerchantInfo: (): Promise<ApiResponse<Merchant>> => {
-    // 暂时使用测试端点，无需认证
-    return api.get('/api/merchant/test-info').then(response => response.data);
+    // 使用演示端点，无需认证
+    return api.get('/api/merchant/demo-info').then(response => response.data);
   },
 
   // 获取交易历史
@@ -15,7 +15,7 @@ export const merchantService = {
     type?: 'DEPOSIT' | 'WITHDRAWAL';
     status?: 'PENDING' | 'SUCCESS' | 'FAILED';
   }): Promise<ApiResponse<PaginationResponse<Transaction>>> => {
-    return api.get('/api/merchant/transactions', { params }).then(response => response.data);
+    return api.get('/api/merchant/demo-transactions', { params }).then(response => response.data);
   },
 
   // 获取订单历史
@@ -25,7 +25,7 @@ export const merchantService = {
     type?: 'DEPOSIT' | 'WITHDRAWAL';
     status?: 'PENDING' | 'PROCESSING' | 'SUCCESS' | 'FAILED' | 'CANCELLED';
   }): Promise<ApiResponse<PaginationResponse<Order>>> => {
-    return api.get('/api/merchant/orders', { params }).then(response => response.data);
+    return api.get('/api/merchant/demo-orders', { params }).then(response => response.data);
   },
 
   // 创建充值订单

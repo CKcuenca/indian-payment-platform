@@ -437,6 +437,78 @@ router.get('/test-info', (req, res) => {
   });
 });
 
+// 公开演示端点 - 用于前端展示（生产环境安全）
+router.get('/demo-info', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      merchantId: 'DEMO001',
+      name: '演示商户',
+      email: 'demo@example.com',
+      status: 'ACTIVE',
+      balance: 0,
+      paymentConfig: {
+        providers: ['mock', 'passpay', 'unispay'],
+        defaultProvider: 'mock'
+      }
+    }
+  });
+});
+
+// 公开演示交易历史端点 - 用于前端展示（生产环境安全）
+router.get('/demo-transactions', (req, res) => {
+  try {
+    const { page = 1, limit = 10, type, status } = req.query;
+    
+    // 返回空的演示数据
+    res.json({
+      success: true,
+      data: {
+        transactions: [],
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: 0,
+          pages: 0
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Demo transactions error:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取演示交易历史失败'
+    });
+  }
+});
+
+// 公开演示订单历史端点 - 用于前端展示（生产环境安全）
+router.get('/demo-orders', (req, res) => {
+  try {
+    const { page = 1, limit = 10, type, status } = req.query;
+    
+    // 返回空的演示数据
+    res.json({
+      success: true,
+      data: {
+        orders: [],
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: 0,
+          pages: 0
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Demo orders error:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取演示订单历史失败'
+    });
+  }
+});
+
 // 获取交易历史
 router.get('/transactions', async (req, res) => {
   try {
