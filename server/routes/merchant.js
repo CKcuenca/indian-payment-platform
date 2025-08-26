@@ -438,7 +438,7 @@ router.get('/test-info', (req, res) => {
 });
 
 // 获取交易历史
-router.get('/transactions', (req, res) => {
+router.get('/transactions', async (req, res) => {
   try {
     // 获取筛选参数
     const { type, status, merchantId, providerName, startDate, endDate, transactionId, page = 1, limit = 10 } = req.query;
@@ -477,6 +477,9 @@ router.get('/transactions', (req, res) => {
       if (endDate) query.createdAt.$lte = new Date(endDate);
     }
 
+    // 计算分页参数
+    const startIndex = (pageNum - 1) * limitNum;
+    
     // 从数据库查询真实交易数据
     const Transaction = require('../models/transaction');
     const total = await Transaction.countDocuments(query);
