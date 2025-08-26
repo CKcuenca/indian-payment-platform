@@ -1,5 +1,7 @@
 const AirPayProvider = require('./payment-providers/airpay-provider');
 const MockProvider = require('./payment-providers/mock-provider');
+const WakeupProvider = require('./payment-providers/wakeup-provider');
+const UnispayProvider = require('./payment-providers/unispay-provider');
 
 /**
  * 支付服务管理器

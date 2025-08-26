@@ -22,7 +22,7 @@ const transactionSchema = new mongoose.Schema({
   // 交易类型
   type: {
     type: String,
-    enum: ['DEPOSIT', 'WITHDRAWAL', 'REFUND', 'ADJUSTMENT'],
+    enum: ['DEPOSIT', 'WITHDRAWAL', 'REFUND', 'ADJUSTMENT', 'WAKE_UP'],
     required: true
   },
   

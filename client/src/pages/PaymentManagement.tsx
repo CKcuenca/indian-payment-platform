@@ -81,6 +81,50 @@ const mockPaymentAccounts = [
   {
     _id: '2',
     accountName: 'Cashfree备用账户',
+  },
+  {
+    _id: '3',
+    accountName: '唤醒支付账户',
+    provider: {
+      name: 'wakeup',
+      accountId: 'WAKEUP001',
+      apiKey: 'wk_test_123456789',
+      secretKey: 'ws_test_987654321',
+      environment: 'production'
+    },
+  },
+  {
+    _id: '4',
+    accountName: 'UNISPAY唤醒支付账户',
+    provider: {
+      name: 'unispay',
+      accountId: 'UNISPAY001',
+      apiKey: 'uk_test_123456789',
+      secretKey: 'us_test_987654321',
+      environment: 'production'
+    },
+    limits: {
+      dailyLimit: 1000000,
+      monthlyLimit: 10000000,
+      singleTransactionLimit: 100000,
+      minTransactionAmount: 100
+    },
+    usage: {
+      dailyUsed: 500000,
+      monthlyUsed: 5000000,
+      lastResetDate: new Date().toISOString()
+    },
+    status: 'ACTIVE',
+    priority: 3,
+    fees: {
+      transactionFee: 0.3,
+      fixedFee: 0
+    },
+    collectionWebhookSuffix: 'wakeup',
+    payoutWebhookSuffix: 'wakeup',
+    description: '唤醒支付 - UPI转账到私人银行卡',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
     provider: {
       name: 'cashfree',
       accountId: 'CASHFREE001',

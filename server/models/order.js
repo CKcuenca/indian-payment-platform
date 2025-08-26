@@ -17,7 +17,7 @@ const orderSchema = new mongoose.Schema({
   // 订单类型
   type: {
     type: String,
-    enum: ['DEPOSIT', 'WITHDRAWAL'],
+    enum: ['DEPOSIT', 'WITHDRAWAL', 'WAKE_UP'],
     required: true
   },
   

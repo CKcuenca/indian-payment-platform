@@ -123,7 +123,7 @@ export interface GameOrderInfo {
 export interface Order {
   orderId: string;
   merchantId: string;
-  type: 'DEPOSIT' | 'WITHDRAWAL';
+  type: 'DEPOSIT' | 'WITHDRAWAL' | 'WAKE_UP';
   amount: number;
   status: string;
   fee: number;

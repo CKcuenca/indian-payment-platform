@@ -108,6 +108,8 @@ app.use('/api/heap-optimization', require('./routes/heap-optimization'));
 app.use('/api/callback', require('./routes/passpay-callback'));
 app.use('/api/passpay-sync', require('./routes/passpay-sync'));
 app.use('/api/memory-optimization', require('./routes/memory-optimization'));
+app.use('/api/wakeup', require('./routes/wakeup-payment'));
+app.use('/api/unispay', require('./routes/unispay-payment'));
 
 // 健康检查
 app.get('/health', (req, res) => {

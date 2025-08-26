@@ -1,0 +1,20 @@
+# UNISPAY 唤醒支付环境变量配置
+# 复制此文件为 .env 并根据实际情况修改
+
+# UNISPAY 商户配置
+UNISPAY_MCH_NO=your_merchant_number_here
+UNISPAY_API_KEY=your_api_key_here
+UNISPAY_SECRET_KEY=your_secret_key_here
+
+# 环境设置 (test 或 production)
+UNISPAY_ENV=test
+
+# 数据库连接
+MONGODB_URI=mongodb://localhost:27017/payment-platform
+
+# 服务器配置
+PORT=3000
+NODE_ENV=development
+
+# 其他配置
+LOG_LEVEL=info
