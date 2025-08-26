@@ -40,9 +40,16 @@ const strictLimiter = rateLimit({
   message: 'Too many requests to sensitive API, please try again later.'
 });
 
-app.use('/api', limiter);
-app.use('/api/auth', strictLimiter); // 认证API使用更严格的限流
-app.use('/api/payment', strictLimiter); // 支付API使用更严格的限流
+// 对演示端点使用更宽松的限流
+const demoLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15分钟
+  max: 1000, // 限制每个IP 15分钟内最多1000个请求
+  message: 'Too many requests to demo endpoints, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: false,
+  skipFailedRequests: false
+});
 
 // 先注册数据库相关路由，再连接数据库
 console.log('🔧 预注册数据库相关路由...');
@@ -107,26 +114,26 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/payment-p
 });
 
 // 基础路由（不依赖数据库）
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/payment', require('./routes/payment'));
-app.use('/api/merchant', require('./routes/merchant'));
-app.use('/api/providers', require('./routes/providers'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/payment-config', require('./routes/payment-config'));
-app.use('/api', require('./routes/cashgitPayment'));
-app.use('/api/webhook', require('./routes/webhook'));
-app.use('/api/payment-status', require('./routes/payment-status'));
-app.use('/api/status-sync', require('./routes/status-sync'));
-app.use('/api/passpay', require('./routes/passpay'));
-app.use('/api/heap-optimization', require('./routes/heap-optimization'));
-app.use('/api/callback', require('./routes/passpay-callback'));
-app.use('/api/passpay-sync', require('./routes/passpay-sync'));
-app.use('/api/memory-optimization', require('./routes/memory-optimization'));
-app.use('/api/wakeup', require('./routes/wakeup-payment'));
-app.use('/api/unispay', require('./routes/unispay-payment'));
-app.use('/api/withdraw', require('./routes/withdraw'));
-app.use('/api/webhook', require('./routes/withdraw-callback'));
+app.use('/api/auth', strictLimiter, require('./routes/auth'));
+app.use('/api/users', strictLimiter, require('./routes/users'));
+app.use('/api/payment', strictLimiter, require('./routes/payment'));
+app.use('/api/merchant', demoLimiter, require('./routes/merchant')); // 使用更宽松的限流
+app.use('/api/providers', limiter, require('./routes/providers'));
+app.use('/api/admin', strictLimiter, require('./routes/admin'));
+app.use('/api/payment-config', strictLimiter, require('./routes/payment-config'));
+app.use('/api', limiter, require('./routes/cashgitPayment'));
+app.use('/api/webhook', limiter, require('./routes/webhook'));
+app.use('/api/payment-status', limiter, require('./routes/payment-status'));
+app.use('/api/status-sync', limiter, require('./routes/status-sync'));
+app.use('/api/passpay', limiter, require('./routes/passpay'));
+app.use('/api/heap-optimization', limiter, require('./routes/heap-optimization'));
+app.use('/api/callback', limiter, require('./routes/passpay-callback'));
+app.use('/api/passpay-sync', limiter, require('./routes/passpay-sync'));
+app.use('/api/memory-optimization', limiter, require('./routes/memory-optimization'));
+app.use('/api/wakeup', limiter, require('./routes/wakeup-payment'));
+app.use('/api/unispay', limiter, require('./routes/unispay-payment'));
+app.use('/api/withdraw', limiter, require('./routes/withdraw'));
+app.use('/api/webhook', limiter, require('./routes/withdraw-callback'));
 
 // 健康检查
 app.get('/health', (req, res) => {
