@@ -439,8 +439,14 @@ router.get('/test-info', (req, res) => {
 
 // 公开演示端点 - 用于前端展示（生产环境安全）
 // 注意：这些端点不需要任何认证，应该可以公开访问
+// 重要：这些端点必须放在其他需要认证的路由之前
 router.get('/demo-info', (req, res) => {
   console.log('Demo info endpoint accessed - no auth required');
+  // 确保设置正确的响应头
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
   res.json({
     success: true,
     data: {
@@ -461,6 +467,11 @@ router.get('/demo-info', (req, res) => {
 // 注意：这些端点不需要任何认证，应该可以公开访问
 router.get('/demo-transactions', (req, res) => {
   console.log('Demo transactions endpoint accessed - no auth required');
+  // 确保设置正确的响应头
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
   try {
     const { page = 1, limit = 10, type, status } = req.query;
     
@@ -490,6 +501,11 @@ router.get('/demo-transactions', (req, res) => {
 // 注意：这些端点不需要任何认证，应该可以公开访问
 router.get('/demo-orders', (req, res) => {
   console.log('Demo orders endpoint accessed - no auth required');
+  // 确保设置正确的响应头
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
   try {
     const { page = 1, limit = 10, type, status } = req.query;
     
