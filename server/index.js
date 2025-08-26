@@ -84,6 +84,77 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/payment-p
 });
 
 // 基础路由（不依赖数据库）
+// 演示端点 - 放在最前面，确保不被任何认证中间件拦截
+app.get('/api/demo/merchant-info', (req, res) => {
+  console.log('Demo merchant info endpoint accessed - no auth required');
+  res.json({
+    success: true,
+    data: {
+      merchantId: 'DEMO001',
+      name: '演示商户',
+      email: 'demo@example.com',
+      status: 'ACTIVE',
+      balance: 0,
+      paymentConfig: {
+        providers: ['mock', 'passpay', 'unispay'],
+        defaultProvider: 'mock'
+      }
+    }
+  });
+});
+
+app.get('/api/demo/transactions', (req, res) => {
+  console.log('Demo transactions endpoint accessed - no auth required');
+  try {
+    const { page = 1, limit = 10, type, status } = req.query;
+    
+    res.json({
+      success: true,
+      data: {
+        transactions: [],
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: 0,
+          pages: 0
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Demo transactions error:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取演示交易历史失败'
+    });
+  }
+});
+
+app.get('/api/demo/orders', (req, res) => {
+  console.log('Demo orders endpoint accessed - no auth required');
+  try {
+    const { page = 1, limit = 10, type, status } = req.query;
+    
+    res.json({
+      success: true,
+      data: {
+        orders: [],
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: 0,
+          pages: 0
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Demo orders error:', error);
+    res.status(500).json({
+      success: false,
+      error: '获取演示订单历史失败'
+    });
+  }
+});
+
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/payment', require('./routes/payment'));
