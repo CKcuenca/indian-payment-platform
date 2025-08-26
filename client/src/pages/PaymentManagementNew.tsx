@@ -10,22 +10,12 @@ import {
   TableHead,
   TableRow,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Chip,
   IconButton,
   Alert,
   CircularProgress,
   Card,
-  CardContent,
-  Grid,
-  Divider
+  CardContent
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -36,9 +26,7 @@ import {
   AccountBalanceWallet
 } from '@mui/icons-material';
 import { 
-  PaymentProviderType,
-  PaymentProviderCategory,
-  PaymentProvider 
+  PaymentProviderCategory
 } from '../types';
 import { paymentProviderService } from '../services/paymentProviderService';
 
@@ -99,7 +87,7 @@ export default function PaymentManagementNew() {
   };
 
   const getProviderColor = (providerName: string) => {
-    const colors: {[key: string]: string} = {
+    const colors: {[key: string]: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'default'} = {
       'airpay': 'primary',
       'cashfree': 'secondary',
       'razorpay': 'success',
@@ -179,36 +167,37 @@ export default function PaymentManagementNew() {
             <CircularProgress />
           </Box>
         ) : (
-          <Grid container spacing={3}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
             {categories.map((category) => (
-            <Grid item xs={12} md={6} key={category.id}>
-              <Card sx={{ height: '100%' }}>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    {getTypeIcon(category.type)}
-                    <Typography variant="h6" sx={{ ml: 1 }}>
-                      {category.name}
+              <Box key={category.id} sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      {getTypeIcon(category.type)}
+                      <Typography variant="h6" sx={{ ml: 1 }}>
+                        {category.name}
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      {category.description}
                     </Typography>
-                  </Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    {category.description}
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {category.providers.map((provider) => (
-                      <Chip
-                        key={provider.id}
-                        label={provider.displayName}
-                        size="small"
-                        color={getProviderColor(provider.name)}
-                        variant="outlined"
-                      />
-                    ))}
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                      {category.providers.map((provider) => (
+                        <Chip
+                          key={provider.id}
+                          label={provider.displayName}
+                          size="small"
+                          color={getProviderColor(provider.name)}
+                          variant="outlined"
+                        />
+                      ))}
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Box>
+            ))}
+          </Box>
+        )}
       </Box>
 
       {/* 支付账户列表 */}

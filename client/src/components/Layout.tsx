@@ -24,7 +24,6 @@ import {
   Dashboard,
   AccountBalance,
   Business,
-
   Api,
   Person,
   TrendingUp,
@@ -65,12 +64,6 @@ const menuItems = [
     text: '支付管理',
     icon: <CreditCard />,
     path: '/payment-management',
-    permissions: [Permission.VIEW_PAYMENT_CONFIG]
-  },
-  {
-    text: '支付管理(新)',
-    icon: <Payment />,
-    path: '/payment-management-new',
     permissions: [Permission.VIEW_PAYMENT_CONFIG]
   },
   {
