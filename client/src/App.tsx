@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import Merchants from './pages/Merchants';
 import PaymentManagement from './pages/PaymentManagement';
+import PaymentManagementNew from './pages/PaymentManagementNew';
 import Users from './pages/Users';
 
 import CashGitPaymentTest from './pages/CashGitPaymentTest';
@@ -144,6 +145,17 @@ function App() {
               <ProtectedRoute permissions={[Permission.VIEW_PAYMENT_CONFIG]}>
                 <Layout>
                   <PaymentManagement />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/payment-management-new"
+            element={
+              <ProtectedRoute permissions={[Permission.VIEW_PAYMENT_CONFIG]}>
+                <Layout>
+                  <PaymentManagementNew />
                 </Layout>
               </ProtectedRoute>
             }

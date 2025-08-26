@@ -68,6 +68,12 @@ const menuItems = [
     permissions: [Permission.VIEW_PAYMENT_CONFIG]
   },
   {
+    text: '支付管理(新)',
+    icon: <Payment />,
+    path: '/payment-management-new',
+    permissions: [Permission.VIEW_PAYMENT_CONFIG]
+  },
+  {
     text: '支付统计',
     icon: <TrendingUp />,
     path: '/payment-data',

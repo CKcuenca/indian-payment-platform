@@ -41,6 +41,52 @@ export interface RolePermissions {
   [UserRole.MERCHANT]: Permission[];
 }
 
+// 支付商类型枚举
+export enum PaymentProviderType {
+  NATIVE = 'native',      // 原生支付商
+  WAKEUP = 'wakeup'       // 唤醒支付商
+}
+
+// 支付商分类接口
+export interface PaymentProviderCategory {
+  id: string;
+  name: string;
+  type: PaymentProviderType;
+  description: string;
+  providers: PaymentProvider[];
+}
+
+// 支付商接口
+export interface PaymentProvider {
+  id: string;
+  name: string;
+  displayName: string;
+  type: PaymentProviderType;
+  category: string;
+  isActive: boolean;
+  features: string[];
+  supportedCurrencies: string[];
+  environment: 'sandbox' | 'production';
+  config: {
+    apiKey: string;
+    secretKey: string;
+    accountId?: string;
+    webhookUrl?: string;
+  };
+  limits: {
+    minAmount: number;
+    maxAmount: number;
+    dailyLimit: number;
+    monthlyLimit: number;
+  };
+  fees: {
+    transactionFee: number;
+    fixedFee: number;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
 // 三方支付配置接口
 export interface PaymentProviderConfig {
   id: string;

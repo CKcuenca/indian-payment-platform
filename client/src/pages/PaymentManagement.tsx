@@ -26,7 +26,12 @@ import {
   CircularProgress,
   LinearProgress,
   Card,
-  CardContent
+  CardContent,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Grid,
+  Divider
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -37,11 +42,21 @@ import {
   AccountBalance,
   Speed,
   TrendingUp,
-  Error
+  Error,
+  ExpandMore as ExpandMoreIcon,
+  Payment,
+  Smartphone,
+  AccountBalanceWallet
 } from '@mui/icons-material';
 import { PermissionGuard } from '../components/PermissionGuard';
 import { SensitiveDataGuard } from '../components/PermissionGuard';
 import { Permission } from '../types';
+import { 
+  PAYMENT_PROVIDER_CATEGORIES, 
+  PaymentProviderType,
+  PaymentProviderCategory,
+  PaymentProvider 
+} from '../config/paymentProviders';
 
 // 支付账户数据（初始为空）
 const mockPaymentAccounts: any[] = [];
@@ -100,19 +115,19 @@ export default function PaymentManagement() {
     setDialogOpen(true);
   };
 
-  const handleEditAccount = (account: any) => {
+  const handleEdit = (account: any) => {
     setEditingAccount(account);
     setFormData({
       accountName: account.accountName,
       providerName: account.provider.name,
-      type: account.type || 'native',
+      type: account.provider.type || 'native',
       accountId: account.provider.accountId,
       apiKey: account.provider.apiKey,
       secretKey: account.provider.secretKey,
       environment: account.provider.environment,
       collectionWebhookSuffix: account.collectionWebhookSuffix || '',
       payoutWebhookSuffix: account.payoutWebhookSuffix || '',
-      description: account.description,
+      description: account.description || '',
       dailyLimit: account.limits.dailyLimit,
       monthlyLimit: account.limits.monthlyLimit,
       singleTransactionLimit: account.limits.singleTransactionLimit,
@@ -125,23 +140,6 @@ export default function PaymentManagement() {
     setDialogOpen(true);
   };
 
-  // 当支付商改变时，自动设置对应的类型
-  useEffect(() => {
-    if (formData.providerName) {
-      const isWakeupProvider = ['wakeup', 'unispay'].includes(formData.providerName);
-      setFormData(prev => ({
-        ...prev,
-        type: isWakeupProvider ? 'wakeup' : 'native'
-      }));
-    }
-  }, [formData.providerName]);
-
-  const handleDeleteAccount = async (id: string) => {
-    if (window.confirm('确定要删除这个支付账户吗？')) {
-      setAccounts(prev => prev.filter(account => account._id !== id));
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -149,14 +147,17 @@ export default function PaymentManagement() {
     try {
       const accountData = {
         accountName: formData.accountName,
-        type: formData.type,
         provider: {
           name: formData.providerName,
+          type: formData.type,
           accountId: formData.accountId,
           apiKey: formData.apiKey,
           secretKey: formData.secretKey,
           environment: formData.environment
         },
+        collectionWebhookSuffix: formData.collectionWebhookSuffix,
+        payoutWebhookSuffix: formData.payoutWebhookSuffix,
+        description: formData.description,
         limits: {
           dailyLimit: formData.dailyLimit,
           monthlyLimit: formData.monthlyLimit,
@@ -167,9 +168,6 @@ export default function PaymentManagement() {
           transactionFee: formData.transactionFee,
           fixedFee: formData.fixedFee
         },
-        collectionWebhookSuffix: formData.collectionWebhookSuffix,
-        payoutWebhookSuffix: formData.payoutWebhookSuffix,
-        description: formData.description,
         priority: formData.priority,
         status: formData.status,
         usage: {
@@ -218,7 +216,6 @@ export default function PaymentManagement() {
       'paytm': 'warning',
       'phonepe': 'info',
       'passpay': 'error',
-      'wakeup': 'info',
       'unispay': 'info'
     };
     return colors[providerName.toLowerCase()] || 'default';
@@ -232,48 +229,40 @@ export default function PaymentManagement() {
     return labels[type] || type;
   };
 
-  const getTypeColor = (type: string) => {
-    const colors: {[key: string]: string} = {
-      'native': 'primary',
-      'wakeup': 'secondary'
-    };
-    return colors[type] || 'default';
+  const getTypeIcon = (type: string) => {
+    if (type === 'wakeup') {
+      return <Smartphone color="primary" />;
+    }
+    return <AccountBalanceWallet color="secondary" />;
   };
 
-  const getStatusColor = (status: string) => {
-    const colors: {[key: string]: string} = {
-      'ACTIVE': 'success',
-      'INACTIVE': 'error',
-      'SUSPENDED': 'warning'
-    };
-    return colors[status] || 'default';
+  const getTypeDescription = (type: string) => {
+    if (type === 'wakeup') {
+      return '通过唤醒用户设备完成支付的创新支付方式';
+    }
+    return '直接与银行和支付网络集成的支付服务商';
   };
 
-  const getRemainingLimit = (account: any, type: 'daily' | 'monthly') => {
-    const limit = type === 'daily' ? account.limits.dailyLimit : account.limits.monthlyLimit;
-    const used = type === 'daily' ? account.usage.dailyUsed : account.usage.monthlyUsed;
-    return Math.max(0, limit - used);
-  };
-
-  const getUsagePercentage = (account: any, type: 'daily' | 'monthly') => {
-    const limit = type === 'daily' ? account.limits.dailyLimit : account.limits.monthlyLimit;
-    const used = type === 'daily' ? account.usage.dailyUsed : account.usage.monthlyUsed;
-    return (used / limit) * 100;
+  // 根据类型过滤支付商
+  const getProvidersByType = (type: string) => {
+    return PAYMENT_PROVIDER_CATEGORIES.find(cat => cat.id === type)?.providers || [];
   };
 
   return (
     <Box sx={{ p: 0 }}>
-      <Typography 
-        variant="h4" 
-        gutterBottom
-        sx={{ 
-          color: 'primary.main',
-          fontWeight: 'bold',
-          mb: 1
-        }}
-      >
-        支付账户管理
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" color="primary" fontWeight="bold">
+          支付管理
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleAddAccount}
+          sx={{ borderRadius: 2 }}
+        >
+          添加支付账户
+        </Button>
+      </Box>
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -281,494 +270,391 @@ export default function PaymentManagement() {
         </Alert>
       )}
 
-      {/* 统计卡片 */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(6, 1fr)' }, gap: 3, mb: 3 }}>
-        <Card>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box>
-                <Typography color="textSecondary" gutterBottom>
-                  总账户数
-                </Typography>
-                <Typography variant="h4">
-                  {accounts.length}
-                </Typography>
-              </Box>
-              <AccountBalance color="primary" sx={{ fontSize: 40 }} />
-            </Box>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box>
-                <Typography color="textSecondary" gutterBottom>
-                  活跃账户
-                </Typography>
-                <Typography variant="h4">
-                  {accounts.filter(a => a.status === 'ACTIVE').length}
-                </Typography>
-              </Box>
-              <TrendingUp color="success" sx={{ fontSize: 40 }} />
-            </Box>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box>
-                <Typography color="textSecondary" gutterBottom>
-                  今日交易量
-                </Typography>
-                <Typography variant="h4">
-                  ₹{(accounts.reduce((sum, a) => sum + a.usage.dailyUsed, 0) / 100).toLocaleString()}
-                </Typography>
-              </Box>
-              <Speed color="info" sx={{ fontSize: 40 }} />
-            </Box>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box>
-                <Typography color="textSecondary" gutterBottom>
-                  平均费率
-                </Typography>
-                <Typography variant="h4">
-                  {(accounts.reduce((sum, a) => sum + a.fees.transactionFee, 0) / accounts.length).toFixed(2)}%
-                </Typography>
-              </Box>
-              <Error color="warning" sx={{ fontSize: 40 }} />
-            </Box>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box>
-                <Typography color="textSecondary" gutterBottom>
-                  原生支付
-                </Typography>
-                <Typography variant="h4">
-                  {accounts.filter(a => a.type === 'native').length}
-                </Typography>
-              </Box>
-              <AccountBalance color="primary" sx={{ fontSize: 40 }} />
-            </Box>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box>
-                <Typography color="textSecondary" gutterBottom>
-                  唤醒支付
-                </Typography>
-                <Typography variant="h4">
-                  {accounts.filter(a => a.type === 'wakeup').length}
-                </Typography>
-              </Box>
-              <Speed color="secondary" sx={{ fontSize: 40 }} />
-            </Box>
-          </CardContent>
-        </Card>
-      </Box>
-
-      {/* 操作按钮 */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h6">支付账户列表</Typography>
-        <PermissionGuard permissions={[Permission.MANAGE_PAYMENT_CONFIG]}>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAddAccount}
-          >
-            添加支付账户
-          </Button>
-        </PermissionGuard>
-      </Box>
-
-      {/* 账户列表 */}
-      <TableContainer component={Paper} sx={{ borderRadius: 2, overflow: 'hidden' }}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: 'grey.100' }}>
-              <TableCell sx={{ fontWeight: 'bold' }}>账户名称</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>支付商</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>类型</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>账户ID</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>API Key</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>限额使用</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>费率</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>状态</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>优先级</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>操作</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {accounts.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
-                  <Typography variant="body1" color="text.secondary">
-                    暂无支付账户
+      {/* 支付商分类概览 */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
+          支付商分类概览
+        </Typography>
+        <Grid container spacing={3}>
+          {PAYMENT_PROVIDER_CATEGORIES.map((category) => (
+            <Grid item xs={12} md={6} key={category.id}>
+              <Card sx={{ height: '100%' }}>
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    {getTypeIcon(category.type)}
+                    <Typography variant="h6" sx={{ ml: 1 }}>
+                      {category.name}
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    {category.description}
                   </Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              accounts.map((account) => (
-                <TableRow key={account._id} hover>
-                  <TableCell>
-                    <Box>
-                      <Typography variant="body1" fontWeight="medium">
-                        {account.accountName}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {account.description}
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={account.provider.name.toUpperCase()}
-                      color={getProviderColor(account.provider.name) as any}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={getTypeLabel(account.type)}
-                      color={getTypeColor(account.type) as any}
-                      size="small"
-                      variant="outlined"
-                    />
-                  </TableCell>
-                  <TableCell>{account.provider.accountId}</TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <SensitiveDataGuard showSensitiveData={showSecrets[account._id]}>
-                        {showSecrets[account._id] ? account.provider.apiKey : '••••••••••••••••'}
-                      </SensitiveDataGuard>
-                      <IconButton
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {category.providers.map((provider) => (
+                      <Chip
+                        key={provider.id}
+                        label={provider.displayName}
                         size="small"
-                        onClick={() => toggleSecretVisibility(account._id)}
-                      >
-                        {showSecrets[account._id] ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                      </IconButton>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ minWidth: 120 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                        <Typography variant="body2">日限额</Typography>
+                        color={getProviderColor(provider.name)}
+                        variant="outlined"
+                      />
+                    ))}
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+
+      {/* 支付账户列表 */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
+          支付账户管理
+        </Typography>
+        
+        {accounts.length === 0 ? (
+          <Paper sx={{ p: 4, textAlign: 'center' }}>
+            <AccountBalance sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              暂无支付账户
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              点击上方"添加支付账户"按钮开始配置
+            </Typography>
+          </Paper>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>账户名称</TableCell>
+                  <TableCell>支付商</TableCell>
+                  <TableCell>类型</TableCell>
+                  <TableCell>环境</TableCell>
+                  <TableCell>状态</TableCell>
+                  <TableCell>优先级</TableCell>
+                  <TableCell>操作</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {accounts.map((account) => (
+                  <TableRow key={account._id}>
+                    <TableCell>{account.accountName}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={account.provider.name}
+                        color={getProviderColor(account.provider.name)}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {getTypeIcon(account.provider.type)}
                         <Typography variant="body2">
-                          {getUsagePercentage(account, 'daily').toFixed(1)}%
+                          {getTypeLabel(account.provider.type)}
                         </Typography>
                       </Box>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={getUsagePercentage(account, 'daily')}
-                        color={getUsagePercentage(account, 'daily') > 80 ? 'error' : 'primary'}
-                        sx={{ height: 6, borderRadius: 3 }}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={account.provider.environment}
+                        color={account.provider.environment === 'production' ? 'success' : 'warning'}
+                        size="small"
                       />
-                      <Typography variant="caption" color="text.secondary">
-                        ₹{(getRemainingLimit(account, 'daily') / 100).toLocaleString()} 剩余
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {account.fees.transactionFee}% + ₹{account.fees.fixedFee}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip 
-                      label={account.status} 
-                      size="small" 
-                      color={getStatusColor(account.status) as any}
-                    />
-                  </TableCell>
-                  <TableCell>{account.priority}</TableCell>
-                  <TableCell>
-                    <IconButton onClick={() => handleEditAccount(account)} size="small">
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton onClick={() => handleDeleteAccount(account._id)} size="small" color="error">
-                      <DeleteIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={account.status}
+                        color={account.status === 'ACTIVE' ? 'success' : 'default'}
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>{account.priority}</TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <IconButton size="small" onClick={() => handleEdit(account)}>
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton size="small">
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </Box>
 
       {/* 添加/编辑账户对话框 */}
-      <Dialog 
-        open={dialogOpen} 
-        onClose={() => setDialogOpen(false)} 
-        maxWidth="lg" 
-        fullWidth
-        PaperProps={{
-          sx: {
-            display: 'flex',
-            flexDirection: 'column',
-            maxHeight: '90vh',
-            overflow: 'hidden'
-          }
-        }}
-      >
-        <DialogTitle sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          borderBottom: 1,
-          borderColor: 'divider',
-          pb: 2,
-          flexShrink: 0,
-          backgroundColor: 'background.paper',
-          position: 'sticky',
-          top: 0,
-          zIndex: 1
-        }}>
-          <Typography variant="h6" component="div">
-            {editingAccount ? '编辑支付账户' : '添加支付账户'}
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button 
-              onClick={() => setDialogOpen(false)}
-              variant="outlined"
-              size="small"
-            >
-              取消
-            </Button>
-            <Button 
-              type="submit" 
-              variant="contained" 
-              disabled={loading}
-              size="small"
-              form="payment-account-form"
-              startIcon={loading ? <CircularProgress size={16} /> : null}
-            >
-              {loading ? '保存中...' : '保存'}
-            </Button>
-          </Box>
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>
+          {editingAccount ? '编辑支付账户' : '添加支付账户'}
         </DialogTitle>
-        <form id="payment-account-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-          <DialogContent sx={{ flex: 1, overflow: 'auto', p: 3 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+        <DialogContent>
+          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+            <Grid container spacing={3}>
               {/* 基本信息 */}
-              <Box>
-                <Typography variant="h6" gutterBottom>基本信息</Typography>
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' }, gap: 2 }}>
-                  <TextField
-                    fullWidth
-                    label="账户名称"
-                    value={formData.accountName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, accountName: e.target.value }))}
-                    required
-                  />
-                  <FormControl fullWidth required>
-                    <InputLabel>支付商</InputLabel>
-                    <Select
-                      value={formData.providerName}
-                      label="支付商"
-                      onChange={(e) => setFormData(prev => ({ ...prev, providerName: e.target.value }))}
-                    >
-                      <MenuItem value="airpay">AirPay</MenuItem>
-                      <MenuItem value="cashfree">Cashfree</MenuItem>
-                      <MenuItem value="razorpay">Razorpay</MenuItem>
-                      <MenuItem value="paytm">Paytm</MenuItem>
-                      <MenuItem value="phonepe">PhonePe</MenuItem>
-                      <MenuItem value="passpay">PassPay</MenuItem>
-                      <MenuItem value="wakeup">唤醒支付</MenuItem>
-                      <MenuItem value="unispay">UNISPAY</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <FormControl fullWidth required>
-                    <InputLabel>支付类型</InputLabel>
-                    <Select
-                      value={formData.type || 'native'}
-                      label="支付类型"
-                      onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
-                    >
-                      <MenuItem value="native">原生支付</MenuItem>
-                      <MenuItem value="wakeup">唤醒支付</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <TextField
-                    fullWidth
-                    label="账户ID"
-                    value={formData.accountId}
-                    onChange={(e) => setFormData(prev => ({ ...prev, accountId: e.target.value }))}
-                    required
-                  />
-                  <FormControl fullWidth required>
-                    <InputLabel>环境</InputLabel>
-                    <Select
-                      value={formData.environment}
-                      label="环境"
-                      onChange={(e) => setFormData(prev => ({ ...prev, environment: e.target.value }))}
-                    >
-                      <MenuItem value="sandbox">沙盒环境</MenuItem>
-                      <MenuItem value="production">生产环境</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <TextField
-                    fullWidth
-                    label="API Key"
-                    value={formData.apiKey}
-                    onChange={(e) => setFormData(prev => ({ ...prev, apiKey: e.target.value }))}
-                    required
-                  />
-                  <TextField
-                    fullWidth
-                    label="Secret Key"
-                    type="password"
-                    value={formData.secretKey}
-                    onChange={(e) => setFormData(prev => ({ ...prev, secretKey: e.target.value }))}
-                    required
-                  />
-                </Box>
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle2" gutterBottom sx={{ color: 'text.secondary' }}>
-                    回调地址配置
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    label="支付商标识"
-                    value={formData.collectionWebhookSuffix}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      collectionWebhookSuffix: e.target.value,
-                      payoutWebhookSuffix: e.target.value 
-                    }))}
-                    placeholder="例如: passpay, airpay, cashfree"
-                    helperText="输入支付商标识，系统自动生成回调地址"
-                  />
-                  
-                  {/* 显示完整的回调地址 */}
-                  {formData.collectionWebhookSuffix && (
-                    <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
-                      <Typography variant="subtitle2" gutterBottom sx={{ color: 'text.secondary' }}>
-                        完整回调地址:
-                      </Typography>
-                      <Box sx={{ mb: 1 }}>
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace', bgcolor: 'white', p: 1, borderRadius: 0.5 }}>
-                          代收回调: https://cashgit.com/api/webhook/{formData.collectionWebhookSuffix}/collection
-                        </Typography>
-                      </Box>
-                      <Box>
-                        <Typography variant="body2" sx={{ fontFamily: 'monospace', bgcolor: 'white', p: 1, borderRadius: 0.5 }}>
-                          代付回调: https://cashgit.com/api/webhook/{formData.collectionWebhookSuffix}/payout
-                        </Typography>
-                      </Box>
-                    </Box>
-                  )}
-                </Box>
-                <Box sx={{ mt: 2 }}>
-                  <TextField
-                    fullWidth
-                    label="描述"
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    multiline
-                    rows={2}
-                  />
-                </Box>
-              </Box>
-
-              {/* 限额设置 */}
-              <Box>
-                <Typography variant="h6" gutterBottom>限额设置</Typography>
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2 }}>
-                  <TextField
-                    fullWidth
-                    label="日限额 (₹)"
-                    type="number"
-                    value={formData.dailyLimit / 100}
-                    onChange={(e) => setFormData(prev => ({ ...prev, dailyLimit: parseInt(e.target.value) * 100 }))}
-                    required
-                  />
-                  <TextField
-                    fullWidth
-                    label="月限额 (₹)"
-                    type="number"
-                    value={formData.monthlyLimit / 100}
-                    onChange={(e) => setFormData(prev => ({ ...prev, monthlyLimit: parseInt(e.target.value) * 100 }))}
-                    required
-                  />
-                  <TextField
-                    fullWidth
-                    label="单笔限额 (₹)"
-                    type="number"
-                    value={formData.singleTransactionLimit / 100}
-                    onChange={(e) => setFormData(prev => ({ ...prev, singleTransactionLimit: parseInt(e.target.value) * 100 }))}
-                    required
-                  />
-                  <TextField
-                    fullWidth
-                    label="最小金额 (₹)"
-                    type="number"
-                    value={formData.minTransactionAmount / 100}
-                    onChange={(e) => setFormData(prev => ({ ...prev, minTransactionAmount: parseInt(e.target.value) * 100 }))}
-                    required
-                  />
-                </Box>
-              </Box>
-
-              {/* 费用设置 */}
-              <Box>
-                <Typography variant="h6" gutterBottom>费用设置</Typography>
-                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2 }}>
-                  <TextField
-                    fullWidth
-                    label="交易费率 (%)"
-                    type="number"
-                    value={formData.transactionFee}
-                    onChange={(e) => setFormData(prev => ({ ...prev, transactionFee: parseFloat(e.target.value) }))}
-                    inputProps={{ step: 0.01, min: 0 }}
-                    required
-                  />
-                  <TextField
-                    fullWidth
-                    label="固定费用 (₹)"
-                    type="number"
-                    value={formData.fixedFee / 100}
-                    onChange={(e) => setFormData(prev => ({ ...prev, fixedFee: parseInt(e.target.value) * 100 }))}
-                    required
-                  />
-                  <TextField
-                    fullWidth
-                    label="优先级"
-                    type="number"
-                    value={formData.priority}
-                    onChange={(e) => setFormData(prev => ({ ...prev, priority: parseInt(e.target.value) }))}
-                    inputProps={{ min: 1 }}
-                    required
-                  />
-                </Box>
-              </Box>
-
-              {/* 状态设置 */}
-              <Box>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.status === 'ACTIVE'}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        status: e.target.checked ? 'ACTIVE' : 'INACTIVE' 
-                      }))}
-                    />
-                  }
-                  label="启用账户"
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom>
+                  基本信息
+                </Typography>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="账户名称"
+                  value={formData.accountName}
+                  onChange={(e) => setFormData({...formData, accountName: e.target.value})}
+                  required
                 />
-              </Box>
-            </Box>
-          </DialogContent>
-        </form>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth required>
+                  <InputLabel>支付商类型</InputLabel>
+                  <Select
+                    value={formData.type}
+                    onChange={(e) => {
+                      setFormData({...formData, type: e.target.value, providerName: ''});
+                    }}
+                  >
+                    {PAYMENT_PROVIDER_CATEGORIES.map((category) => (
+                      <MenuItem key={category.id} value={category.id}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {getTypeIcon(category.type)}
+                          {category.name}
+                        </Box>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth required>
+                  <InputLabel>支付商</InputLabel>
+                  <Select
+                    value={formData.providerName}
+                    onChange={(e) => setFormData({...formData, providerName: e.target.value})}
+                  >
+                    {getProvidersByType(formData.type).map((provider) => (
+                      <MenuItem key={provider.id} value={provider.id}>
+                        {provider.displayName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth required>
+                  <InputLabel>环境</InputLabel>
+                  <Select
+                    value={formData.environment}
+                    onChange={(e) => setFormData({...formData, environment: e.target.value})}
+                  >
+                    <MenuItem value="sandbox">沙箱环境</MenuItem>
+                    <MenuItem value="production">生产环境</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* 配置信息 */}
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h6" gutterBottom>
+                  配置信息
+                </Typography>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="账户ID"
+                  value={formData.accountId}
+                  onChange={(e) => setFormData({...formData, accountId: e.target.value})}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="API密钥"
+                  value={formData.apiKey}
+                  onChange={(e) => setFormData({...formData, apiKey: e.target.value})}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="密钥"
+                  type="password"
+                  value={formData.secretKey}
+                  onChange={(e) => setFormData({...formData, secretKey: e.target.value})}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="优先级"
+                  type="number"
+                  value={formData.priority}
+                  onChange={(e) => setFormData({...formData, priority: parseInt(e.target.value)})}
+                  inputProps={{ min: 1, max: 10 }}
+                />
+              </Grid>
+
+              {/* 限额配置 */}
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h6" gutterBottom>
+                  限额配置
+                </Typography>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="日限额"
+                  type="number"
+                  value={formData.dailyLimit}
+                  onChange={(e) => setFormData({...formData, dailyLimit: parseInt(e.target.value)})}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="月限额"
+                  type="number"
+                  value={formData.monthlyLimit}
+                  onChange={(e) => setFormData({...formData, monthlyLimit: parseInt(e.target.value)})}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="单笔限额"
+                  type="number"
+                  value={formData.singleTransactionLimit}
+                  onChange={(e) => setFormData({...formData, singleTransactionLimit: parseInt(e.target.value)})}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="最小交易金额"
+                  type="number"
+                  value={formData.minTransactionAmount}
+                  onChange={(e) => setFormData({...formData, minTransactionAmount: parseInt(e.target.value)})}
+                  required
+                />
+              </Grid>
+
+              {/* 费率配置 */}
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h6" gutterBottom>
+                  费率配置
+                </Typography>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="交易费率 (%)"
+                  type="number"
+                  value={formData.transactionFee}
+                  onChange={(e) => setFormData({...formData, transactionFee: parseFloat(e.target.value)})}
+                  inputProps={{ step: 0.01, min: 0 }}
+                  required
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="固定费用"
+                  type="number"
+                  value={formData.fixedFee}
+                  onChange={(e) => setFormData({...formData, fixedFee: parseFloat(e.target.value)})}
+                  inputProps={{ step: 0.01, min: 0 }}
+                />
+              </Grid>
+
+              {/* 回调配置 */}
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h6" gutterBottom>
+                  回调配置
+                </Typography>
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="代收回调后缀"
+                  value={formData.collectionWebhookSuffix}
+                  onChange={(e) => setFormData({...formData, collectionWebhookSuffix: e.target.value})}
+                  helperText="代收回调: https://cashgit.com/api/webhook/{formData.collectionWebhookSuffix}/collection"
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="代付回调后缀"
+                  value={formData.payoutWebhookSuffix}
+                  onChange={(e) => setFormData({...formData, payoutWebhookSuffix: e.target.value})}
+                  helperText="代付回调: https://cashgit.com/api/webhook/{formData.collectionWebhookSuffix}/payout"
+                />
+              </Grid>
+              
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="描述"
+                  multiline
+                  rows={3}
+                  value={formData.description}
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
+                />
+              </Grid>
+
+              {/* 操作按钮 */}
+              <Grid item xs={12}>
+                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                  <Button onClick={() => setDialogOpen(false)}>
+                    取消
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={loading}
+                    startIcon={loading ? <CircularProgress size={20} /> : null}
+                  >
+                    {editingAccount ? '更新' : '创建'}
+                  </Button>
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
+        </DialogContent>
       </Dialog>
     </Box>
   );

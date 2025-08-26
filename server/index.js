@@ -162,6 +162,7 @@ app.use('/api/merchant', require('./routes/merchant')); // 无限流
 app.use('/api/providers', require('./routes/providers'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/payment-config', require('./routes/payment-config'));
+app.use('/api/payment-providers', require('./routes/payment-providers'));
 app.use('/api', require('./routes/cashgitPayment'));
 app.use('/api/webhook', require('./routes/webhook'));
 app.use('/api/payment-status', require('./routes/payment-status'));
