@@ -41,7 +41,7 @@ import { PermissionGuard } from '../components/PermissionGuard';
 import { Permission } from '../types';
 
 // 模拟用户数据 - 已清理，改为从API获取
-const mockUsers: User[] = [];
+// const mockUsers: User[] = [];
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([]);

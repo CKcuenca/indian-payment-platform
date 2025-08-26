@@ -45,7 +45,7 @@ import { Permission } from '../types';
 import { formatAmount, formatDate as formatDateUtil } from '../utils/formatters';
 
 // 模拟商户数据 - 已清理，改为从API获取
-const mockMerchants: Merchant[] = [];
+// const mockMerchants: Merchant[] = [];
 
 export default function Merchants() {
   const [merchants, setMerchants] = useState<Merchant[]>([]);
