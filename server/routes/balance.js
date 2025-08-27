@@ -9,11 +9,11 @@ const Order = require('../models/order');
  */
 router.post('/query', mgAuthMiddleware, async (req, res) => {
   try {
-    const { mchNo, timestamp, sign } = req.body;
+    const { appid, timestamp, sign } = req.body;
     const merchant = req.merchant;
     
     // 验证商户号
-    if (mchNo !== merchant.merchantId) {
+    if (appid !== merchant.merchantId) {
       return res.json(errorResponse(400, '商户号不匹配'));
     }
     
@@ -21,7 +21,7 @@ router.post('/query', mgAuthMiddleware, async (req, res) => {
     const balance = await calculateMerchantBalance(merchant.merchantId);
     
     return res.json(successResponse({
-      mchNo: merchant.merchantId,
+      appid: merchant.merchantId,
       balance: balance.totalBalance.toString(),
       currency: 'INR',
       frozenAmount: balance.frozenAmount.toString(),

@@ -9,11 +9,11 @@ const Order = require('../models/order');
  */
 router.post('/query', mgAuthMiddleware, async (req, res) => {
   try {
-    const { mchNo, mchOrderId, timestamp, sign } = req.body;
+    const { appid, mchOrderId, timestamp, sign } = req.body;
     const merchant = req.merchant;
     
     // 验证商户号
-    if (mchNo !== merchant.merchantId) {
+    if (appid !== merchant.merchantId) {
       return res.json(errorResponse(400, '商户号不匹配'));
     }
     

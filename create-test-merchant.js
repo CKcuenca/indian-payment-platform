@@ -1,49 +1,74 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
+const Merchant = require('./server/models/merchant');
 
-// 连接数据库
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/payment-platform', {
+// 连接MongoDB
+mongoose.connect('mongodb://localhost:27017/payment-platform', {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useUnifiedTopology: true
 });
-
-const Merchant = require('./server/models/Merchant');
 
 async function createTestMerchant() {
   try {
     // 检查是否已存在
-    const existingMerchant = await Merchant.findOne({ merchantId: 'test_merchant_001' });
+    const existingMerchant = await Merchant.findOne({ merchantId: 'TEST001' });
     if (existingMerchant) {
-      console.log('测试商户已存在:', existingMerchant.merchantId);
-      return;
+      console.log('✅ 测试商户已存在:', existingMerchant.merchantId);
+      return existingMerchant;
     }
 
     // 创建测试商户
-    const merchant = new Merchant({
-      merchantId: 'test_merchant_001',
-      name: '测试商户',
-      email: 'test@example.com',
+    const testMerchant = new Merchant({
+      merchantId: 'TEST001',
+      name: '测试游戏公司',
+      email: 'test@game.com',
       phone: '+91-9876543210',
-      address: '测试地址',
-      balance: 10000,
-      isActive: true,
-      secretKey: 'test_secret_key_123',
+      status: 'ACTIVE',
       apiKey: 'test_api_key_123',
-      defaultPaymentProvider: 'mock',
-      feeRate: 0.02,
-      dailyLimit: 100000,
-      monthlyLimit: 1000000,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      secretKey: 'test_secret_key_456',
+      paymentConfig: {
+        defaultProvider: 'unispay',
+        providers: [
+          {
+            name: 'unispay',
+            enabled: true,
+            config: {}
+          },
+          {
+            name: 'passpay',
+            enabled: true,
+            config: {}
+          },
+          {
+            name: 'wakeup',
+            enabled: true,
+            config: {}
+          }
+        ]
+      }
     });
 
-    await merchant.save();
-    console.log('测试商户创建成功:', merchant.merchantId);
+    await testMerchant.save();
+    console.log('✅ 测试商户创建成功:', testMerchant.merchantId);
+    return testMerchant;
+
   } catch (error) {
-    console.error('创建测试商户失败:', error);
-  } finally {
-    mongoose.connection.close();
+    console.error('❌ 创建测试商户失败:', error);
+    throw error;
   }
 }
 
-createTestMerchant();
+// 运行脚本
+if (require.main === module) {
+  createTestMerchant()
+    .then(() => {
+      console.log('🎉 测试商户设置完成！');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('💥 设置失败:', error);
+      process.exit(1);
+    });
+}
+
+module.exports = { createTestMerchant };
+

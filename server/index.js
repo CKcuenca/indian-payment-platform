@@ -163,17 +163,8 @@ app.use('/api/providers', require('./routes/providers'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/payment-config', require('./routes/payment-config'));
 app.use('/api/payment-providers', require('./routes/payment-providers'));
-app.use('/api', require('./routes/cashgitPayment'));
-app.use('/api/webhook', require('./routes/webhook'));
-app.use('/api/payment-status', require('./routes/payment-status'));
-app.use('/api/status-sync', require('./routes/status-sync'));
-app.use('/api/passpay', require('./routes/passpay'));
-app.use('/api/heap-optimization', require('./routes/heap-optimization'));
-app.use('/api/callback', require('./routes/passpay-callback'));
-app.use('/api/passpay-sync', require('./routes/passpay-sync'));
-app.use('/api/memory-optimization', require('./routes/memory-optimization'));
 
-// 统一对外接口 - 游戏公司使用
+// 统一对外接口 - 游戏公司使用（必须在通用路由之前）
 app.use('/api/order', require('./routes/order'));
 app.use('/api/payout', require('./routes/payout'));
 app.use('/api/balance', require('./routes/balance'));
@@ -183,6 +174,17 @@ app.use('/api/upi-query', require('./routes/upi-query'));
 app.use('/api/wakeup', require('./routes/wakeup-payment'));
 app.use('/api/unispay', require('./routes/unispay-payment'));
 app.use('/api/withdraw', require('./routes/withdraw'));
+
+// 通用路由（必须在具体路由之后）
+app.use('/api', require('./routes/cashgitPayment'));
+app.use('/api/webhook', require('./routes/webhook'));
+app.use('/api/payment-status', require('./routes/payment-status'));
+app.use('/api/status-sync', require('./routes/status-sync'));
+app.use('/api/passpay', require('./routes/passpay'));
+app.use('/api/heap-optimization', require('./routes/heap-optimization'));
+app.use('/api/callback', require('./routes/passpay-callback'));
+app.use('/api/passpay-sync', require('./routes/passpay-sync'));
+app.use('/api/memory-optimization', require('./routes/memory-optimization'));
 app.use('/api/webhook', require('./routes/withdraw-callback'));
 
 // 健康检查

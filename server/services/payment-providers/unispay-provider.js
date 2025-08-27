@@ -394,6 +394,126 @@ class UnispayProvider extends BaseProvider {
   }
 
   /**
+   * 创建出款订单
+   * @param {Object} orderData 出款订单数据
+   * @returns {Promise<Object>} 出款结果
+   */
+  async createPayoutOrder(orderData) {
+    try {
+      const { 
+        orderId, 
+        amount, 
+        currency = 'INR', 
+        bankCode, 
+        accountNumber, 
+        ifscCode, 
+        accountName, 
+        transferMode = 'IMPS',
+        remark 
+      } = orderData;
+      
+      // 验证必要参数
+      if (!amount || !accountNumber || !ifscCode || !accountName) {
+        return { 
+          success: false, 
+          error: `缺少必要参数：amount(${amount}), accountNumber(${accountNumber}), ifscCode(${ifscCode}), accountName(${accountName})` 
+        };
+      }
+      
+      // 构建出款请求参数
+      const requestParams = {
+        mchNo: this.mchNo,
+        mchOrderId: orderId,
+        amount: amount.toString(),
+        currency: currency,
+        bankCode: bankCode,
+        accountNumber: accountNumber,
+        ifscCode: ifscCode,
+        accountHolder: accountName,
+        transferMode: transferMode,
+        remark: remark || '游戏提现',
+        timestamp: Date.now()
+      };
+      
+      // 生成签名
+      requestParams.sign = this.generateSignature(requestParams);
+      
+      // 发送出款请求到UNISPAY
+      const response = await this.makeRequest('/api/payout/create', requestParams);
+      
+      if (response.code === 200) {
+        return {
+          success: true,
+          providerOrderId: response.data.orderId,
+          status: 'PROCESSING'
+        };
+      } else {
+        return {
+          success: false,
+          error: response.message || '出款申请失败'
+        };
+      }
+      
+    } catch (error) {
+      console.error('UNISPAY出款申请失败:', error);
+      return {
+        success: false,
+        error: 'UNISPAY服务异常'
+      };
+    }
+  }
+
+  /**
+   * 查询出款订单状态
+   * @param {string} orderId 订单ID
+   * @returns {Promise<Object>} 查询结果
+   */
+  async queryPayoutOrder(orderId) {
+    try {
+      const requestParams = {
+        mchNo: this.mchNo,
+        mchOrderId: orderId,
+        timestamp: Date.now()
+      };
+      
+      // 生成签名
+      requestParams.sign = this.generateSignature(requestParams);
+      
+      // 发送查询请求到UNISPAY
+      const response = await this.makeRequest('/api/payout/query', requestParams);
+      
+      if (response.code === 200) {
+        return {
+          success: true,
+          providerOrderId: response.data.orderId,
+          status: response.data.status,
+          amount: response.data.amount,
+          currency: response.data.currency,
+          bankCode: response.data.bankCode,
+          accountNumber: response.data.accountNumber,
+          ifscCode: response.data.ifscCode,
+          accountName: response.data.accountHolder,
+          transferMode: response.data.transferMode,
+          utrNumber: response.data.utrNumber,
+          createTime: response.data.createTime
+        };
+      } else {
+        return {
+          success: false,
+          error: response.message || '查询出款订单失败'
+        };
+      }
+      
+    } catch (error) {
+      console.error('UNISPAY查询出款订单失败:', error);
+      return {
+        success: false,
+        error: 'UNISPAY服务异常'
+      };
+    }
+  }
+
+  /**
    * 处理出款异步通知
    * @param {Object} notificationData 通知数据
    * @returns {Object} 处理结果

@@ -1,6 +1,13 @@
 const mongoose = require('mongoose');
 
 const paymentConfigSchema = new mongoose.Schema({
+  // 关联的商户ID
+  merchantId: {
+    type: String,
+    required: true,
+    index: true
+  },
+  
   // 支付账户基本信息
   accountName: {
     type: String,

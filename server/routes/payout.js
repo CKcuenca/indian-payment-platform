@@ -11,7 +11,7 @@ const Order = require('../models/order');
 router.post('/create', mgAuthMiddleware, async (req, res) => {
   try {
     const { 
-      mchNo, 
+      appid, 
       mchOrderId, 
       amount, 
       currency, 
@@ -27,7 +27,7 @@ router.post('/create', mgAuthMiddleware, async (req, res) => {
     const merchant = req.merchant;
     
     // 验证商户号
-    if (mchNo !== merchant.merchantId) {
+    if (appid !== merchant.merchantId) {
       return res.json(errorResponse(400, '商户号不匹配'));
     }
     
@@ -106,11 +106,11 @@ router.post('/create', mgAuthMiddleware, async (req, res) => {
  */
 router.post('/query', mgAuthMiddleware, async (req, res) => {
   try {
-    const { mchNo, mchOrderId, timestamp, sign } = req.body;
+    const { appid, mchOrderId, timestamp, sign } = req.body;
     const merchant = req.merchant;
     
     // 验证商户号
-    if (mchNo !== merchant.merchantId) {
+    if (appid !== merchant.merchantId) {
       return res.json(errorResponse(400, '商户号不匹配'));
     }
     
@@ -169,6 +169,7 @@ async function createUnispayPayout(orderId, amount, currency, bankCode, accountN
   try {
     const UnispayProvider = require('../services/payment-providers/unispay-provider');
     const paymentConfig = await PaymentConfig.findOne({
+      'merchantId': merchant.merchantId,
       'provider.name': 'unispay',
       'status': 'ACTIVE'
     });
@@ -249,6 +250,7 @@ async function createPasspayPayout(orderId, amount, currency, bankCode, accountN
   try {
     const PasspayProvider = require('../services/payment-providers/passpay-provider');
     const paymentConfig = await PaymentConfig.findOne({
+      'merchantId': merchant.merchantId,
       'provider.name': 'passpay',
       'status': 'ACTIVE'
     });
