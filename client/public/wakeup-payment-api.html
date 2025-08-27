@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>印度唤醒支付API对接文档</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; line-height: 1.6; color: #333; background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; font-weight: 300; }
+        .header p { font-size: 1.2em; opacity: 0.9; }
+        .nav { background: #2c3e50; padding: 15px 20px; position: sticky; top: 0; z-index: 100; }
+        .nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 20px; }
+        .nav a { color: white; text-decoration: none; padding: 8px 16px; border-radius: 20px; transition: all 0.3s ease; }
+        .nav a:hover { background: rgba(255,255,255,0.2); }
+        .content { padding: 40px 20px; }
+        .section { margin-bottom: 40px; padding: 30px; border-radius: 10px; background: #fafafa; border-left: 4px solid #667eea; }
+        .section h2 { color: #2c3e50; margin-bottom: 20px; font-size: 1.8em; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+        .section h3 { color: #34495e; margin: 25px 0 15px 0; font-size: 1.4em; }
+        .section p { margin-bottom: 15px; text-align: justify; }
+        .section ul, .section ol { margin: 15px 0; padding-left: 30px; }
+        .section li { margin-bottom: 8px; }
+        .code-block { background: #2d3748; color: #e2e8f0; padding: 20px; border-radius: 8px; overflow-x: auto; margin: 20px 0; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; }
+        .highlight { background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .table { width: 100%; border-collapse: collapse; margin: 20px 0; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .table th { background: #667eea; color: white; padding: 15px; text-align: left; font-weight: 600; }
+        .table td { padding: 12px 15px; border-bottom: 1px solid #ecf0f1; }
+        .table tr:nth-child(even) { background: #f8f9fa; }
+        .table tr:hover { background: #e3f2fd; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 0.8em; font-weight: 600; text-transform: uppercase; }
+        .badge-required { background: #dc3545; color: white; }
+        .badge-optional { background: #6c757d; color: white; }
+        .endpoint { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; margin: 15px 0; }
+        .endpoint-url { font-family: monospace; background: #e9ecef; padding: 8px 12px; border-radius: 4px; color: #495057; font-weight: 600; }
+        .method { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 600; text-transform: uppercase; margin-right: 10px; }
+        .method-post { background: #28a745; color: white; }
+        @media (max-width: 768px) { .nav ul { flex-direction: column; gap: 10px; } .header h1 { font-size: 2em; } .content { padding: 20px 15px; } .section { padding: 20px; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🇮🇳 印度唤醒支付API对接文档</h1>
+            <p>India Wake-up Payment API Integration Documentation</p>
+        </div>
+        
+        <nav class="nav">
+            <ul>
+                <li><a href="#overview">前言概述</a></li>
+                <li><a href="#signature">签名算法</a></li>
+                <li><a href="#payment-types">支付类型</a></li>
+                <li><a href="#deposit">存款订单</a></li>
+                <li><a href="#withdraw">出款订单</a></li>
+                <li><a href="#callback">异步通知</a></li>
+                <li><a href="#query">查询接口</a></li>
+                <li><a href="#error-codes">错误码说明</a></li>
+                <li><a href="#examples">示例代码</a></li>
+            </ul>
+        </nav>
+        
+        <div class="content">
+            <div class="section" id="overview">
+                <h2>📋 前言概述</h2>
+                <h3>概要</h3>
+                <p>本文档定义了接入印度唤醒支付系统的报文接口规范，具体包括：</p>
+                <ul>
+                    <li><strong>接口通信方式</strong>：涵盖网络通讯方式及接口加解密方式</li>
+                    <li><strong>业务处理流程</strong>：涉及代收、代付、流水管理及财务管理等模块</li>
+                    <li><strong>交易报文格式说明</strong>：包含入参、出参规范及JSON格式标准</li>
+                </ul>
+                <div class="highlight">
+                    <strong>💡 请求头说明：</strong>请求头Content-Type为：application/json;charset=utf-8，所有接口一致
+                </div>
+            </div>
+            
+            <div class="section" id="signature">
+                <h2>🔐 签名算法</h2>
+                <h3>签名规则</h3>
+                <h4>Step 1. 排序拼接</h4>
+                <p>将非空参数值按照参数名ASCII码从小到大排序（字典序），使用<code>&</code>拼接成字符串。</p>
+                <h4>Step 2. 拼接密钥</h4>
+                <p>在字符串末尾拼接上<code>&key=</code>商户密钥。</p>
+                <h4>Step 3. 加密签名</h4>
+                <p>对拼接后的字符串进行MD5加密，得到32位小写字符串。</p>
+            </div>
+            
+            <div class="section" id="payment-types">
+                <h2>💳 支付类型</h2>
+                <p>印度唤醒支付系统支持以下支付方式：</p>
+                <div class="table">
+                    <table>
+                        <thead>
+                            <tr><th>支付类型</th><th>说明</th><th>状态</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>UPI支付</td><td>印度统一支付接口，支持所有银行</td><td><span class="badge badge-required">已上线</span></td></tr>
+                            <tr><td>银行卡支付</td><td>支持Visa、MasterCard、RuPay等</td><td><span class="badge badge-required">已上线</span></td></tr>
+                            <tr><td>数字钱包</td><td>Paytm、PhonePe、Google Pay等</td><td><span class="badge badge-required">已上线</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="section" id="deposit">
+                <h2>💰 存款订单</h2>
+                <div class="endpoint">
+                    <div class="method method-post">POST</div>
+                    <span class="endpoint-url">/api/order/create</span>
+                </div>
+                <h3>请求参数</h3>
+                <div class="table">
+                    <table>
+                        <thead>
+                            <tr><th>参数名</th><th>类型</th><th>必填</th><th>说明</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>merchantId</td><td>String</td><td><span class="badge badge-required">必填</span></td><td>商户号</td></tr>
+                            <tr><td>orderId</td><td>String</td><td><span class="badge badge-required">必填</td><td>商户订单号</td></tr>
+                            <tr><td>amount</td><td>BigDecimal</td><td><span class="badge badge-required">必填</span></td><td>订单金额</td></tr>
+                            <tr><td>currency</td><td>String</td><td><span class="badge badge-required">必填</span></td><td>币种（INR）</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="section" id="examples">
+                <h2>💻 示例代码</h2>
+                <h3>Java示例</h3>
+                <div class="code-block">
+<pre>// 创建存款订单示例
+public class PaymentExample {
+    public static void createDepositOrder() {
+        Map<String, String> params = new HashMap<>();
+        params.put("merchantId", "your_merchant_id");
+        params.put("orderId", "ORDER_" + System.currentTimeMillis());
+        params.put("amount", "1000.00");
+        params.put("currency", "INR");
+        // 生成签名并发送请求
+    }
+}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
