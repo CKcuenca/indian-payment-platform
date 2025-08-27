@@ -2,11 +2,33 @@
 	"info": {
 		"_postman_id": "indian-payment-platform-unified-apis",
 		"name": "Indian Payment Platform - 统一支付接口",
-		"description": "印度支付平台统一API接口测试集合\n\n包含以下接口：\n- 存款申请和查询\n- 出款申请和查询\n- 余额查询\n- UPI信息查询\n\n注意：所有请求都需要正确的签名验证",
+		"description": "印度支付平台统一API接口测试集合\n\n包含以下接口：\n- 健康检查\n- 存款申请和查询\n- 出款申请和查询\n- 余额查询\n- UPI信息查询\n\n注意：所有请求都需要正确的签名验证",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "12345678"
 	},
 	"item": [
+		{
+			"name": "0. 健康检查",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{base_url}}/health",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"health"
+					]
+				},
+				"description": "检查服务器健康状态\n\n这是一个简单的GET请求，用于验证：\n- 服务器是否正在运行\n- API路由是否正确配置\n- 网络连接是否正常\n\n预期响应：200 OK"
+			},
+			"response": []
+		},
 		{
 			"name": "1. 余额查询",
 			"request": {
