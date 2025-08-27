@@ -35,104 +35,73 @@ import {
 } from '@mui/icons-material';
 
 
-// 模拟支付账户数据
-const mockPaymentAccounts = [
-  {
-    _id: '1',
-    accountName: 'AirPay主账户',
-    provider: {
-      name: 'airpay',
-      type: 'native',
-      subType: 'third_party',
-      accountId: 'AP001',
-      apiKey: 'ak_123456789',
-      secretKey: 'sk_987654321',
-      environment: 'production'
-    },
-    description: 'AirPay主要支付账户',
-    limits: {
-      dailyLimit: 1000000,
-      monthlyLimit: 10000000,
-      singleTransactionLimit: 100000,
-      minTransactionAmount: 100
-    },
-    fees: {
-      transactionFee: 0.5,
-      fixedFee: 0
-    },
-    priority: 1,
-    status: 'ACTIVE',
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2024-01-01T00:00:00Z'
-  },
-  {
-    _id: '2',
-    accountName: 'UniSpay唤醒账户',
-    provider: {
-      name: 'unispay',
-      type: 'wakeup',
-      subType: 'wakeup', // 唤醒类型没有子类型
-      accountId: 'US001',
-      apiKey: 'uk_123456789',
-      secretKey: 'sk_987654321',
-      environment: 'production'
-    },
-    description: 'UniSpay唤醒支付账户',
-    limits: {
-      dailyLimit: 500000,
-      monthlyLimit: 5000000,
-      singleTransactionLimit: 50000,
-      minTransactionAmount: 100
-    },
-    fees: {
-      transactionFee: 0.6,
-      fixedFee: 0
-    },
-    priority: 2,
-    status: 'ACTIVE',
-    createdAt: '2024-01-02T00:00:00Z',
-    updatedAt: '2024-01-02T00:00:00Z'
-  },
-  {
-    _id: '3',
-    accountName: 'PassPay 4方平台账户',
-    provider: {
-      name: 'passpay',
-      type: 'native',
-      subType: 'fourth_party', // PassPay属于4方平台
-      accountId: 'PP001',
-      apiKey: 'pk_123456789',
-      secretKey: 'sk_987654321',
-      environment: 'production'
-    },
-    description: 'PassPay 4方平台账户，使用统一API',
-    limits: {
-      dailyLimit: 500000,
-      monthlyLimit: 5000000,
-      singleTransactionLimit: 50000,
-      minTransactionAmount: 100
-    },
-    fees: {
-      transactionFee: 0.6,
-      fixedFee: 0
-    },
-    priority: 2,
-    status: 'ACTIVE',
-    createdAt: '2024-01-02T00:00:00Z',
-    updatedAt: '2024-01-02T00:00:00Z'
-  }
-];
+// 支付账户类型定义
+interface PaymentAccount {
+  _id: string;
+  accountName: string;
+  provider: {
+    name: string;
+    type: string;
+    subType: string;
+    accountId: string;
+    apiKey: string;
+    secretKey: string;
+    environment: string;
+  };
+  description: string;
+  limits: {
+    dailyLimit: number;
+    monthlyLimit: number;
+    singleTransactionLimit: number;
+    minTransactionAmount: number;
+  };
+  fees: {
+    transactionFee: number;
+    fixedFee: number;
+  };
+  priority: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function PaymentManagementNew() {
   const [error, setError] = useState<string | null>(null);
   
   // 支付账户状态
-  const [accounts, setAccounts] = useState(mockPaymentAccounts);
+  const [accounts, setAccounts] = useState<PaymentAccount[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  // 获取支付账户列表
+  const fetchAccounts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // TODO: 替换为真实的API调用
+      // const response = await api.get('/payment-config');
+      // if (response.data.success) {
+      //   setAccounts(response.data.data);
+      // }
+      
+      // 临时设置为空数组，等待API集成
+      setAccounts([]);
+      
+    } catch (err: any) {
+      setError(err.message || '获取支付账户失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // 组件加载时获取数据
+  React.useEffect(() => {
+    fetchAccounts();
+  }, []);
   
   // 对话框状态
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingAccount, setEditingAccount] = useState<any>(null);
+  const [editingAccount, setEditingAccount] = useState<PaymentAccount | null>(null);
   
   // 表单数据
   const [formData, setFormData] = useState({
@@ -181,7 +150,7 @@ export default function PaymentManagementNew() {
     setDialogOpen(true);
   };
 
-  const handleEdit = (account: any) => {
+  const handleEdit = (account: PaymentAccount) => {
     setEditingAccount(account);
     setFormData({
       accountName: account.accountName,
@@ -265,7 +234,18 @@ export default function PaymentManagementNew() {
 
   const handleDelete = (accountId: string) => {
     if (window.confirm('确定要删除这个支付账户吗？')) {
-      setAccounts(prev => prev.filter(account => account._id !== accountId));
+      try {
+        setError(null);
+        
+        // TODO: 调用删除API
+        // await api.delete(`/payment-config/${accountId}`);
+        
+        // 临时从本地状态中删除
+        setAccounts(prev => prev.filter(account => account._id !== accountId));
+        
+      } catch (err: any) {
+        setError(err.message || '删除失败');
+      }
     }
   };
 
