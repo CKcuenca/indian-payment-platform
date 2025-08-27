@@ -773,6 +773,94 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                         </div>
                         
                         <h3>响应参数</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>code</td>
+                                        <td>String</td>
+                                        <td>响应码</td>
+                                        <td>0000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>message</td>
+                                        <td>String</td>
+                                        <td>响应消息</td>
+                                        <td>成功</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.orderId</td>
+                                        <td>String</td>
+                                        <td>商户订单号</td>
+                                        <td>ORDER_20241201_001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.platformOrderId</td>
+                                        <td>String</td>
+                                        <td>平台订单号</td>
+                                        <td>CG202412010001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.paymentUrl</td>
+                                        <td>String</td>
+                                        <td>支付链接</td>
+                                        <td>https://payment.cashgit.com/pay/123456</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.qrCode</td>
+                                        <td>String</td>
+                                        <td>支付二维码（Base64格式）</td>
+                                        <td>data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.expireTime</td>
+                                        <td>String</td>
+                                        <td>订单过期时间</td>
+                                        <td>2024-12-01 23:59:59</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.amount</td>
+                                        <td>String</td>
+                                        <td>订单金额（分）</td>
+                                        <td>1000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.currency</td>
+                                        <td>String</td>
+                                        <td>币种</td>
+                                        <td>INR</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.status</td>
+                                        <td>String</td>
+                                        <td>订单状态</td>
+                                        <td>PENDING</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.payType</td>
+                                        <td>Integer</td>
+                                        <td>支付类型</td>
+                                        <td>101</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.createTime</td>
+                                        <td>String</td>
+                                        <td>创建时间</td>
+                                        <td>2024-12-01 10:00:00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>响应示例</h3>
                         <div class="code-block">
 <pre>{
     "code": "0000",
@@ -785,9 +873,61 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
         "expireTime": "2024-12-01 23:59:59",
         "amount": "1000",
         "currency": "INR",
-        "status": "PENDING"
+        "status": "PENDING",
+        "payType": 101,
+        "createTime": "2024-12-01 10:00:00"
     }
 }</pre>
+                        </div>
+                        
+                        <h3>订单状态说明</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>状态</th>
+                                        <th>说明</th>
+                                        <th>处理时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>PENDING</td>
+                                        <td>待支付</td>
+                                        <td>等待用户完成支付</td>
+                                    </tr>
+                                    <tr>
+                                        <td>PROCESSING</td>
+                                        <td>处理中</td>
+                                        <td>支付已提交，等待确认</td>
+                                    </tr>
+                                    <tr>
+                                        <td>SUCCESS</td>
+                                        <td>支付成功</td>
+                                        <td>支付完成，资金已到账</td>
+                                    </tr>
+                                    <tr>
+                                        <td>FAILED</td>
+                                        <td>支付失败</td>
+                                        <td>支付失败，可重新发起</td>
+                                    </tr>
+                                    <tr>
+                                        <td>EXPIRED</td>
+                                        <td>已过期</td>
+                                        <td>订单超时，需要重新创建</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="note">
+                            <strong>重要提示：</strong>
+                            <ul>
+                                <li>支付链接有效期为24小时，超时后需要重新创建订单</li>
+                                <li>二维码支持主流支付应用扫描，如Paytm、PhonePe、Google Pay等</li>
+                                <li>建议在用户完成支付后，通过异步通知或查询接口确认支付状态</li>
+                                <li>订单创建成功后，请妥善保存订单号，便于后续查询和核对</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
