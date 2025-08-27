@@ -18,18 +18,20 @@ const validateRequest = (req, res, next) => {
 // 创建商户
 router.post('/merchants', [
   body('name').notEmpty().withMessage('Name is required'),
-  body('email').isEmail().withMessage('Valid email is required'),
-  body('phone').notEmpty().withMessage('Phone is required'),
+  body('email').optional().isEmail().withMessage('Email must be valid if provided'),
+  body('phone').optional(),
   validateRequest
 ], async (req, res) => {
   try {
     const { name, email, phone } = req.body;
     const Merchant = require('../models/merchant');
 
-    // 检查邮箱是否已存在
-    const existingMerchant = await Merchant.findOne({ email });
-    if (existingMerchant) {
-      return res.status(400).json({ error: 'Email already exists' });
+    // 检查邮箱是否已存在（如果提供了邮箱）
+    if (email) {
+      const existingMerchant = await Merchant.findOne({ email });
+      if (existingMerchant) {
+        return res.status(400).json({ error: 'Email already exists' });
+      }
     }
 
     // 生成商户ID和密钥
@@ -38,26 +40,35 @@ router.post('/merchants', [
     const secretKey = Merchant.generateSecretKey();
 
     // 创建商户
-    const merchant = new Merchant({
+    const merchantData = {
       merchantId,
       name,
-      email,
-      phone,
       apiKey,
       secretKey
-    });
+    };
+    
+    // 只有当字段有值时才添加
+    if (email) merchantData.email = email;
+    if (phone) merchantData.phone = phone;
+    
+    const merchant = new Merchant(merchantData);
 
     await merchant.save();
 
+    const responseData = {
+      merchantId: merchant.merchantId,
+      name: merchant.name,
+      apiKey: merchant.apiKey,
+      secretKey: merchant.secretKey
+    };
+    
+    // 只有当字段有值时才添加到响应中
+    if (merchant.email) responseData.email = merchant.email;
+    if (merchant.phone) responseData.phone = merchant.phone;
+    
     res.json({
       success: true,
-      data: {
-        merchantId: merchant.merchantId,
-        name: merchant.name,
-        email: merchant.email,
-        apiKey: merchant.apiKey,
-        secretKey: merchant.secretKey
-      }
+      data: responseData
     });
   } catch (error) {
     console.error('Create merchant error:', error);

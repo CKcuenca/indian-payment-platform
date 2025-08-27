@@ -582,14 +582,14 @@ export default function Merchants() {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                required
+                helperText="可选字段"
               />
               <TextField
                 fullWidth
                 label="电话"
                 value={formData.phone}
                 onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                required
+                helperText="可选字段"
               />
               <FormControl fullWidth>
                 <InputLabel>状态</InputLabel>

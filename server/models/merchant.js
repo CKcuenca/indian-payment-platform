@@ -14,12 +14,12 @@ const merchantSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true,
-    unique: true
+    required: false,
+    unique: false
   },
   phone: {
     type: String,
-    required: true
+    required: false
   },
   
   // 商户状态

@@ -20,11 +20,11 @@ async function createTestMerchant() {
     const testMerchant = new Merchant({
       merchantId: 'TEST001',
       name: '测试游戏公司',
-      email: 'test@game.com',
-      phone: '+91-9876543210',
+      email: 'test@game.com', // 可选字段
+      phone: '+91-9876543210', // 可选字段
       status: 'ACTIVE',
-      apiKey: 'test_api_key_123',
-      secretKey: 'test_secret_key_456',
+      apiKey: 'test_api_key_' + Date.now(),
+      secretKey: 'test_secret_key_' + Date.now(),
       paymentConfig: {
         defaultProvider: 'unispay',
         providers: [
