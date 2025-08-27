@@ -172,6 +172,14 @@ app.use('/api/heap-optimization', require('./routes/heap-optimization'));
 app.use('/api/callback', require('./routes/passpay-callback'));
 app.use('/api/passpay-sync', require('./routes/passpay-sync'));
 app.use('/api/memory-optimization', require('./routes/memory-optimization'));
+
+// 统一对外接口 - 游戏公司使用
+app.use('/api/order', require('./routes/order'));
+app.use('/api/payout', require('./routes/payout'));
+app.use('/api/balance', require('./routes/balance'));
+app.use('/api/upi-query', require('./routes/upi-query'));
+
+// 内部支付商接口 - 保留用于内部调用
 app.use('/api/wakeup', require('./routes/wakeup-payment'));
 app.use('/api/unispay', require('./routes/unispay-payment'));
 app.use('/api/withdraw', require('./routes/withdraw'));
