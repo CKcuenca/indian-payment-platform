@@ -82,6 +82,11 @@
             padding-left: 50px; 
             font-size: 0.9em; 
             color: #bdc3c7; 
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateX(-10px);
         }
         
         .menu-item.sub-item:hover { 
@@ -90,6 +95,46 @@
         
         .menu-item.sub-item.active { 
             color: #667eea; 
+        }
+        
+        .menu-item.sub-item.show {
+            max-height: 50px;
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .menu-item.parent {
+            position: relative;
+        }
+        
+        .menu-item.parent::after {
+            content: '▼';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: transform 0.3s ease;
+            font-size: 0.8em;
+            color: #bdc3c7;
+        }
+        
+        .menu-item.parent.expanded::after {
+            transform: translateY(-50%) rotate(180deg);
+        }
+        
+        .menu-item.parent:hover::after {
+            color: #ecf0f1;
+        }
+        
+        .menu-item.parent:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        
+        /* 子菜单项的悬停效果 */
+        .menu-item.sub-item:hover {
+            color: #ecf0f1;
+            background: rgba(255,255,255,0.05);
+            transform: translateX(5px);
         }
         
         /* 右侧内容区 */
@@ -416,7 +461,7 @@
                 
                 <div class="menu-section">
                     <div class="menu-section-title">核心接口</div>
-                    <a href="#deposit" class="menu-item" data-section="deposit">存款接口</a>
+                    <a href="#deposit" class="menu-item parent" data-section="deposit" data-has-submenu="true">存款接口</a>
                     <a href="#deposit-apply" class="menu-item sub-item" data-section="deposit-apply">申请存款</a>
                     <a href="#deposit-query" class="menu-item sub-item" data-section="deposit-query">存款查询</a>
                     <a href="#deposit-notify" class="menu-item sub-item" data-section="deposit-notify">异步通知</a>
@@ -424,7 +469,7 @@
                 
                 <div class="menu-section">
                     <div class="menu-section-title">出款服务</div>
-                    <a href="#withdraw" class="menu-item" data-section="withdraw">出款接口</a>
+                    <a href="#withdraw" class="menu-item parent" data-section="withdraw" data-has-submenu="true">出款接口</a>
                     <a href="#withdraw-apply" class="menu-item sub-item" data-section="withdraw-apply">申请出款</a>
                     <a href="#withdraw-query" class="menu-item sub-item" data-section="withdraw-query">出款查询</a>
                 </div>
@@ -1117,10 +1162,19 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
             const mobileMenuToggle = document.getElementById('mobileMenuToggle');
             const sidebar = document.getElementById('sidebar');
             
+            // 初始化菜单状态
+            initializeMenuState();
+            
             // 菜单点击事件
             menuItems.forEach(item => {
                 item.addEventListener('click', function(e) {
                     e.preventDefault();
+                    
+                    // 检查是否是一级菜单（有子菜单的）
+                    if (this.classList.contains('parent')) {
+                        toggleSubmenu(this);
+                        return; // 不切换内容，只展开/折叠子菜单
+                    }
                     
                     // 移除所有活动状态
                     menuItems.forEach(mi => mi.classList.remove('active'));
@@ -1142,6 +1196,52 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                     }
                 });
             });
+            
+            // 展开/折叠子菜单
+            function toggleSubmenu(parentItem) {
+                const isExpanded = parentItem.classList.contains('expanded');
+                const subItems = getSubmenuItems(parentItem);
+                
+                if (isExpanded) {
+                    // 折叠子菜单
+                    parentItem.classList.remove('expanded');
+                    subItems.forEach(item => {
+                        item.classList.remove('show');
+                    });
+                } else {
+                    // 展开子菜单
+                    parentItem.classList.add('expanded');
+                    subItems.forEach(item => {
+                        item.classList.add('show');
+                    });
+                }
+            }
+            
+            // 获取子菜单项
+            function getSubmenuItems(parentItem) {
+                const subItems = [];
+                let nextElement = parentItem.nextElementSibling;
+                
+                while (nextElement && nextElement.classList.contains('sub-item')) {
+                    subItems.push(nextElement);
+                    nextElement = nextElement.nextElementSibling;
+                }
+                
+                return subItems;
+            }
+            
+            // 初始化菜单状态
+            function initializeMenuState() {
+                // 默认展开第一个有子菜单的菜单项
+                const firstParent = document.querySelector('.menu-item.parent');
+                if (firstParent) {
+                    firstParent.classList.add('expanded');
+                    const subItems = getSubmenuItems(firstParent);
+                    subItems.forEach(item => {
+                        item.classList.add('show');
+                    });
+                }
+            }
             
             // 移动端菜单切换
             mobileMenuToggle.addEventListener('click', function() {
