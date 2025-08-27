@@ -92,6 +92,34 @@ const mockPaymentAccounts = [
     status: 'ACTIVE',
     createdAt: '2024-01-02T00:00:00Z',
     updatedAt: '2024-01-02T00:00:00Z'
+  },
+  {
+    _id: '3',
+    accountName: 'PassPay 4方平台账户',
+    provider: {
+      name: 'passpay',
+      type: 'native',
+      subType: 'fourth_party', // PassPay属于4方平台
+      accountId: 'PP001',
+      apiKey: 'pk_123456789',
+      secretKey: 'sk_987654321',
+      environment: 'production'
+    },
+    description: 'PassPay 4方平台账户，使用统一API',
+    limits: {
+      dailyLimit: 500000,
+      monthlyLimit: 5000000,
+      singleTransactionLimit: 50000,
+      minTransactionAmount: 100
+    },
+    fees: {
+      transactionFee: 0.6,
+      fixedFee: 0
+    },
+    priority: 2,
+    status: 'ACTIVE',
+    createdAt: '2024-01-02T00:00:00Z',
+    updatedAt: '2024-01-02T00:00:00Z'
   }
 ];
 
@@ -251,12 +279,12 @@ export default function PaymentManagementNew() {
       'razorpay': 'success',
       'paytm': 'warning',
       // 4方平台
+      'passpay': 'info',
       '4party_platform1': 'info',
       '4party_platform2': 'info',
       '4party_platform3': 'info',
       // 唤醒支付商
-      'passpay': 'error',
-      'unispay': 'info'
+      'unispay': 'error'
     };
     return colors[providerName.toLowerCase()] || 'default';
   };
@@ -476,9 +504,9 @@ export default function PaymentManagementNew() {
                         // 检查当前选中的支付商是否在新类型中可用
                         let shouldResetProvider = false;
                         if (newType === 'native') {
-                          shouldResetProvider = !['airpay', 'cashfree', 'razorpay', 'paytm'].includes(currentProvider);
+                          shouldResetProvider = !['airpay', 'cashfree', 'razorpay', 'paytm', 'passpay', '4party_platform1', '4party_platform2', '4party_platform3'].includes(currentProvider);
                         } else if (newType === 'wakeup') {
-                          shouldResetProvider = !['unispay', 'passpay'].includes(currentProvider);
+                          shouldResetProvider = !['unispay'].includes(currentProvider);
                         }
                         
                         setFormData({
@@ -521,7 +549,7 @@ export default function PaymentManagementNew() {
                           if (newSubType === 'third_party') {
                             shouldResetProvider = !['airpay', 'cashfree', 'razorpay', 'paytm'].includes(currentProvider);
                           } else if (newSubType === 'fourth_party') {
-                            shouldResetProvider = !['4party_platform1', '4party_platform2'].includes(currentProvider);
+                            shouldResetProvider = !['passpay', '4party_platform1', '4party_platform2', '4party_platform3'].includes(currentProvider);
                           }
                           
                           setFormData({
@@ -563,17 +591,17 @@ export default function PaymentManagementNew() {
                             <MenuItem value="razorpay">Razorpay (3方)</MenuItem>
                             <MenuItem value="paytm">Paytm (3方)</MenuItem>
                           </>
-                        ) : (
-                          <>
-                            <MenuItem value="4party_platform1">4方平台1 (统一API)</MenuItem>
-                            <MenuItem value="4party_platform2">4方平台2 (统一API)</MenuItem>
-                            <MenuItem value="4party_platform3">4方平台3 (统一API)</MenuItem>
-                          </>
-                        )
+                                                 ) : (
+                           <>
+                             <MenuItem value="passpay">PassPay (4方平台)</MenuItem>
+                             <MenuItem value="4party_platform1">4方平台1 (统一API)</MenuItem>
+                             <MenuItem value="4party_platform2">4方平台2 (统一API)</MenuItem>
+                             <MenuItem value="4party_platform3">4方平台3 (统一API)</MenuItem>
+                           </>
+                         )
                       ) : (
                         <>
                           <MenuItem value="unispay">UniSpay (唤醒)</MenuItem>
-                          <MenuItem value="passpay">PassPay (唤醒)</MenuItem>
                         </>
                       )}
                     </Select>
