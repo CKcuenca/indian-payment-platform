@@ -59,7 +59,6 @@ export default function Merchants() {
     merchantId: '',
     name: '',
     email: '',
-    phone: '',
     status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE' | 'SUSPENDED',
     defaultProvider: 'AirPay',
     depositFee: 0.5,
@@ -103,7 +102,6 @@ export default function Merchants() {
       merchantId: '',
       name: '',
       email: '',
-      phone: '',
       status: 'ACTIVE',
       defaultProvider: 'AirPay',
       depositFee: 0.5,
@@ -127,7 +125,6 @@ export default function Merchants() {
       merchantId: merchant.merchantId,
       name: merchant.name,
       email: merchant.email,
-      phone: merchant.phone,
       status: merchant.status,
       defaultProvider: merchant.defaultProvider,
       depositFee: merchant.depositFee,
@@ -163,8 +160,8 @@ export default function Merchants() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.merchantId || !formData.name || !formData.email || !formData.phone) {
-      setError('请填写所有必填字段');
+    if (!formData.merchantId || !formData.name) {
+      setError('请填写商户ID和商户名称');
       return;
     }
 
@@ -208,7 +205,6 @@ export default function Merchants() {
           merchantId: formData.merchantId,
           name: formData.name,
           email: formData.email,
-          phone: formData.phone,
           status: formData.status,
           defaultProvider: formData.defaultProvider,
           depositFee: formData.depositFee,
@@ -233,7 +229,6 @@ export default function Merchants() {
           merchantId: formData.merchantId,
           name: formData.name,
           email: formData.email,
-          phone: formData.phone,
           status: formData.status,
           balance: 0,
           defaultProvider: formData.defaultProvider,
@@ -584,13 +579,7 @@ export default function Merchants() {
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                 helperText="可选字段"
               />
-              <TextField
-                fullWidth
-                label="电话"
-                value={formData.phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                helperText="可选字段"
-              />
+
               <FormControl fullWidth>
                 <InputLabel>状态</InputLabel>
                 <Select

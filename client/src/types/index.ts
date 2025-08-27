@@ -116,7 +116,6 @@ export interface Merchant {
   merchantId: string;
   name: string;
   email: string;
-  phone: string;
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
   balance: number;
   defaultProvider: string;

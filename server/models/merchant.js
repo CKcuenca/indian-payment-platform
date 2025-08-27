@@ -17,10 +17,7 @@ const merchantSchema = new mongoose.Schema({
     required: false,
     unique: false
   },
-  phone: {
-    type: String,
-    required: false
-  },
+
   
   // 商户状态
   status: {

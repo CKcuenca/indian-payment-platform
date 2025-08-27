@@ -19,7 +19,6 @@ const validateRequest = (req, res, next) => {
 router.post('/merchants', [
   body('name').notEmpty().withMessage('Name is required'),
   body('email').optional().isEmail().withMessage('Email must be valid if provided'),
-  body('phone').optional(),
   validateRequest
 ], async (req, res) => {
   try {
@@ -49,7 +48,6 @@ router.post('/merchants', [
     
     // 只有当字段有值时才添加
     if (email) merchantData.email = email;
-    if (phone) merchantData.phone = phone;
     
     const merchant = new Merchant(merchantData);
 
@@ -64,7 +62,6 @@ router.post('/merchants', [
     
     // 只有当字段有值时才添加到响应中
     if (merchant.email) responseData.email = merchant.email;
-    if (merchant.phone) responseData.phone = merchant.phone;
     
     res.json({
       success: true,
