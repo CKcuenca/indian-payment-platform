@@ -372,12 +372,57 @@ export default function PaymentManagementNew() {
       </Box>
 
       {/* 添加/编辑账户对话框 */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>
-          {editingAccount ? '编辑支付账户' : '添加支付账户'}
+      <Dialog 
+        open={dialogOpen} 
+        onClose={() => setDialogOpen(false)} 
+        maxWidth="md" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            display: 'flex',
+            flexDirection: 'column',
+            maxHeight: '90vh',
+            overflow: 'hidden'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          borderBottom: 1,
+          borderColor: 'divider',
+          pb: 2,
+          flexShrink: 0,
+          backgroundColor: 'background.paper',
+          position: 'sticky',
+          top: 0,
+          zIndex: 1
+        }}>
+          <Typography variant="h6" component="div">
+            {editingAccount ? '编辑支付账户' : '添加支付账户'}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button 
+              onClick={() => setDialogOpen(false)}
+              variant="outlined"
+              size="small"
+            >
+              取消
+            </Button>
+            <Button 
+              type="submit" 
+              variant="contained" 
+              disabled={loading}
+              size="small"
+              form="payment-account-form"
+            >
+              {loading ? <CircularProgress size={16} /> : '保存'}
+            </Button>
+          </Box>
         </DialogTitle>
-        <DialogContent>
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+        <form id="payment-account-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+          <DialogContent sx={{ flex: 1, overflow: 'auto', p: 3 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               {/* 基本信息 */}
               <Box>
@@ -635,25 +680,9 @@ export default function PaymentManagementNew() {
                 />
               </Box>
 
-              {/* 操作按钮 */}
-              <Box>
-                <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-                  <Button onClick={() => setDialogOpen(false)}>
-                    取消
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={loading}
-                    startIcon={loading ? <CircularProgress size={20} /> : null}
-                  >
-                    {editingAccount ? '更新' : '创建'}
-                  </Button>
-                </Box>
-              </Box>
             </Box>
-          </Box>
-        </DialogContent>
+          </DialogContent>
+        </form>
       </Dialog>
     </Box>
   );
