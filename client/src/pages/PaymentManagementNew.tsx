@@ -571,14 +571,14 @@ export default function PaymentManagementNew() {
                             <MenuItem value="razorpay">Razorpay (3方)</MenuItem>
                             <MenuItem value="paytm">Paytm (3方)</MenuItem>
                           </>
-                                                 ) : (
-                           <>
-                             <MenuItem value="passpay">PassPay (4方平台)</MenuItem>
-                             <MenuItem value="4party_platform1">4方平台1 (统一API)</MenuItem>
-                             <MenuItem value="4party_platform2">4方平台2 (统一API)</MenuItem>
-                             <MenuItem value="4party_platform3">4方平台3 (统一API)</MenuItem>
-                           </>
-                         )
+                        ) : (
+                          <>
+                            <MenuItem value="passpay">PassPay (4方平台)</MenuItem>
+                            <MenuItem value="4party_platform1">4方平台1 (统一API)</MenuItem>
+                            <MenuItem value="4party_platform2">4方平台2 (统一API)</MenuItem>
+                            <MenuItem value="4party_platform3">4方平台3 (统一API)</MenuItem>
+                          </>
+                        )
                       ) : (
                         <>
                           <MenuItem value="unispay">UniSpay (唤醒)</MenuItem>
