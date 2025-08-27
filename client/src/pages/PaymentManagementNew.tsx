@@ -448,7 +448,22 @@ export default function PaymentManagementNew() {
                     <Select
                       value={formData.type}
                       onChange={(e) => {
-                        setFormData({...formData, type: e.target.value, providerName: ''});
+                        const newType = e.target.value;
+                        const currentProvider = formData.providerName;
+                        
+                        // 检查当前选中的支付商是否在新类型中可用
+                        let shouldResetProvider = false;
+                        if (newType === 'native') {
+                          shouldResetProvider = !['airpay', 'cashfree', 'razorpay', 'paytm'].includes(currentProvider);
+                        } else if (newType === 'wakeup') {
+                          shouldResetProvider = !['unispay', 'passpay'].includes(currentProvider);
+                        }
+                        
+                        setFormData({
+                          ...formData, 
+                          type: newType, 
+                          providerName: shouldResetProvider ? '' : currentProvider
+                        });
                       }}
                     >
                       <MenuItem value="native">
