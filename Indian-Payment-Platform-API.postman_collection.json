@@ -1,0 +1,345 @@
+{
+	"info": {
+		"_postman_id": "indian-payment-platform-unified-apis",
+		"name": "Indian Payment Platform - 统一支付接口",
+		"description": "印度支付平台统一API接口测试集合\n\n包含以下接口：\n- 存款申请和查询\n- 出款申请和查询\n- 余额查询\n- UPI信息查询\n\n注意：所有请求都需要正确的签名验证",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "1. 余额查询",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-API-Key",
+						"value": "pk_rzz8igydcme01uhm7"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"appid\": \"MERCHANT_ME01UHM7\",\n  \"timestamp\": \"{{timestamp}}\",\n  \"sign\": \"{{balance_signature}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/balance/query",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"balance",
+						"query"
+					]
+				},
+				"description": "查询商户余额信息\n\n请求参数：\n- appid: 商户ID\n- timestamp: 时间戳\n- sign: MD5签名"
+			},
+			"response": []
+		},
+		{
+			"name": "2. 存款申请",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-API-Key",
+						"value": "pk_rzz8igydcme01uhm7"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"appid\": \"MERCHANT_ME01UHM7\",\n  \"mchOrderId\": \"ORDER_{{timestamp}}\",\n  \"amount\": \"1000\",\n  \"currency\": \"INR\",\n  \"payType\": 101,\n  \"notifyUrl\": \"https://test.com/notify\",\n  \"timestamp\": \"{{timestamp}}\",\n  \"sign\": \"{{order_signature}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/order/create",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"order",
+						"create"
+					]
+				},
+				"description": "创建存款订单\n\n请求参数：\n- appid: 商户ID\n- mchOrderId: 商户订单号\n- amount: 金额\n- currency: 货币\n- payType: 支付类型\n- notifyUrl: 回调地址\n- timestamp: 时间戳\n- sign: MD5签名"
+			},
+			"response": []
+		},
+		{
+			"name": "3. 存款查询",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-API-Key",
+						"value": "pk_rzz8igydcme01uhm7"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"appid\": \"MERCHANT_ME01UHM7\",\n  \"mchOrderId\": \"{{order_id}}\",\n  \"timestamp\": \"{{timestamp}}\",\n  \"sign\": \"{{order_query_signature}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/order/query",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"order",
+						"query"
+					]
+				},
+				"description": "查询存款订单状态\n\n请求参数：\n- appid: 商户ID\n- mchOrderId: 商户订单号\n- timestamp: 时间戳\n- sign: MD5签名\n\n注意：需要先创建存款订单获得order_id"
+			},
+			"response": []
+		},
+		{
+			"name": "4. 出款申请",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-API-Key",
+						"value": "pk_rzz8igydcme01uhm7"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"appid\": \"MERCHANT_ME01UHM7\",\n  \"mchOrderId\": \"PAYOUT_{{timestamp}}\",\n  \"amount\": \"500\",\n  \"currency\": \"INR\",\n  \"bankCode\": \"HDFC\",\n  \"accountNumber\": \"1234567890\",\n  \"ifscCode\": \"HDFC0001234\",\n  \"accountName\": \"Test User\",\n  \"transferMode\": \"IMPS\",\n  \"remark\": \"测试提现\",\n  \"timestamp\": \"{{timestamp}}\",\n  \"sign\": \"{{payout_signature}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/payout/create",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"payout",
+						"create"
+					]
+				},
+				"description": "创建出款订单\n\n请求参数：\n- appid: 商户ID\n- mchOrderId: 商户订单号\n- amount: 金额\n- currency: 货币\n- bankCode: 银行代码\n- accountNumber: 账户号码\n- ifscCode: IFSC代码\n- accountName: 账户持有人姓名\n- transferMode: 转账模式\n- remark: 备注\n- timestamp: 时间戳\n- sign: MD5签名"
+			},
+			"response": []
+		},
+		{
+			"name": "5. 出款查询",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-API-Key",
+						"value": "pk_rzz8igydcme01uhm7"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"appid\": \"MERCHANT_ME01UHM7\",\n  \"mchOrderId\": \"{{payout_id}}\",\n  \"timestamp\": \"{{timestamp}}\",\n  \"sign\": \"{{payout_query_signature}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/payout/query",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"payout",
+						"query"
+					]
+				},
+				"description": "查询出款订单状态\n\n请求参数：\n- appid: 商户ID\n- mchOrderId: 商户订单号\n- timestamp: 时间戳\n- sign: MD5签名\n\n注意：需要先创建出款订单获得payout_id"
+			},
+			"response": []
+		},
+		{
+			"name": "6. UPI查询",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "X-API-Key",
+						"value": "pk_rzz8igydcme01uhm7"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"appid\": \"MERCHANT_ME01UHM7\",\n  \"timestamp\": \"{{timestamp}}\",\n  \"sign\": \"{{upi_signature}}\"\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/api/upi-query/query",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"upi-query",
+						"query"
+					]
+				},
+				"description": "查询UPI信息\n\n请求参数：\n- appid: 商户ID\n- timestamp: 时间戳\n- sign: MD5签名"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// 生成时间戳",
+					"const timestamp = Date.now().toString();",
+					"pm.environment.set('timestamp', timestamp);",
+					"",
+					"// 商户信息",
+					"const merchantId = 'MERCHANT_ME01UHM7';",
+					"const secretKey = 'sk_mxf9mdelh5me01uhm7';",
+					"",
+					"// 生成签名函数",
+					"function generateSignature(params, secretKey) {",
+					"    const sortedKeys = Object.keys(params).sort();",
+					"    const signString = sortedKeys",
+					"        .filter(key => key !== 'sign' && params[key] !== undefined && params[key] !== null && params[key] !== '')",
+					"        .map(key => `${key}=${params[key]}`)",
+					"        .join('&') + secretKey;",
+					"    ",
+					"    // 注意：这里使用CryptoJS，Postman内置支持",
+					"    return CryptoJS.MD5(signString).toString();",
+					"}",
+					"",
+					"// 根据请求类型生成不同签名",
+					"const requestName = pm.info.requestName;",
+					"",
+					"if (requestName === '1. 余额查询') {",
+					"    const params = {",
+					"        appid: merchantId,",
+					"        timestamp: timestamp",
+					"    };",
+					"    const signature = generateSignature(params, secretKey);",
+					"    pm.environment.set('balance_signature', signature);",
+					"}",
+					"",
+					"if (requestName === '2. 存款申请') {",
+					"    const params = {",
+					"        appid: merchantId,",
+					"        mchOrderId: `ORDER_${timestamp}`,",
+					"        amount: '1000',",
+					"        currency: 'INR',",
+					"        payType: 101,",
+					"        notifyUrl: 'https://test.com/notify',",
+					"        timestamp: timestamp",
+					"    };",
+					"    const signature = generateSignature(params, secretKey);",
+					"    pm.environment.set('order_signature', signature);",
+					"    pm.environment.set('order_id', `ORDER_${timestamp}`);",
+					"}",
+					"",
+					"if (requestName === '3. 存款查询') {",
+					"    const params = {",
+					"        appid: merchantId,",
+					"        mchOrderId: pm.environment.get('order_id'),",
+					"        timestamp: timestamp",
+					"    };",
+					"    const signature = generateSignature(params, secretKey);",
+					"    pm.environment.set('order_query_signature', signature);",
+					"}",
+					"",
+					"if (requestName === '4. 出款申请') {",
+					"    const params = {",
+					"        appid: merchantId,",
+					"        mchOrderId: `PAYOUT_${timestamp}`,",
+					"        amount: '500',",
+					"        currency: 'INR',",
+					"        bankCode: 'HDFC',",
+					"        accountNumber: '1234567890',",
+					"        ifscCode: 'HDFC0001234',",
+					"        accountName: 'Test User',",
+					"        transferMode: 'IMPS',",
+					"        remark: '测试提现',",
+					"        timestamp: timestamp",
+					"    };",
+					"    const signature = generateSignature(params, secretKey);",
+					"    pm.environment.set('payout_signature', signature);",
+					"    pm.environment.set('payout_id', `PAYOUT_${timestamp}`);",
+					"}",
+					"",
+					"if (requestName === '5. 出款查询') {",
+					"    const params = {",
+					"        appid: merchantId,",
+					"        mchOrderId: pm.environment.get('payout_id'),",
+					"        timestamp: timestamp",
+					"    };",
+					"    const signature = generateSignature(params, secretKey);",
+					"    pm.environment.set('payout_query_signature', signature);",
+					"}",
+					"",
+					"if (requestName === '6. UPI查询') {",
+					"    const params = {",
+					"        appid: merchantId,",
+					"        timestamp: timestamp",
+					"    };",
+					"    const signature = generateSignature(params, secretKey);",
+					"    pm.environment.set('upi_signature', signature);",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://cashgit.com",
+			"type": "string",
+			"description": "线上服务器地址（使用域名）"
+		},
+		{
+			"key": "local_url",
+			"value": "http://localhost:3001",
+			"type": "string",
+			"description": "本地开发服务器地址"
+		},
+		{
+			"key": "merchant_id",
+			"value": "MERCHANT_ME01UHM7",
+			"type": "string",
+			"description": "测试商户ID"
+		},
+		{
+			"key": "api_key",
+			"value": "pk_rzz8igydcme01uhm7",
+			"type": "string",
+			"description": "测试商户API密钥"
+		},
+		{
+			"key": "secret_key",
+			"value": "sk_mxf9mdelh5me01uhm7",
+			"type": "string",
+			"description": "测试商户密钥"
+		}
+	]
+}
