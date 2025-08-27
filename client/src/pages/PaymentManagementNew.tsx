@@ -43,6 +43,7 @@ const mockPaymentAccounts = [
     provider: {
       name: 'airpay',
       type: 'native',
+      subType: 'third_party',
       accountId: 'AP001',
       apiKey: 'ak_123456789',
       secretKey: 'sk_987654321',
@@ -70,6 +71,7 @@ const mockPaymentAccounts = [
     provider: {
       name: 'unispay',
       type: 'wakeup',
+      subType: 'wakeup', // 唤醒类型没有子类型
       accountId: 'US001',
       apiKey: 'uk_123456789',
       secretKey: 'sk_987654321',
@@ -109,6 +111,7 @@ export default function PaymentManagementNew() {
     accountName: '',
     providerName: '',
     type: 'native',
+    subType: 'third_party', // 新增：子类型 (third_party, fourth_party)
     accountId: '',
     apiKey: '',
     secretKey: '',
@@ -132,6 +135,7 @@ export default function PaymentManagementNew() {
       accountName: '',
       providerName: '',
       type: 'native',
+      subType: 'third_party',
       accountId: '',
       apiKey: '',
       secretKey: '',
@@ -155,6 +159,7 @@ export default function PaymentManagementNew() {
       accountName: account.accountName,
       providerName: account.provider.name,
       type: account.provider.type,
+      subType: account.provider.subType || 'third_party', // 从账户数据获取子类型，如果没有则默认为third_party
       accountId: account.provider.accountId,
       apiKey: account.provider.apiKey,
       secretKey: account.provider.secretKey,
@@ -182,6 +187,7 @@ export default function PaymentManagementNew() {
         provider: {
           name: formData.providerName,
           type: formData.type,
+          subType: formData.subType, // 添加子类型
           accountId: formData.accountId,
           apiKey: formData.apiKey,
           secretKey: formData.secretKey,
@@ -239,10 +245,16 @@ export default function PaymentManagementNew() {
 
   const getProviderColor = (providerName: string) => {
     const colors: {[key: string]: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'default'} = {
+      // 3方支付商
       'airpay': 'primary',
       'cashfree': 'secondary',
       'razorpay': 'success',
       'paytm': 'warning',
+      // 4方平台
+      '4party_platform1': 'info',
+      '4party_platform2': 'info',
+      '4party_platform3': 'info',
+      // 唤醒支付商
       'passpay': 'error',
       'unispay': 'info'
     };
@@ -324,11 +336,21 @@ export default function PaymentManagementNew() {
                   <TableRow key={account._id}>
                     <TableCell>{account.accountName}</TableCell>
                     <TableCell>
-                      <Chip
-                        label={account.provider.name}
-                        color={getProviderColor(account.provider.name)}
-                        size="small"
-                      />
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Chip
+                          label={account.provider.name}
+                          color={getProviderColor(account.provider.name)}
+                          size="small"
+                        />
+                        {account.provider.type === 'native' && (
+                          <Chip
+                            label={account.provider.subType === 'third_party' ? '3方' : '4方'}
+                            color={account.provider.subType === 'third_party' ? 'success' : 'info'}
+                            size="small"
+                            variant="outlined"
+                          />
+                        )}
+                      </Box>
                     </TableCell>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -462,6 +484,7 @@ export default function PaymentManagementNew() {
                         setFormData({
                           ...formData, 
                           type: newType, 
+                          subType: newType === 'wakeup' ? 'wakeup' : 'third_party', // 重置子类型
                           providerName: shouldResetProvider ? '' : currentProvider
                         });
                       }}
@@ -482,6 +505,49 @@ export default function PaymentManagementNew() {
                   </FormControl>
                 </Box>
                 
+                {/* 原生支付商的子类型选择 */}
+                {formData.type === 'native' && (
+                  <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                    <FormControl fullWidth required>
+                      <InputLabel>分支类型</InputLabel>
+                      <Select
+                        value={formData.subType}
+                        onChange={(e) => {
+                          const newSubType = e.target.value;
+                          const currentProvider = formData.providerName;
+                          
+                          // 检查当前选中的支付商是否在新子类型中可用
+                          let shouldResetProvider = false;
+                          if (newSubType === 'third_party') {
+                            shouldResetProvider = !['airpay', 'cashfree', 'razorpay', 'paytm'].includes(currentProvider);
+                          } else if (newSubType === 'fourth_party') {
+                            shouldResetProvider = !['4party_platform1', '4party_platform2'].includes(currentProvider);
+                          }
+                          
+                          setFormData({
+                            ...formData,
+                            subType: newSubType,
+                            providerName: shouldResetProvider ? '' : currentProvider
+                          });
+                        }}
+                      >
+                        <MenuItem value="third_party">
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <AccountBalanceWallet color="primary" />
+                            3方支付商
+                          </Box>
+                        </MenuItem>
+                        <MenuItem value="fourth_party">
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <AccountBalanceWallet color="secondary" />
+                            4方平台
+                          </Box>
+                        </MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                )}
+                
                 <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                   <FormControl fullWidth required>
                     <InputLabel>支付商</InputLabel>
@@ -490,16 +556,24 @@ export default function PaymentManagementNew() {
                       onChange={(e) => setFormData({...formData, providerName: e.target.value})}
                     >
                       {formData.type === 'native' ? (
-                        <>
-                          <MenuItem value="airpay">AirPay</MenuItem>
-                          <MenuItem value="cashfree">CashFree</MenuItem>
-                          <MenuItem value="razorpay">Razorpay</MenuItem>
-                          <MenuItem value="paytm">Paytm</MenuItem>
-                        </>
+                        formData.subType === 'third_party' ? (
+                          <>
+                            <MenuItem value="airpay">AirPay (3方)</MenuItem>
+                            <MenuItem value="cashfree">CashFree (3方)</MenuItem>
+                            <MenuItem value="razorpay">Razorpay (3方)</MenuItem>
+                            <MenuItem value="paytm">Paytm (3方)</MenuItem>
+                          </>
+                        ) : (
+                          <>
+                            <MenuItem value="4party_platform1">4方平台1 (统一API)</MenuItem>
+                            <MenuItem value="4party_platform2">4方平台2 (统一API)</MenuItem>
+                            <MenuItem value="4party_platform3">4方平台3 (统一API)</MenuItem>
+                          </>
+                        )
                       ) : (
                         <>
-                          <MenuItem value="unispay">UniSpay</MenuItem>
-                          <MenuItem value="passpay">PassPay</MenuItem>
+                          <MenuItem value="unispay">UniSpay (唤醒)</MenuItem>
+                          <MenuItem value="passpay">PassPay (唤醒)</MenuItem>
                         </>
                       )}
                     </Select>
