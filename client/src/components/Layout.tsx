@@ -203,7 +203,7 @@ export default function Layout({ children }: LayoutProps) {
               variant="outlined"
               size="small"
               sx={{ mr: 2, borderColor: 'rgba(255,255,255,0.3)', color: 'white' }}
-              onClick={() => window.open('/docs/india-wakeup-payment-api.md', '_blank')}
+              onClick={() => window.open('/wakeup-payment-api.html', '_blank')}
             >
               唤醒对接文档
             </Button>
