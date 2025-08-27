@@ -803,7 +803,7 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                         </div>
                         
                         <h3>接口说明</h3>
-                        <p>该接口用于查询存款订单的状态和详细信息。</p>
+                        <p>该接口用于查询存款订单的状态和详细信息。商户可以通过此接口实时了解订单处理进度和最终结果。</p>
                         
                         <h3>请求参数</h3>
                         <div class="table">
@@ -814,6 +814,7 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                         <th>类型</th>
                                         <th>必填</th>
                                         <th>说明</th>
+                                        <th>示例值</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -822,27 +823,128 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户号</td>
+                                        <td>M171925157713</td>
                                     </tr>
                                     <tr>
                                         <td>mchOrderId</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户订单号</td>
+                                        <td>ORDER_20241201_001</td>
                                     </tr>
                                     <tr>
                                         <td>timestamp</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
-                                        <td>时间戳</td>
+                                        <td>时间戳（毫秒）</td>
+                                        <td>1725300081000</td>
                                     </tr>
                                     <tr>
                                         <td>sign</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>签名</td>
+                                        <td>fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde</td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        
+                        <h3>请求示例</h3>
+                        <div class="code-block">
+<pre>{
+    "mchNo": "M171925157713",
+    "mchOrderId": "ORDER_20241201_001",
+    "timestamp": "1725300081000",
+    "sign": "fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde"
+}</pre>
+                        </div>
+                        
+                        <h3>响应参数</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>code</td>
+                                        <td>String</td>
+                                        <td>响应码</td>
+                                        <td>0000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>message</td>
+                                        <td>String</td>
+                                        <td>响应消息</td>
+                                        <td>成功</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.orderId</td>
+                                        <td>String</td>
+                                        <td>商户订单号</td>
+                                        <td>ORDER_20241201_001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.platformOrderId</td>
+                                        <td>String</td>
+                                        <td>平台订单号</td>
+                                        <td>CG202412010001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.status</td>
+                                        <td>String</td>
+                                        <td>订单状态</td>
+                                        <td>SUCCESS</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.amount</td>
+                                        <td>String</td>
+                                        <td>订单金额</td>
+                                        <td>1000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.currency</td>
+                                        <td>String</td>
+                                        <td>币种</td>
+                                        <td>INR</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.createTime</td>
+                                        <td>String</td>
+                                        <td>创建时间</td>
+                                        <td>2024-12-01 10:00:00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.updateTime</td>
+                                        <td>String</td>
+                                        <td>更新时间</td>
+                                        <td>2024-12-01 10:05:30</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>响应示例</h3>
+                        <div class="code-block">
+<pre>{
+    "code": "0000",
+    "message": "成功",
+    "data": {
+        "orderId": "ORDER_20241201_001",
+        "platformOrderId": "CG202412010001",
+        "status": "SUCCESS",
+        "amount": "1000",
+        "currency": "INR",
+        "createTime": "2024-12-01 10:00:00",
+        "updateTime": "2024-12-01 10:05:30"
+    }
+}</pre>
                         </div>
                     </div>
                 </div>
@@ -867,6 +969,7 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                         <th>参数名</th>
                                         <th>类型</th>
                                         <th>说明</th>
+                                        <th>示例值</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -874,29 +977,66 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                         <td>mchOrderId</td>
                                         <td>String</td>
                                         <td>商户订单号</td>
+                                        <td>ORDER_20241201_001</td>
                                     </tr>
                                     <tr>
                                         <td>platformOrderId</td>
                                         <td>String</td>
                                         <td>平台订单号</td>
+                                        <td>CG202412010001</td>
                                     </tr>
                                     <tr>
                                         <td>status</td>
                                         <td>String</td>
                                         <td>订单状态：SUCCESS-成功，FAILED-失败，PENDING-处理中</td>
+                                        <td>SUCCESS</td>
                                     </tr>
                                     <tr>
                                         <td>amount</td>
                                         <td>String</td>
-                                        <td>订单金额</td>
+                                        <td>订单金额（分）</td>
+                                        <td>1000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>currency</td>
+                                        <td>String</td>
+                                        <td>币种</td>
+                                        <td>INR</td>
+                                    </tr>
+                                    <tr>
+                                        <td>payType</td>
+                                        <td>Integer</td>
+                                        <td>支付类型</td>
+                                        <td>101</td>
+                                    </tr>
+                                    <tr>
+                                        <td>timestamp</td>
+                                        <td>String</td>
+                                        <td>通知时间戳</td>
+                                        <td>1725300081000</td>
                                     </tr>
                                     <tr>
                                         <td>sign</td>
                                         <td>String</td>
                                         <td>签名验证</td>
+                                        <td>fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde</td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        
+                        <h3>通知示例</h3>
+                        <div class="code-block">
+<pre>{
+    "mchOrderId": "ORDER_20241201_001",
+    "platformOrderId": "CG202412010001",
+    "status": "SUCCESS",
+    "amount": "1000",
+    "currency": "INR",
+    "payType": 101,
+    "timestamp": "1725300081000",
+    "sign": "fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde"
+}</pre>
                         </div>
                         
                         <h3>响应要求</h3>
@@ -907,6 +1047,15 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
     "message": "success"
 }</pre>
                         </div>
+                        
+                        <div class="note">
+                            <strong>重要提示：</strong>
+                            <ul>
+                                <li>异步通知会重试多次，直到收到成功响应</li>
+                                <li>商户必须验证签名，确保数据来源可信</li>
+                                <li>建议在数据库中记录通知日志，便于问题排查</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 
@@ -914,7 +1063,49 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                 <div class="content-section" id="withdraw">
                     <div class="section">
                         <h2>4. 出款接口</h2>
-                        <p>出款接口用于向用户银行账户转账，支持多种银行和账户类型。</p>
+                        <p>出款接口用于向用户银行账户转账，支持多种银行和账户类型。系统支持印度主要银行的IMPS、NEFT、RTGS等转账方式。</p>
+                        
+                        <h3>支持的银行类型</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>银行类型</th>
+                                        <th>说明</th>
+                                        <th>状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>公共部门银行</td>
+                                        <td>SBI、PNB、BOB、Canara Bank等</td>
+                                        <td><span class="badge badge-success">已支持</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>私营银行</td>
+                                        <td>HDFC、ICICI、Axis Bank、Kotak等</td>
+                                        <td><span class="badge badge-success">已支持</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>外资银行</td>
+                                        <td>Citibank、Standard Chartered等</td>
+                                        <td><span class="badge badge-success">已支持</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>合作银行</td>
+                                        <td>各类合作银行</td>
+                                        <td><span class="badge badge-warning">部分支持</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>转账方式</h3>
+                        <ul>
+                            <li><strong>IMPS (Immediate Payment Service)</strong>：实时转账，24x7可用，限额20万卢比</li>
+                            <li><strong>NEFT (National Electronic Funds Transfer)</strong>：批量转账，工作日处理，无金额限制</li>
+                            <li><strong>RTGS (Real Time Gross Settlement)</strong>：大额实时转账，工作日处理，最低2万卢比</li>
+                        </ul>
                     </div>
                 </div>
                 
@@ -940,6 +1131,7 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                         <th>类型</th>
                                         <th>必填</th>
                                         <th>说明</th>
+                                        <th>示例值</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -948,45 +1140,195 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户号</td>
+                                        <td>M171925157713</td>
                                     </tr>
                                     <tr>
                                         <td>mchOrderId</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户订单号</td>
+                                        <td>WITHDRAW_20241201_001</td>
                                     </tr>
                                     <tr>
                                         <td>amount</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>出款金额（分）</td>
+                                        <td>5000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>currency</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>币种</td>
+                                        <td>INR</td>
                                     </tr>
                                     <tr>
                                         <td>bankCode</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>银行代码</td>
+                                        <td>SBIN</td>
                                     </tr>
                                     <tr>
                                         <td>accountNumber</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>银行账号</td>
+                                        <td>1234567890</td>
                                     </tr>
                                     <tr>
                                         <td>ifscCode</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>IFSC代码</td>
+                                        <td>SBIN0001234</td>
                                     </tr>
                                     <tr>
                                         <td>accountName</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>账户姓名</td>
+                                        <td>John Doe</td>
+                                    </tr>
+                                    <tr>
+                                        <td>transferMode</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-optional">可选</span></td>
+                                        <td>转账方式：IMPS/NEFT/RTGS</td>
+                                        <td>IMPS</td>
+                                    </tr>
+                                    <tr>
+                                        <td>remark</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-optional">可选</span></td>
+                                        <td>备注信息</td>
+                                        <td>Withdrawal for user</td>
+                                    </tr>
+                                    <tr>
+                                        <td>timestamp</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>时间戳（毫秒）</td>
+                                        <td>1725300081000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>sign</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>签名</td>
+                                        <td>fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde</td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        
+                        <h3>请求示例</h3>
+                        <div class="code-block">
+<pre>{
+    "mchNo": "M171925157713",
+    "mchOrderId": "WITHDRAW_20241201_001",
+    "amount": "5000",
+    "currency": "INR",
+    "bankCode": "SBIN",
+    "accountNumber": "1234567890",
+    "ifscCode": "SBIN0001234",
+    "accountName": "John Doe",
+    "transferMode": "IMPS",
+    "remark": "Withdrawal for user",
+    "timestamp": "1725300081000",
+    "sign": "fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde"
+}</pre>
+                        </div>
+                        
+                        <h3>响应参数</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>code</td>
+                                        <td>String</td>
+                                        <td>响应码</td>
+                                        <td>0000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>message</td>
+                                        <td>String</td>
+                                        <td>响应消息</td>
+                                        <td>成功</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.orderId</td>
+                                        <td>String</td>
+                                        <td>商户订单号</td>
+                                        <td>WITHDRAW_20241201_001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.platformOrderId</td>
+                                        <td>String</td>
+                                        <td>平台订单号</td>
+                                        <td>CG202412010002</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.status</td>
+                                        <td>String</td>
+                                        <td>订单状态</td>
+                                        <td>PROCESSING</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.amount</td>
+                                        <td>String</td>
+                                        <td>出款金额</td>
+                                        <td>5000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.currency</td>
+                                        <td>String</td>
+                                        <td>币种</td>
+                                        <td>INR</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.createTime</td>
+                                        <td>String</td>
+                                        <td>创建时间</td>
+                                        <td>2024-12-01 10:00:00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>响应示例</h3>
+                        <div class="code-block">
+<pre>{
+    "code": "0000",
+    "message": "成功",
+    "data": {
+        "orderId": "WITHDRAW_20241201_001",
+        "platformOrderId": "CG202412010002",
+        "status": "PROCESSING",
+        "amount": "5000",
+        "currency": "INR",
+        "createTime": "2024-12-01 10:00:00"
+    }
+}</pre>
+                        </div>
+                        
+                        <div class="note">
+                            <strong>注意事项：</strong>
+                            <ul>
+                                <li>IFSC代码必须准确，否则可能导致转账失败</li>
+                                <li>账户姓名必须与银行记录完全一致</li>
+                                <li>IMPS转账通常在几分钟内完成，NEFT/RTGS需要1-2个工作日</li>
+                                <li>建议在转账前验证银行账户信息的准确性</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -1002,7 +1344,226 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                         </div>
                         
                         <h3>接口说明</h3>
-                        <p>该接口用于查询出款订单的状态和详细信息。</p>
+                        <p>该接口用于查询出款订单的状态和详细信息。商户可以通过此接口了解出款处理进度、转账状态和最终结果。</p>
+                        
+                        <h3>请求参数</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>必填</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>mchNo</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户号</td>
+                                        <td>M171925157713</td>
+                                    </tr>
+                                    <tr>
+                                        <td>mchOrderId</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户订单号</td>
+                                        <td>WITHDRAW_20241201_001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>timestamp</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>时间戳（毫秒）</td>
+                                        <td>1725300081000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>sign</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>签名</td>
+                                        <td>fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>请求示例</h3>
+                        <div class="code-block">
+<pre>{
+    "mchNo": "M171925157713",
+    "mchOrderId": "WITHDRAW_20241201_001",
+    "timestamp": "1725300081000",
+    "sign": "fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde"
+}</pre>
+                        </div>
+                        
+                        <h3>响应参数</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>code</td>
+                                        <td>String</td>
+                                        <td>响应码</td>
+                                        <td>0000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>message</td>
+                                        <td>String</td>
+                                        <td>响应消息</td>
+                                        <td>成功</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.orderId</td>
+                                        <td>String</td>
+                                        <td>商户订单号</td>
+                                        <td>WITHDRAW_20241201_001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.platformOrderId</td>
+                                        <td>String</td>
+                                        <td>平台订单号</td>
+                                        <td>CG202412010002</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.status</td>
+                                        <td>String</td>
+                                        <td>订单状态</td>
+                                        <td>SUCCESS</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.amount</td>
+                                        <td>String</td>
+                                        <td>出款金额</td>
+                                        <td>5000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.currency</td>
+                                        <td>String</td>
+                                        <td>币种</td>
+                                        <td>INR</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.bankCode</td>
+                                        <td>String</td>
+                                        <td>银行代码</td>
+                                        <td>SBIN</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.accountNumber</td>
+                                        <td>String</td>
+                                        <td>银行账号</td>
+                                        <td>1234567890</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.ifscCode</td>
+                                        <td>String</td>
+                                        <td>IFSC代码</td>
+                                        <td>SBIN0001234</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.accountName</td>
+                                        <td>String</td>
+                                        <td>账户姓名</td>
+                                        <td>John Doe</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.transferMode</td>
+                                        <td>String</td>
+                                        <td>转账方式</td>
+                                        <td>IMPS</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.utrNumber</td>
+                                        <td>String</td>
+                                        <td>UTR号码</td>
+                                        <td>UTR123456789</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.createTime</td>
+                                        <td>String</td>
+                                        <td>创建时间</td>
+                                        <td>2024-12-01 10:00:00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.updateTime</td>
+                                        <td>String</td>
+                                        <td>更新时间</td>
+                                        <td>2024-12-01 10:05:30</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>响应示例</h3>
+                        <div class="code-block">
+<pre>{
+    "code": "0000",
+    "message": "成功",
+    "data": {
+        "orderId": "WITHDRAW_20241201_001",
+        "platformOrderId": "CG202412010002",
+        "status": "SUCCESS",
+        "amount": "5000",
+        "currency": "INR",
+        "bankCode": "SBIN",
+        "accountNumber": "1234567890",
+        "ifscCode": "SBIN0001234",
+        "accountName": "John Doe",
+        "transferMode": "IMPS",
+        "utrNumber": "UTR123456789",
+        "createTime": "2024-12-01 10:00:00",
+        "updateTime": "2024-12-01 10:05:30"
+    }
+}</pre>
+                        </div>
+                        
+                        <h3>订单状态说明</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>状态</th>
+                                        <th>说明</th>
+                                        <th>处理时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>PROCESSING</td>
+                                        <td>处理中</td>
+                                        <td>1-5分钟</td>
+                                    </tr>
+                                    <tr>
+                                        <td>SUCCESS</td>
+                                        <td>成功</td>
+                                        <td>IMPS: 1-5分钟, NEFT: 1-2小时, RTGS: 实时</td>
+                                    </tr>
+                                    <tr>
+                                        <td>FAILED</td>
+                                        <td>失败</td>
+                                        <td>立即</td>
+                                    </tr>
+                                    <tr>
+                                        <td>PENDING</td>
+                                        <td>待处理</td>
+                                        <td>工作日9:00-17:00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 
@@ -1017,7 +1578,174 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                         </div>
                         
                         <h3>接口说明</h3>
-                        <p>该接口专门用于查询印度UPI支付的相关信息。</p>
+                        <p>该接口专门用于查询印度UPI支付的相关信息。UPI（Unified Payments Interface）是印度国家支付公司（NPCI）开发的实时支付系统，支持24x7全天候支付服务。</p>
+                        
+                        <h3>请求参数</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>必填</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>mchNo</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户号</td>
+                                        <td>M171925157713</td>
+                                    </tr>
+                                    <tr>
+                                        <td>mchOrderId</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户订单号</td>
+                                        <td>ORDER_20241201_001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>timestamp</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>时间戳（毫秒）</td>
+                                        <td>1725300081000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>sign</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>签名</td>
+                                        <td>fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>请求示例</h3>
+                        <div class="code-block">
+<pre>{
+    "mchNo": "M171925157713",
+    "mchOrderId": "ORDER_20241201_001",
+    "timestamp": "1725300081000",
+    "sign": "fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde"
+}</pre>
+                        </div>
+                        
+                        <h3>响应参数</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>code</td>
+                                        <td>String</td>
+                                        <td>响应码</td>
+                                        <td>0000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>message</td>
+                                        <td>String</td>
+                                        <td>响应消息</td>
+                                        <td>成功</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.orderId</td>
+                                        <td>String</td>
+                                        <td>商户订单号</td>
+                                        <td>ORDER_20241201_001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.platformOrderId</td>
+                                        <td>String</td>
+                                        <td>平台订单号</td>
+                                        <td>CG202412010001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.status</td>
+                                        <td>String</td>
+                                        <td>订单状态</td>
+                                        <td>SUCCESS</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.upiId</td>
+                                        <td>String</td>
+                                        <td>UPI ID</td>
+                                        <td>user@bank</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.upiTransactionId</td>
+                                        <td>String</td>
+                                        <td>UPI交易ID</td>
+                                        <td>UPI123456789</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.amount</td>
+                                        <td>String</td>
+                                        <td>交易金额</td>
+                                        <td>1000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.currency</td>
+                                        <td>String</td>
+                                        <td>币种</td>
+                                        <td>INR</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.createTime</td>
+                                        <td>String</td>
+                                        <td>创建时间</td>
+                                        <td>2024-12-01 10:00:00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.updateTime</td>
+                                        <td>String</td>
+                                        <td>更新时间</td>
+                                        <td>2024-12-01 10:05:30</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>响应示例</h3>
+                        <div class="code-block">
+<pre>{
+    "code": "0000",
+    "message": "成功",
+    "data": {
+        "orderId": "ORDER_20241201_001",
+        "platformOrderId": "CG202412010001",
+        "status": "SUCCESS",
+        "upiId": "user@bank",
+        "upiTransactionId": "UPI123456789",
+        "amount": "1000",
+        "currency": "INR",
+        "createTime": "2024-12-01 10:00:00",
+        "updateTime": "2024-12-01 10:05:30"
+    }
+}</pre>
+                        </div>
+                        
+                        <div class="info">
+                            <strong>UPI支付优势：</strong>
+                            <ul>
+                                <li>24x7全天候服务，不受银行营业时间限制</li>
+                                <li>实时到账，通常在几秒钟内完成</li>
+                                <li>支持所有印度银行和数字钱包</li>
+                                <li>安全可靠，使用UPI PIN进行身份验证</li>
+                                <li>支持二维码扫描支付</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 
@@ -1073,6 +1801,7 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                         <th>类型</th>
                                         <th>必填</th>
                                         <th>说明</th>
+                                        <th>示例值</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1081,21 +1810,124 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户号</td>
+                                        <td>M171925157713</td>
                                     </tr>
                                     <tr>
                                         <td>timestamp</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
-                                        <td>时间戳</td>
+                                        <td>时间戳（毫秒）</td>
+                                        <td>1725300081000</td>
                                     </tr>
                                     <tr>
                                         <td>sign</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>签名</td>
+                                        <td>fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde</td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        
+                        <h3>请求示例</h3>
+                        <div class="code-block">
+<pre>{
+    "mchNo": "M171925157713",
+    "timestamp": "1725300081000",
+    "sign": "fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde"
+}</pre>
+                        </div>
+                        
+                        <h3>响应参数</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>code</td>
+                                        <td>String</td>
+                                        <td>响应码</td>
+                                        <td>0000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>message</td>
+                                        <td>String</td>
+                                        <td>响应消息</td>
+                                        <td>成功</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.mchNo</td>
+                                        <td>String</td>
+                                        <td>商户号</td>
+                                        <td>M171925157713</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.balance</td>
+                                        <td>String</td>
+                                        <td>账户余额（分）</td>
+                                        <td>100000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.currency</td>
+                                        <td>String</td>
+                                        <td>币种</td>
+                                        <td>INR</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.frozenAmount</td>
+                                        <td>String</td>
+                                        <td>冻结金额（分）</td>
+                                        <td>5000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.availableAmount</td>
+                                        <td>String</td>
+                                        <td>可用金额（分）</td>
+                                        <td>95000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.lastUpdateTime</td>
+                                        <td>String</td>
+                                        <td>最后更新时间</td>
+                                        <td>2024-12-01 10:00:00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>响应示例</h3>
+                        <div class="code-block">
+<pre>{
+    "code": "0000",
+    "message": "成功",
+    "data": {
+        "mchNo": "M171925157713",
+        "balance": "100000",
+        "currency": "INR",
+        "frozenAmount": "5000",
+        "availableAmount": "95000",
+        "lastUpdateTime": "2024-12-01 10:00:00"
+    }
+}</pre>
+                        </div>
+                        
+                        <div class="note">
+                            <strong>余额说明：</strong>
+                            <ul>
+                                <li><strong>账户余额</strong>：商户账户的总余额</li>
+                                <li><strong>冻结金额</strong>：正在处理中的交易金额</li>
+                                <li><strong>可用金额</strong>：可以用于新交易的金额</li>
+                                <li>余额查询不收取任何费用</li>
+                                <li>建议定期查询余额，确保账户资金充足</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -1105,6 +1937,9 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                     <div class="section">
                         <h2>❌ 错误码说明</h2>
                         
+                        <p>以下是系统返回的常见错误码及其解决方案。如果遇到未列出的错误码，请联系技术支持。</p>
+                        
+                        <h3>系统级错误码</h3>
                         <div class="table">
                             <table>
                                 <thead>
@@ -1112,6 +1947,7 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                         <th>错误码</th>
                                         <th>说明</th>
                                         <th>解决方案</th>
+                                        <th>严重程度</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1119,34 +1955,170 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                         <td>0000</td>
                                         <td>成功</td>
                                         <td>-</td>
-                                    </tr>
-                                    <tr>
-                                        <td>1001</td>
-                                        <td>参数错误</td>
-                                        <td>检查请求参数格式和必填项</td>
-                                    </tr>
-                                    <tr>
-                                        <td>1002</td>
-                                        <td>签名验证失败</td>
-                                        <td>检查签名算法和密钥</td>
-                                    </tr>
-                                    <tr>
-                                        <td>1003</td>
-                                        <td>商户不存在</td>
-                                        <td>联系客服确认商户信息</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2001</td>
-                                        <td>订单不存在</td>
-                                        <td>检查订单号是否正确</td>
+                                        <td><span class="badge badge-success">正常</span></td>
                                     </tr>
                                     <tr>
                                         <td>9999</td>
                                         <td>系统异常</td>
                                         <td>联系技术支持</td>
+                                        <td><span class="badge badge-required">严重</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>9998</td>
+                                        <td>服务维护中</td>
+                                        <td>等待服务恢复</td>
+                                        <td><span class="badge badge-warning">中等</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>9997</td>
+                                        <td>网络超时</td>
+                                        <td>检查网络连接，重试请求</td>
+                                        <td><span class="badge badge-warning">中等</span></td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        
+                        <h3>参数验证错误码</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>错误码</th>
+                                        <th>说明</th>
+                                        <th>解决方案</th>
+                                        <th>严重程度</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1001</td>
+                                        <td>参数错误</td>
+                                        <td>检查请求参数格式和必填项</td>
+                                        <td><span class="badge badge-warning">中等</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>1002</td>
+                                        <td>签名验证失败</td>
+                                        <td>检查签名算法和密钥</td>
+                                        <td><span class="badge badge-required">严重</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>1003</td>
+                                        <td>商户不存在</td>
+                                        <td>联系客服确认商户信息</td>
+                                        <td><span class="badge badge-required">严重</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>1004</td>
+                                        <td>商户已禁用</td>
+                                        <td>联系客服激活商户账户</td>
+                                        <td><span class="badge badge-required">严重</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>1005</td>
+                                        <td>参数格式错误</td>
+                                        <td>检查参数类型和格式</td>
+                                        <td><span class="badge badge-warning">中等</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>业务逻辑错误码</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>错误码</th>
+                                        <th>说明</th>
+                                        <th>解决方案</th>
+                                        <th>严重程度</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>2001</td>
+                                        <td>订单不存在</td>
+                                        <td>检查订单号是否正确</td>
+                                        <td><span class="badge badge-warning">中等</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2002</td>
+                                        <td>订单已存在</td>
+                                        <td>使用新的订单号</td>
+                                        <td><span class="badge badge-warning">中等</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2003</td>
+                                        <td>订单状态错误</td>
+                                        <td>检查订单当前状态</td>
+                                        <td><span class="badge badge-warning">中等</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2004</td>
+                                        <td>金额超出限制</td>
+                                        <td>调整金额至允许范围内</td>
+                                        <td><span class="badge badge-warning">中等</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2005</td>
+                                        <td>余额不足</td>
+                                        <td>充值账户余额</td>
+                                        <td><span class="badge badge-warning">中等</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>支付相关错误码</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>错误码</th>
+                                        <th>说明</th>
+                                        <th>解决方案</th>
+                                        <th>严重程度</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>3001</td>
+                                        <td>支付方式不支持</td>
+                                        <td>选择支持的支付方式</td>
+                                        <td><span class="badge badge-warning">中等</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>3002</td>
+                                        <td>银行信息错误</td>
+                                        <td>验证银行账户信息</td>
+                                        <td><span class="badge badge-warning">中等</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>3003</td>
+                                        <td>IFSC代码无效</td>
+                                        <td>检查IFSC代码是否正确</td>
+                                        <td><span class="badge badge-warning">中等</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>3004</td>
+                                        <td>账户验证失败</td>
+                                        <td>确认账户信息准确性</td>
+                                        <td><span class="badge badge-warning">中等</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="warning">
+                            <strong>错误处理建议：</strong>
+                            <ul>
+                                <li>对于严重错误（1002、1003、1004），应立即停止相关操作并联系客服</li>
+                                <li>对于中等错误（1001、2001-2005、3001-3004），检查参数后重试</li>
+                                <li>系统异常（9999）时，记录错误日志并联系技术支持</li>
+                                <li>建议实现错误重试机制，但避免无限重试</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
