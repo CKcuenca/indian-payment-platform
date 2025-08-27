@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -22,8 +22,6 @@ import {
   IconButton,
   Alert,
   CircularProgress,
-  Card,
-  CardContent,
   Divider,
   Switch,
   FormControlLabel
@@ -35,10 +33,7 @@ import {
   Smartphone,
   AccountBalanceWallet
 } from '@mui/icons-material';
-import { 
-  PaymentProviderCategory
-} from '../types';
-import { paymentProviderService } from '../services/paymentProviderService';
+
 
 // 模拟支付账户数据
 const mockPaymentAccounts = [
@@ -99,9 +94,6 @@ const mockPaymentAccounts = [
 ];
 
 export default function PaymentManagementNew() {
-  // 支付商分类状态
-  const [categories, setCategories] = useState<PaymentProviderCategory[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // 支付账户状态
@@ -132,22 +124,7 @@ export default function PaymentManagementNew() {
     status: 'ACTIVE'
   });
 
-  // 加载支付商分类
-  useEffect(() => {
-    const loadCategories = async () => {
-      setCategoriesLoading(true);
-      try {
-        const data = await paymentProviderService.getCategories();
-        setCategories(data);
-      } catch (err) {
-        setError('加载支付商分类失败');
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
-    
-    loadCategories();
-  }, []);
+
 
   const handleAddAccount = () => {
     setEditingAccount(null);
@@ -287,10 +264,7 @@ export default function PaymentManagementNew() {
     return <AccountBalanceWallet color="secondary" />;
   };
 
-  // 根据类型过滤支付商
-  const getProvidersByType = (type: string) => {
-    return categories.find(cat => cat.id === type)?.providers || [];
-  };
+
 
   return (
     <Box sx={{ p: 0 }}>
@@ -314,48 +288,7 @@ export default function PaymentManagementNew() {
         </Alert>
       )}
 
-      {/* 支付商分类概览 */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
-          支付商分类概览
-        </Typography>
-        {categoriesLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-            {categories.map((category) => (
-              <Box key={category.id} sx={{ flex: '1 1 300px', minWidth: 0 }}>
-                <Card sx={{ height: '100%' }}>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      {getTypeIcon(category.type)}
-                      <Typography variant="h6" sx={{ ml: 1 }}>
-                        {category.name}
-                      </Typography>
-                    </Box>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      {category.description}
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {category.providers.map((provider) => (
-                        <Chip
-                          key={provider.id}
-                          label={provider.displayName}
-                          size="small"
-                          color={getProviderColor(provider.name)}
-                          variant="outlined"
-                        />
-                      ))}
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Box>
-            ))}
-          </Box>
-        )}
-      </Box>
+
 
       {/* 支付账户列表 */}
       <Box sx={{ mb: 4 }}>
@@ -473,14 +406,18 @@ export default function PaymentManagementNew() {
                         setFormData({...formData, type: e.target.value, providerName: ''});
                       }}
                     >
-                      {categories.map((category) => (
-                        <MenuItem key={category.id} value={category.id}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {getTypeIcon(category.type)}
-                            {category.name}
-                          </Box>
-                        </MenuItem>
-                      ))}
+                      <MenuItem value="native">
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <AccountBalanceWallet color="secondary" />
+                          原生支付商
+                        </Box>
+                      </MenuItem>
+                      <MenuItem value="wakeup">
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Smartphone color="primary" />
+                          唤醒支付商
+                        </Box>
+                      </MenuItem>
                     </Select>
                   </FormControl>
                 </Box>
@@ -492,11 +429,19 @@ export default function PaymentManagementNew() {
                       value={formData.providerName}
                       onChange={(e) => setFormData({...formData, providerName: e.target.value})}
                     >
-                      {getProvidersByType(formData.type).map((provider) => (
-                        <MenuItem key={provider.id} value={provider.id}>
-                          {provider.displayName}
-                        </MenuItem>
-                      ))}
+                      {formData.type === 'native' ? (
+                        <>
+                          <MenuItem value="airpay">AirPay</MenuItem>
+                          <MenuItem value="cashfree">CashFree</MenuItem>
+                          <MenuItem value="razorpay">Razorpay</MenuItem>
+                          <MenuItem value="paytm">Paytm</MenuItem>
+                        </>
+                      ) : (
+                        <>
+                          <MenuItem value="unispay">UniSpay</MenuItem>
+                          <MenuItem value="passpay">PassPay</MenuItem>
+                        </>
+                      )}
                     </Select>
                   </FormControl>
                 </Box>
