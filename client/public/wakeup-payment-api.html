@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>印度唤醒支付API对接文档</title>
+    <title>印度唤醒支付API对接文档 - CashGit</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; line-height: 1.6; color: #333; background-color: #f5f5f5; }
@@ -36,6 +36,10 @@
         .endpoint-url { font-family: monospace; background: #e9ecef; padding: 8px 12px; border-radius: 4px; color: #495057; font-weight: 600; }
         .method { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 600; text-transform: uppercase; margin-right: 10px; }
         .method-post { background: #28a745; color: white; }
+        .method-get { background: #007bff; color: white; }
+        .code-inline { background: #f1f3f4; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+        .note { background: #e7f3ff; border-left: 4px solid #007bff; padding: 15px; margin: 15px 0; }
+        .note strong { color: #007bff; }
         @media (max-width: 768px) { .nav ul { flex-direction: column; gap: 10px; } .header h1 { font-size: 2em; } .content { padding: 20px 15px; } .section { padding: 20px; } }
     </style>
 </head>
@@ -43,7 +47,7 @@
     <div class="container">
         <div class="header">
             <h1>🇮🇳 印度唤醒支付API对接文档</h1>
-            <p>India Wake-up Payment API Integration Documentation</p>
+            <p>India Wake-up Payment API Integration Documentation - CashGit</p>
         </div>
         
         <nav class="nav">
@@ -63,63 +67,424 @@
         <div class="content">
             <div class="section" id="overview">
                 <h2>📋 前言概述</h2>
+                
                 <h3>概要</h3>
-                <p>本文档定义了接入印度唤醒支付系统的报文接口规范，具体包括：</p>
+                <p>本文档定义了接入CashGit印度唤醒支付系统的报文接口规范，具体包括：</p>
                 <ul>
                     <li><strong>接口通信方式</strong>：涵盖网络通讯方式及接口加解密方式</li>
                     <li><strong>业务处理流程</strong>：涉及代收、代付、流水管理及财务管理等模块</li>
                     <li><strong>交易报文格式说明</strong>：包含入参、出参规范及JSON格式标准</li>
                 </ul>
+                
+                <h3>目标人群</h3>
+                <p>目标读者为具备开发能力、熟悉相关编程语言的开发、维护及管理人员。</p>
+                
                 <div class="highlight">
                     <strong>💡 请求头说明：</strong>请求头Content-Type为：application/json;charset=utf-8，所有接口一致
+                </div>
+                
+                <h3>相关术语</h3>
+                <ul>
+                    <li><strong>平台或系统</strong>：指提供印度唤醒支付功能的我司系统，用于支持商户完成各类交易。</li>
+                    <li><strong>商户号</strong>：这是商户在平台上的唯一标识，用于验证其在平台的合法性。</li>
+                    <li><strong>商户订单号</strong>：商户系统为每笔订单生成的唯一编号，需确保其唯一性，以便在平台中进行区分。</li>
+                    <li><strong>支付类型</strong>：指用来区分支付产品类别的字段，具体内容详见接口描述。</li>
+                    <li><strong>加密密钥</strong>：商户用于交易请求前对数据进行加密和验签的关键工具。</li>
+                    <li><strong>币种</strong>：用于区分货币类型的字段，详情参考接口描述部分。</li>
+                    <li><strong>后台异步回调</strong>：当交易处理完成后，系统会主动通知商户网站并携带相关结果信息。</li>
+                    <li><strong>商户</strong>：指接入平台并使用其支付服务的客户或机构。</li>
+                </ul>
+                
+                <div class="note">
+                    <strong>注意：</strong>密钥必须妥善保管，一旦泄露应及时联系平台处理，以避免可能的损失。
                 </div>
             </div>
             
             <div class="section" id="signature">
                 <h2>🔐 签名算法</h2>
+                
                 <h3>签名规则</h3>
+                
                 <h4>Step 1. 排序拼接</h4>
-                <p>将非空参数值按照参数名ASCII码从小到大排序（字典序），使用<code>&</code>拼接成字符串。</p>
-                <h4>Step 2. 拼接密钥</h4>
-                <p>在字符串末尾拼接上<code>&key=</code>商户密钥。</p>
-                <h4>Step 3. 加密签名</h4>
-                <p>对拼接后的字符串进行MD5加密，得到32位小写字符串。</p>
+                <p>将非空参数值按照参数名ASCII码从小到大排序（字典序），使用URL键值对的格式（即key1=value1&key2=value2…）拼接成字符串(strString)。</p>
+                <ul>
+                    <li>参数名ASCII码从小到大排序</li>
+                    <li>如果参数的值为空不参与签名</li>
+                    <li>参数名区分大小写</li>
+                </ul>
+                
+                <h4>Step 2. 拼接key加密</h4>
+                <p>将strString最后拼接上key得到strSign字符串，并对strSign进行<code class="code-inline">SHA-256</code>，得到sign值signValue(16进制小写)</p>
+                
+                <h3>示例参考【Java】</h3>
+                <div class="code-block">
+<pre>// 引入依赖
+&lt;dependency&gt;
+    &lt;groupId&gt;cn.hutool&lt;/groupId&gt;
+    &lt;artifactId&gt;hutool-core&lt;/artifactId&gt;
+    &lt;version&gt;5.8.26&lt;/version&gt;
+&lt;/dependency&gt;
+
+/**
+ * 计算SHA-256摘要值，并转为16进制字符串
+ */
+public static void main(String[] args) {
+    Map&lt;String, Object&gt; map = new TreeMap&lt;&gt;();
+    map.put("mchNo", "M171925157713");
+    map.put("mchOrderId", "1234567as94");
+    map.put("timestamp", "1725300081000");
+    map.put("payType", 102);
+    map.put("notifyUrl", "http://localhost:8080/test");
+    map.put("amount", "1000");
+    
+    String sign = checkSha256Hex(map, "123456789", "key");
+    map.put("sign", sign);
+    System.out.println(sign);
+}</pre>
+                </div>
             </div>
             
             <div class="section" id="payment-types">
                 <h2>💳 支付类型</h2>
-                <p>印度唤醒支付系统支持以下支付方式：</p>
+                
+                <p>CashGit印度唤醒支付系统支持以下支付方式：</p>
+                
                 <div class="table">
                     <table>
                         <thead>
-                            <tr><th>支付类型</th><th>说明</th><th>状态</th></tr>
+                            <tr>
+                                <th>支付类型</th>
+                                <th>支付类型代码</th>
+                                <th>说明</th>
+                                <th>状态</th>
+                            </tr>
                         </thead>
                         <tbody>
-                            <tr><td>UPI支付</td><td>印度统一支付接口，支持所有银行</td><td><span class="badge badge-required">已上线</span></td></tr>
-                            <tr><td>银行卡支付</td><td>支持Visa、MasterCard、RuPay等</td><td><span class="badge badge-required">已上线</span></td></tr>
-                            <tr><td>数字钱包</td><td>Paytm、PhonePe、Google Pay等</td><td><span class="badge badge-required">已上线</span></td></tr>
+                            <tr>
+                                <td>UPI支付</td>
+                                <td><code class="code-inline">101</code></td>
+                                <td>印度统一支付接口，支持所有银行</td>
+                                <td><span class="badge badge-required">已上线</span></td>
+                            </tr>
+                            <tr>
+                                <td>银行卡支付</td>
+                                <td><code class="code-inline">102</code></td>
+                                <td>支持Visa、MasterCard、RuPay等</td>
+                                <td><span class="badge badge-required">已上线</span></td>
+                            </tr>
+                            <tr>
+                                <td>数字钱包</td>
+                                <td><code class="code-inline">103</code></td>
+                                <td>Paytm、PhonePe、Google Pay等</td>
+                                <td><span class="badge badge-required">已上线</span></td>
+                            </tr>
                         </tbody>
                     </table>
+                </div>
+                
+                <div class="note">
+                    <strong>重要提示：</strong>支付类型代码在创建订单时必须准确填写，否则可能导致支付失败。
                 </div>
             </div>
             
             <div class="section" id="deposit">
                 <h2>💰 存款订单</h2>
+                
                 <div class="endpoint">
                     <div class="method method-post">POST</div>
                     <span class="endpoint-url">/api/order/create</span>
                 </div>
+                
+                <h3>接口说明</h3>
+                <p>该接口用于创建存款订单，支持多种支付方式。商户调用此接口后，系统会返回支付链接或二维码，用户可通过该链接完成支付。</p>
+                
                 <h3>请求参数</h3>
                 <div class="table">
                     <table>
                         <thead>
-                            <tr><th>参数名</th><th>类型</th><th>必填</th><th>说明</th></tr>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                                <th>示例值</th>
+                            </tr>
                         </thead>
                         <tbody>
-                            <tr><td>merchantId</td><td>String</td><td><span class="badge badge-required">必填</span></td><td>商户号</td></tr>
-                            <tr><td>orderId</td><td>String</td><td><span class="badge badge-required">必填</td><td>商户订单号</td></tr>
-                            <tr><td>amount</td><td>BigDecimal</td><td><span class="badge badge-required">必填</span></td><td>订单金额</td></tr>
-                            <tr><td>currency</td><td>String</td><td><span class="badge badge-required">必填</span></td><td>币种（INR）</td></tr>
+                            <tr>
+                                <td>mchNo</td>
+                                <td>String</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>商户号</td>
+                                <td>M171925157713</td>
+                            </tr>
+                            <tr>
+                                <td>mchOrderId</td>
+                                <td>String</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>商户订单号</td>
+                                <td>ORDER_20241201_001</td>
+                            </tr>
+                            <tr>
+                                <td>amount</td>
+                                <td>String</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>订单金额（分）</td>
+                                <td>1000</td>
+                            </tr>
+                            <tr>
+                                <td>currency</td>
+                                <td>String</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>币种</td>
+                                <td>INR</td>
+                            </tr>
+                            <tr>
+                                <td>payType</td>
+                                <td>Integer</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>支付类型</td>
+                                <td>101</td>
+                            </tr>
+                            <tr>
+                                <td>notifyUrl</td>
+                                <td>String</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>异步通知地址</td>
+                                <td>https://your-domain.com/notify</td>
+                            </tr>
+                            <tr>
+                                <td>timestamp</td>
+                                <td>String</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>时间戳（毫秒）</td>
+                                <td>1725300081000</td>
+                            </tr>
+                            <tr>
+                                <td>sign</td>
+                                <td>String</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>签名</td>
+                                <td>fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h3>响应参数</h3>
+                <div class="code-block">
+<pre>{
+    "code": "0000",
+    "message": "成功",
+    "data": {
+        "orderId": "ORDER_20241201_001",
+        "platformOrderId": "CG202412010001",
+        "paymentUrl": "https://payment.cashgit.com/pay/123456",
+        "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+        "expireTime": "2024-12-01 23:59:59",
+        "amount": "1000",
+        "currency": "INR",
+        "status": "PENDING"
+    }
+}</pre>
+                </div>
+            </div>
+            
+            <div class="section" id="withdraw">
+                <h2>💸 出款订单</h2>
+                
+                <div class="endpoint">
+                    <div class="method method-post">POST</div>
+                    <span class="endpoint-url">/api/payout/create</span>
+                </div>
+                
+                <h3>接口说明</h3>
+                <p>该接口用于创建出款订单，支持多种出款方式。商户调用此接口后，系统会处理出款请求并返回处理结果。</p>
+                
+                <h3>请求参数</h3>
+                <div class="table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>必填</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>mchNo</td>
+                                <td>String</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>商户号</td>
+                            </tr>
+                            <tr>
+                                <td>mchOrderId</td>
+                                <td>String</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>商户订单号</td>
+                            </tr>
+                            <tr>
+                                <td>amount</td>
+                                <td>String</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>出款金额（分）</td>
+                            </tr>
+                            <tr>
+                                <td>bankCode</td>
+                                <td>String</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>银行代码</td>
+                            </tr>
+                            <tr>
+                                <td>accountNumber</td>
+                                <td>String</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>银行账号</td>
+                            </tr>
+                            <tr>
+                                <td>ifscCode</td>
+                                <td>String</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>IFSC代码</td>
+                            </tr>
+                            <tr>
+                                <td>accountName</td>
+                                <td>String</td>
+                                <td><span class="badge badge-required">必填</span></td>
+                                <td>账户姓名</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="section" id="callback">
+                <h2>📡 异步通知</h2>
+                
+                <div class="highlight">
+                    <strong>重要提示：</strong>异步通知是支付结果的主要通知方式，商户必须正确处理异步通知。
+                </div>
+                
+                <h3>通知机制</h3>
+                <p>当交易状态发生变化时，系统会主动向商户的notifyUrl发送POST请求，携带交易结果信息。商户收到通知后，必须返回成功响应，否则系统会重试通知。</p>
+                
+                <h3>通知参数</h3>
+                <div class="table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>类型</th>
+                                <th>说明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>mchOrderId</td>
+                                <td>String</td>
+                                <td>商户订单号</td>
+                            </tr>
+                            <tr>
+                                <td>platformOrderId</td>
+                                <td>String</td>
+                                <td>平台订单号</td>
+                            </tr>
+                            <tr>
+                                <td>status</td>
+                                <td>String</td>
+                                <td>订单状态：SUCCESS-成功，FAILED-失败，PENDING-处理中</td>
+                            </tr>
+                            <tr>
+                                <td>amount</td>
+                                <td>String</td>
+                                <td>订单金额</td>
+                            </tr>
+                            <tr>
+                                <td>sign</td>
+                                <td>String</td>
+                                <td>签名验证</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <h3>响应要求</h3>
+                <p>商户收到异步通知后，必须返回以下格式的响应：</p>
+                <div class="code-block">
+<pre>{
+    "code": "0000",
+    "message": "success"
+}</pre>
+                </div>
+            </div>
+            
+            <div class="section" id="query">
+                <h2>🔍 查询接口</h2>
+                
+                <h3>存款查询</h3>
+                <div class="endpoint">
+                    <div class="method method-post">POST</div>
+                    <span class="endpoint-url">/api/order/query</span>
+                </div>
+                
+                <h3>出款查询</h3>
+                <div class="endpoint">
+                    <div class="method method-post">POST</div>
+                    <span class="endpoint-url">/api/payout/query</span>
+                </div>
+                
+                <h3>余额查询</h3>
+                <div class="endpoint">
+                    <div class="method method-post">POST</div>
+                    <span class="endpoint-url">/api/mch/balance</span>
+                </div>
+            </div>
+            
+            <div class="section" id="error-codes">
+                <h2>❌ 错误码说明</h2>
+                
+                <div class="table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>错误码</th>
+                                <th>说明</th>
+                                <th>解决方案</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>0000</td>
+                                <td>成功</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>1001</td>
+                                <td>参数错误</td>
+                                <td>检查请求参数格式和必填项</td>
+                            </tr>
+                            <tr>
+                                <td>1002</td>
+                                <td>签名验证失败</td>
+                                <td>检查签名算法和密钥</td>
+                            </tr>
+                            <tr>
+                                <td>1003</td>
+                                <td>商户不存在</td>
+                                <td>联系客服确认商户信息</td>
+                            </tr>
+                            <tr>
+                                <td>2001</td>
+                                <td>订单不存在</td>
+                                <td>检查订单号是否正确</td>
+                            </tr>
+                            <tr>
+                                <td>9999</td>
+                                <td>系统异常</td>
+                                <td>联系技术支持</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -127,22 +492,59 @@
             
             <div class="section" id="examples">
                 <h2>💻 示例代码</h2>
+                
                 <h3>Java示例</h3>
                 <div class="code-block">
-<pre>// 创建存款订单示例
+<pre>// 创建存款订单
 public class PaymentExample {
+    private static final String MERCHANT_ID = "your_merchant_id";
+    private static final String SECRET_KEY = "your_secret_key";
+    private static final String API_URL = "https://api.cashgit.com";
+    
     public static void createDepositOrder() {
-        Map<String, String> params = new HashMap<>();
-        params.put("merchantId", "your_merchant_id");
-        params.put("orderId", "ORDER_" + System.currentTimeMillis());
-        params.put("amount", "1000.00");
-        params.put("currency", "INR");
-        // 生成签名并发送请求
+        try {
+            // 构建请求参数
+            Map&lt;String, String&gt; params = new HashMap&lt;&gt;();
+            params.put("mchNo", MERCHANT_ID);
+            params.put("mchOrderId", "ORDER_" + System.currentTimeMillis());
+            params.put("amount", "1000");
+            params.put("currency", "INR");
+            params.put("payType", "101");
+            params.put("notifyUrl", "https://your-domain.com/notify");
+            params.put("timestamp", String.valueOf(System.currentTimeMillis()));
+            
+            // 生成签名
+            String signature = SignatureUtil.generateSignature(params, SECRET_KEY);
+            params.put("sign", signature);
+            
+            // 发送请求
+            String response = sendHttpRequest(API_URL + "/api/order/create", params);
+            System.out.println("响应结果：" + response);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }</pre>
                 </div>
             </div>
         </div>
     </div>
+    
+    <script>
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
