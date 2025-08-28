@@ -579,12 +579,9 @@ export default function PaymentManagementNew() {
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        {getTypeIcon(account.provider.type)}
-                        <Typography variant="body2">
-                          {getTypeLabel(account.provider.type)}
-                        </Typography>
-                      </Box>
+                      <Typography variant="body2">
+                        {getTypeLabel(account.provider.type)}
+                      </Typography>
                     </TableCell>
                     <TableCell>
                       <Chip
