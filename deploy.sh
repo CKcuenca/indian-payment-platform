@@ -46,7 +46,7 @@ deploy_backend() {
         server/ ubuntu@$SERVER_HOST:$REMOTE_PATH/server/
     
     # 重启后端服务
-    ssh -i $SSH_KEY ubuntu@$SERVER_HOST "cd $REMOTE_PATH/server && pm2 restart cashgit-backend"
+    ssh -i $SSH_KEY ubuntu@$SERVER_HOST "cd $REMOTE_PATH/server && pm2 restart indian-payment-platform"
     
     echo_info "后端部署完成"
 }

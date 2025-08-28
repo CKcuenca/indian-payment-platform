@@ -185,7 +185,7 @@ app.use('/api/heap-optimization', require('./routes/heap-optimization'));
 app.use('/api/callback', require('./routes/passpay-callback'));
 app.use('/api/passpay-sync', require('./routes/passpay-sync'));
 app.use('/api/memory-optimization', require('./routes/memory-optimization'));
-app.use('/api/webhook', require('./routes/withdraw-callback'));
+app.use('/api/withdraw-webhook', require('./routes/withdraw-callback'));
 
 // 健康检查
 app.get('/health', (req, res) => {

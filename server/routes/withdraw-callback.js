@@ -8,7 +8,7 @@ const router = express.Router();
 
 /**
  * 处理UniSpay出款回调通知
- * POST /api/webhook/unispay/withdraw
+ * POST /api/withdraw-webhook/unispay/withdraw
  */
 router.post('/unispay/withdraw', async (req, res) => {
   try {
