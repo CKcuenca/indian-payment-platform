@@ -313,6 +313,234 @@ function mapPassPayPayoutStatus(status) {
 }
 
 /**
+ * UniSpay充值回调处理
+ * POST /api/webhook/unispay/collection
+ */
+router.post('/unispay/collection', async (req, res) => {
+  try {
+    console.log('🔔 收到UniSpay充值回调通知:', JSON.stringify(req.body, null, 2));
+
+    const notificationData = req.body;
+    const { 
+      mchOrderId,      // 商户订单ID
+      orderNo,         // UniSpay订单号
+      state,           // 订单状态
+      amount,          // 订单金额
+      currency,        // 货币
+      successTime,     // 成功时间
+      msg,             // 消息
+      sign             // 签名
+    } = notificationData;
+
+    // 验证必要参数
+    if (!mchOrderId || !orderNo || !state) {
+      console.error('❌ UniSpay充值回调缺少必要参数');
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required parameters'
+      });
+    }
+
+    // 查询订单
+    const order = await Order.findOne({ orderId: mchOrderId, type: 'DEPOSIT' });
+    if (!order) {
+      console.error(`❌ 未找到充值订单: ${mchOrderId}`);
+      return res.status(404).json({
+        success: false,
+        error: 'Order not found'
+      });
+    }
+
+    // 获取支付配置
+    const paymentConfig = await PaymentConfig.findOne({
+      'provider.name': 'unispay',
+      'provider.accountId': order.provider.accountId || order.provider.merchantId
+    });
+
+    if (!paymentConfig) {
+      console.error(`❌ 未找到UniSpay支付配置`);
+      return res.status(500).json({
+        success: false,
+        error: 'Payment configuration not found'
+      });
+    }
+
+    // 创建UniSpay提供者实例进行签名验证
+    const PaymentManager = require('../services/payment-manager');
+    const paymentManager = new PaymentManager();
+    paymentManager.registerProvider('unispay', require('../services/payment-providers/unispay-provider'), {
+      accountId: paymentConfig.provider.accountId,
+      apiKey: paymentConfig.provider.apiKey,
+      secretKey: paymentConfig.provider.secretKey,
+      environment: paymentConfig.provider.environment,
+      mchNo: paymentConfig.provider.mchNo
+    });
+
+    // 验证签名
+    const unispayProvider = paymentManager.providers.get('unispay');
+    if (!unispayProvider.verifySignature(notificationData, sign)) {
+      console.error('❌ UniSpay充值回调签名验证失败');
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid signature'
+      });
+    }
+
+    // 映射状态
+    const orderStatus = mapUnispayStatus(state);
+    
+    // 更新订单状态
+    const updateData = {
+      status: orderStatus,
+      updatedAt: new Date(),
+      'provider.providerOrderId': orderNo,
+      'provider.providerTransactionId': orderNo
+    };
+
+    if (orderStatus === 'SUCCESS' && successTime) {
+      updateData.paidTime = new Date(successTime);
+    }
+
+    await Order.findByIdAndUpdate(order._id, updateData);
+
+    // 更新交易状态
+    await Transaction.findOneAndUpdate(
+      { orderId: order.orderId },
+      {
+        status: orderStatus,
+        updatedAt: new Date(),
+        'provider.providerTransactionId': orderNo
+      }
+    );
+
+    console.log(`✅ UniSpay充值回调处理成功: ${mchOrderId} -> ${orderStatus}`);
+
+    // 转发通知给下游商户
+    await forwardNotificationToMerchant(order, {
+      status: orderStatus,
+      orderNo: orderNo,
+      amount: amount,
+      currency: currency,
+      successTime: successTime,
+      message: msg
+    });
+
+    // 返回成功响应
+    res.json({
+      success: true,
+      message: 'Notification processed successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ UniSpay充值回调处理失败:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Callback processing failed'
+    });
+  }
+});
+
+/**
+ * 转发通知给下游商户
+ */
+async function forwardNotificationToMerchant(order, statusUpdate) {
+  if (!order.callback?.notifyUrl) {
+    console.log('ℹ️ 订单没有配置回调URL，跳过转发');
+    return;
+  }
+
+  try {
+    console.log(`🔄 转发通知给商户: ${order.callback.notifyUrl}`);
+    
+    // 构建通知数据
+    const notificationData = {
+      orderId: order.orderId,
+      merchantId: order.merchantId,
+      status: statusUpdate.status,
+      amount: order.amount,
+      currency: order.currency,
+      fee: order.fee,
+      netAmount: order.netAmount,
+      providerOrderId: statusUpdate.orderNo,
+      providerTransactionId: statusUpdate.orderNo,
+      timestamp: new Date().toISOString(),
+      message: statusUpdate.message || ''
+    };
+
+    // 生成签名（使用商户的secretKey）
+    const Merchant = require('../models/merchant');
+    const merchant = await Merchant.findOne({ merchantId: order.merchantId });
+    if (merchant) {
+      const signature = generateNotificationSignature(notificationData, merchant.secretKey);
+      notificationData.signature = signature;
+    }
+
+    // 发送通知
+    const axios = require('axios');
+    const response = await axios.post(order.callback.notifyUrl, notificationData, {
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'PaymentPlatform/1.0'
+      }
+    });
+
+    if (response.status === 200) {
+      console.log(`✅ 通知转发成功: ${order.callback.notifyUrl}`);
+    } else {
+      console.warn(`⚠️ 通知转发响应异常: ${response.status}`);
+    }
+
+  } catch (error) {
+    console.error(`❌ 通知转发失败: ${order.callback.notifyUrl}`, error.message);
+    
+    // 记录失败日志，可以考虑重试机制
+    // TODO: 实现重试队列
+  }
+}
+
+/**
+ * 生成通知签名
+ */
+function generateNotificationSignature(data, secretKey) {
+  const crypto = require('crypto');
+  
+  // 移除signature字段
+  const { signature, ...signData } = data;
+  
+  // 按字母顺序排序
+  const sortedKeys = Object.keys(signData).sort();
+  
+  // 构建签名字符串
+  let signStr = '';
+  sortedKeys.forEach(key => {
+    if (signData[key] !== undefined && signData[key] !== null && signData[key] !== '') {
+      signStr += `${key}=${signData[key]}&`;
+    }
+  });
+  
+  // 移除最后的&，然后添加密钥
+  signStr = signStr.slice(0, -1) + `&key=${secretKey}`;
+  
+  // 生成SHA-256签名
+  return crypto.createHash('sha256').update(signStr).digest('hex');
+}
+
+/**
+ * 映射UniSpay状态
+ */
+function mapUnispayStatus(state) {
+  const statusMap = {
+    1: 'PENDING',      // 待处理
+    2: 'PROCESSING',   // 处理中
+    3: 'SUCCESS',      // 成功
+    4: 'FAILED',       // 失败
+    5: 'CANCELLED'     // 已取消
+  };
+  return statusMap[state] || 'UNKNOWN';
+}
+
+/**
  * 通用Webhook测试接口
  */
 router.get('/test', (req, res) => {
@@ -322,6 +550,7 @@ router.get('/test', (req, res) => {
     endpoints: {
       'PassPay代收回调': 'POST /api/webhook/passpay/collection',
       'PassPay代付回调': 'POST /api/webhook/passpay/payout',
+      'UniSpay充值回调': 'POST /api/webhook/unispay/collection',
       '测试接口': 'GET /api/webhook/test'
     }
   });

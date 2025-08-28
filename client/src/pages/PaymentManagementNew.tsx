@@ -50,6 +50,13 @@ interface PaymentAccount {
     // UniSpay专用字段
     mchNo?: string;
   };
+  // 回调URL配置
+  callbackUrls?: {
+    collectionNotifyUrl?: string;
+    collectionReturnUrl?: string;
+    payoutNotifyUrl?: string;
+    payoutReturnUrl?: string;
+  };
   description: string;
   limits: {
     // 代收限额
@@ -140,6 +147,12 @@ export default function PaymentManagementNew() {
               mchNo: 'MCH123456'
             },
             description: 'UniSpay主要支付账户，支持代收代付',
+            callbackUrls: {
+              collectionNotifyUrl: 'https://cashgit.com/api/webhook/unispay/collection',
+              collectionReturnUrl: 'https://cashgit.com/payment/return',
+              payoutNotifyUrl: 'https://cashgit.com/api/webhook/unispay/withdraw',
+              payoutReturnUrl: 'https://cashgit.com/withdraw/return'
+            },
             limits: {
               collection: {
                 dailyLimit: 1000000,
@@ -183,6 +196,12 @@ export default function PaymentManagementNew() {
               mchNo: ''
             },
             description: 'PassPay 4方支付平台账户',
+            callbackUrls: {
+              collectionNotifyUrl: 'https://cashgit.com/api/webhook/passpay/collection',
+              collectionReturnUrl: 'https://cashgit.com/payment/return',
+              payoutNotifyUrl: 'https://cashgit.com/api/webhook/passpay/payout',
+              payoutReturnUrl: 'https://cashgit.com/withdraw/return'
+            },
             limits: {
               collection: {
                 dailyLimit: 2000000,
@@ -248,6 +267,11 @@ export default function PaymentManagementNew() {
     // UniSpay专用字段
     mchNo: '',
     description: '',
+    // 回调URL配置
+    collectionNotifyUrl: '',
+    collectionReturnUrl: '',
+    payoutNotifyUrl: '',
+    payoutReturnUrl: '',
     // 代收限额
     collectionDailyLimit: 1000000,
     collectionMonthlyLimit: 10000000,
@@ -284,6 +308,11 @@ export default function PaymentManagementNew() {
       // UniSpay专用字段
       mchNo: '',
       description: '',
+      // 回调URL配置
+      collectionNotifyUrl: '',
+      collectionReturnUrl: '',
+      payoutNotifyUrl: '',
+      payoutReturnUrl: '',
       // 代收限额
       collectionDailyLimit: 1000000,
       collectionMonthlyLimit: 10000000,
@@ -1109,6 +1138,60 @@ export default function PaymentManagementNew() {
                     onChange={(e) => setFormData({...formData, collectionFixedFee: parseFloat(e.target.value)})}
                     inputProps={{ step: 0.01, min: 0 }}
                     helperText="代收固定费用，如0"
+                  />
+                </Box>
+              </Box>
+
+              {/* 回调URL配置 */}
+              <Box>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h6" gutterBottom color="info">
+                  回调URL配置
+                </Typography>
+              </Box>
+              
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                  <TextField
+                    fullWidth
+                    label="代收异步通知URL"
+                    value={formData.collectionNotifyUrl}
+                    onChange={(e) => setFormData({...formData, collectionNotifyUrl: e.target.value})}
+                    helperText="代收订单状态变化时的异步通知地址"
+                    placeholder="https://your-domain.com/api/webhook/collection"
+                  />
+                </Box>
+                
+                <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                  <TextField
+                    fullWidth
+                    label="代收同步返回URL"
+                    value={formData.collectionReturnUrl}
+                    onChange={(e) => setFormData({...formData, collectionReturnUrl: e.target.value})}
+                    helperText="代收支付完成后的跳转地址"
+                    placeholder="https://your-domain.com/payment/return"
+                  />
+                </Box>
+                
+                <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                  <TextField
+                    fullWidth
+                    label="代付异步通知URL"
+                    value={formData.payoutNotifyUrl}
+                    onChange={(e) => setFormData({...formData, payoutNotifyUrl: e.target.value})}
+                    helperText="代付订单状态变化时的异步通知地址"
+                    placeholder="https://your-domain.com/api/webhook/payout"
+                  />
+                </Box>
+                
+                <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                  <TextField
+                    fullWidth
+                    label="代付同步返回URL"
+                    value={formData.payoutReturnUrl}
+                    onChange={(e) => setFormData({...formData, payoutReturnUrl: e.target.value})}
+                    helperText="代付完成后的跳转地址"
+                    placeholder="https://your-domain.com/withdraw/return"
                   />
                 </Box>
               </Box>
