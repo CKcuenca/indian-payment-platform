@@ -51,12 +51,10 @@ interface PaymentAccount {
     mchNo?: string;
   };
   // 回调URL配置
-  callbackUrls?: {
-    collectionNotifyUrl?: string;
-    collectionReturnUrl?: string;
-    payoutNotifyUrl?: string;
-    payoutReturnUrl?: string;
-  };
+  collectionNotifyUrl?: string;
+  collectionReturnUrl?: string;
+  payoutNotifyUrl?: string;
+  payoutReturnUrl?: string;
   description: string;
   limits: {
     // 代收限额
@@ -147,12 +145,10 @@ export default function PaymentManagementNew() {
               mchNo: 'MCH123456'
             },
             description: 'UniSpay主要支付账户，支持代收代付',
-            callbackUrls: {
-              collectionNotifyUrl: 'https://cashgit.com/api/webhook/unispay/collection',
-              collectionReturnUrl: 'https://cashgit.com/payment/return',
-              payoutNotifyUrl: 'https://cashgit.com/api/webhook/unispay/withdraw',
-              payoutReturnUrl: 'https://cashgit.com/withdraw/return'
-            },
+            collectionNotifyUrl: 'https://cashgit.com/api/webhook/unispay/collection',
+            collectionReturnUrl: 'https://cashgit.com/payment/return',
+            payoutNotifyUrl: 'https://cashgit.com/api/withdraw-webhook/unispay/withdraw',
+            payoutReturnUrl: 'https://cashgit.com/withdraw/return',
             limits: {
               collection: {
                 dailyLimit: 1000000,
@@ -196,12 +192,10 @@ export default function PaymentManagementNew() {
               mchNo: ''
             },
             description: 'PassPay 4方支付平台账户',
-            callbackUrls: {
-              collectionNotifyUrl: 'https://cashgit.com/api/webhook/passpay/collection',
-              collectionReturnUrl: 'https://cashgit.com/payment/return',
-              payoutNotifyUrl: 'https://cashgit.com/api/webhook/passpay/payout',
-              payoutReturnUrl: 'https://cashgit.com/withdraw/return'
-            },
+            collectionNotifyUrl: 'https://cashgit.com/api/webhook/passpay/collection',
+            collectionReturnUrl: 'https://cashgit.com/payment/return',
+            payoutNotifyUrl: 'https://cashgit.com/api/webhook/passpay/payout',
+            payoutReturnUrl: 'https://cashgit.com/withdraw/return',
             limits: {
               collection: {
                 dailyLimit: 2000000,
@@ -365,6 +359,11 @@ export default function PaymentManagementNew() {
       // 代付费率
       payoutTransactionFee: account.fees.payout?.transactionFee || 0.3,
       payoutFixedFee: account.fees.payout?.fixedFee || 6,
+      // 回调URL
+      collectionNotifyUrl: account.collectionNotifyUrl || '',
+      collectionReturnUrl: account.collectionReturnUrl || '',
+      payoutNotifyUrl: account.payoutNotifyUrl || '',
+      payoutReturnUrl: account.payoutReturnUrl || '',
       priority: account.priority,
       status: account.status
     });
@@ -416,6 +415,11 @@ export default function PaymentManagementNew() {
             fixedFee: formData.payoutFixedFee
           }
         },
+        // 回调URL配置
+        collectionNotifyUrl: formData.collectionNotifyUrl,
+        collectionReturnUrl: formData.collectionReturnUrl,
+        payoutNotifyUrl: formData.payoutNotifyUrl,
+        payoutReturnUrl: formData.payoutReturnUrl,
         priority: formData.priority,
         status: formData.status
       };
