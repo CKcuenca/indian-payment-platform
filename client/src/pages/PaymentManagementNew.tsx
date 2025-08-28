@@ -666,23 +666,28 @@ export default function PaymentManagementNew() {
                   />
                 </Box>
                 
-                <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
-                  <TextField
-                    fullWidth
-                    label="API密钥"
-                    value={formData.apiKey}
-                    onChange={(e) => setFormData({...formData, apiKey: e.target.value})}
-                    required
-                  />
-                </Box>
+                {/* API密钥 - 除了UniSpay外都需要 */}
+                {formData.providerName !== 'unispay' && (
+                  <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                    <TextField
+                      fullWidth
+                      label="API密钥 (用于身份认证)"
+                      value={formData.apiKey}
+                      onChange={(e) => setFormData({...formData, apiKey: e.target.value})}
+                      helperText="用于API身份认证，UniSpay不需要"
+                      required
+                    />
+                  </Box>
+                )}
                 
                 <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                   <TextField
                     fullWidth
-                    label="密钥"
+                    label="密钥 (用于签名验证)"
                     type="password"
                     value={formData.secretKey}
                     onChange={(e) => setFormData({...formData, secretKey: e.target.value})}
+                    helperText="用于API签名验证，请保密"
                     required
                   />
                 </Box>

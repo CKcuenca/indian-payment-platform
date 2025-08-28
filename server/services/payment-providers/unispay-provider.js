@@ -13,7 +13,6 @@ class UnispayProvider extends BaseProvider {
       ? 'https://asia666.unispay.xyz' 
       : 'https://test-api.unispay.com';
     this.mchNo = config.mchNo;
-    this.apiKey = config.apiKey;
     this.secretKey = config.secretKey;
   }
 
