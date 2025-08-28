@@ -93,7 +93,7 @@ export default function PaymentManagementNew() {
   const [loading, setLoading] = useState(false);
   
   // 获取支付账户列表
-  const fetchAccounts = async () => {
+  const fetchAccounts = React.useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -215,21 +215,21 @@ export default function PaymentManagementNew() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
   
   // 保存账户数据到本地存储
-  const saveAccountsToStorage = (accounts: PaymentAccount[]) => {
+  const saveAccountsToStorage = React.useCallback((accounts: PaymentAccount[]) => {
     try {
       localStorage.setItem('paymentAccounts', JSON.stringify(accounts));
     } catch (error) {
       console.error('保存支付账户数据到本地存储失败:', error);
     }
-  };
+  }, []);
 
   // 组件加载时获取数据
   React.useEffect(() => {
     fetchAccounts();
-  }, []);
+  }, [fetchAccounts]);
   
   // 对话框状态
   const [dialogOpen, setDialogOpen] = useState(false);
