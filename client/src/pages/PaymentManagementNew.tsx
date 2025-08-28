@@ -478,12 +478,7 @@ export default function PaymentManagementNew() {
     return labels[type] || type;
   };
 
-  const getTypeIcon = (type: string) => {
-    if (type === 'wakeup') {
-      return <Smartphone color="primary" />;
-    }
-    return <AccountBalanceWallet color="secondary" />;
-  };
+
 
 
 
