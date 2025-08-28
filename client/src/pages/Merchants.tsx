@@ -13,6 +13,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogActions,
   TextField,
   FormControl,
   InputLabel,
@@ -39,10 +40,11 @@ import {
 
   History as HistoryIcon,
 } from '@mui/icons-material';
-import { Merchant } from '../types';
+import { Merchant, UserRole } from '../types';
 import { PermissionGuard } from '../components/PermissionGuard';
 import { Permission } from '../types';
 import { formatAmount, formatDate as formatDateUtil } from '../utils/formatters';
+import { authService } from '../services/authService';
 
 // 模拟商户数据 - 已清理，改为从API获取
 // const mockMerchants: Merchant[] = [];
@@ -54,6 +56,21 @@ export default function Merchants() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingMerchant, setEditingMerchant] = useState<Merchant | null>(null);
   const [showBalance, setShowBalance] = useState<{ [key: string]: boolean }>({});
+  
+  // 商户视图相关状态
+  const [isMerchantView, setIsMerchantView] = useState(false);
+  const [currentMerchant, setCurrentMerchant] = useState<Merchant | null>(null);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [apiKeyForm, setApiKeyForm] = useState({
+    apiKeyName: '',
+    description: ''
+  });
 
   const [formData, setFormData] = useState({
     merchantId: '',
@@ -75,11 +92,92 @@ export default function Merchants() {
   });
 
   useEffect(() => {
-    // 从API获取商户数据
-    fetchMerchants();
+    // 检查当前用户角色
+    const currentUser = authService.getCurrentUser();
+    console.log('🔍 useEffect - 当前用户:', currentUser);
+    console.log('🔍 useEffect - 用户角色:', currentUser?.role);
+    console.log('🔍 useEffect - UserRole.MERCHANT:', UserRole.MERCHANT);
+    
+    if (currentUser && currentUser.role === UserRole.MERCHANT) {
+      console.log('🔍 useEffect - 设置为商户视图');
+      setIsMerchantView(true);
+      // 如果是商户，获取自己的信息
+      fetchCurrentMerchantInfo();
+    } else {
+      console.log('🔍 useEffect - 设置为管理员视图');
+      // 如果是管理员，获取所有商户列表
+      fetchMerchants();
+    }
   }, []);
 
-  // 获取商户数据
+  // 获取当前商户信息
+  const fetchCurrentMerchantInfo = async () => {
+    console.log('🔍 fetchCurrentMerchantInfo - 开始执行');
+    try {
+      setLoading(true);
+      const currentUser = authService.getCurrentUser();
+      console.log('🔍 fetchCurrentMerchantInfo - 当前用户:', currentUser);
+      console.log('🔍 fetchCurrentMerchantInfo - 商户ID:', currentUser?.merchantId);
+      
+      if (!currentUser?.merchantId) {
+        setError('商户ID未找到');
+        return;
+      }
+      
+      const response = await fetch(`http://localhost:3001/api/merchant-profile/profile`, {
+        headers: {
+          'Authorization': `Bearer ${authService.getToken()}`
+        }
+      });
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          // 转换API数据格式以匹配前端期望
+          const apiData = result.data;
+          const convertedData = {
+            merchantId: apiData.merchantId,
+            name: apiData.name,
+            email: apiData.email,
+            status: apiData.status,
+            defaultProvider: apiData.paymentConfig?.defaultProvider || 'airpay',
+            depositFee: (apiData.paymentConfig?.fees?.deposit || 0.01) * 100, // 转换为百分比
+            withdrawalFee: (apiData.paymentConfig?.fees?.withdrawal || 0.01) * 100, // 转换为百分比
+            minDeposit: apiData.paymentConfig?.limits?.minDeposit || 100,
+            maxDeposit: apiData.paymentConfig?.limits?.maxDeposit || 5000000,
+            minWithdrawal: apiData.paymentConfig?.limits?.minWithdrawal || 100,
+            maxWithdrawal: apiData.paymentConfig?.limits?.maxWithdrawal || 5000000,
+            limits: {
+              dailyLimit: apiData.paymentConfig?.limits?.dailyLimit || 50000000,
+              monthlyLimit: apiData.paymentConfig?.limits?.monthlyLimit || 500000000,
+              singleTransactionLimit: apiData.paymentConfig?.limits?.maxDeposit || 5000000,
+            },
+            balance: 0, // 默认余额
+            usage: {
+              dailyUsed: 0,
+              monthlyUsed: 0,
+              lastResetDate: new Date().toISOString()
+            },
+            createdAt: apiData.createdAt || new Date(),
+            updatedAt: apiData.updatedAt || new Date()
+          };
+          
+          console.log('🔍 转换后的商户数据:', convertedData);
+          setCurrentMerchant(convertedData);
+        } else {
+          setError(result.message || '获取商户信息失败');
+        }
+      } else {
+        setError('获取商户信息失败');
+      }
+    } catch (err: any) {
+      console.error('获取商户信息失败:', err);
+      setError('获取商户信息失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 获取所有商户数据
   const fetchMerchants = async () => {
     try {
       setLoading(true);
@@ -164,6 +262,88 @@ export default function Merchants() {
       } finally {
         setLoading(false);
       }
+    }
+  };
+
+  // 修改密码
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setError('新密码和确认密码不匹配');
+      return;
+    }
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('http://localhost:3001/api/merchant-profile/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        setPasswordDialogOpen(false);
+        setPasswordForm({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+        // 可以显示成功消息
+      } else {
+        setError(result.message || '修改密码失败');
+      }
+    } catch (err: any) {
+      setError('网络错误，请稍后重试');
+      console.error('修改密码失败:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 生成API密钥
+  const handleGenerateApiKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('http://localhost:3001/api/merchant-profile/generate-api-key', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: apiKeyForm.apiKeyName,
+          description: apiKeyForm.description
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.success) {
+        setApiKeyDialogOpen(false);
+        setApiKeyForm({
+          apiKeyName: '',
+          description: ''
+        });
+        // 可以显示成功消息
+      } else {
+        setError(result.message || '生成API密钥失败');
+      }
+    } catch (err: any) {
+      setError('网络错误，请稍后重试');
+      console.error('生成API密钥失败:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -334,17 +514,19 @@ export default function Merchants() {
             mb: 3
           }}
         >
-          商户管理
+          {isMerchantView ? '我的账户' : '商户管理'}
         </Typography>
-        <PermissionGuard permissions={[Permission.MANAGE_MERCHANTS]}>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAddNew}
-          >
-            添加商户
-          </Button>
-        </PermissionGuard>
+        {!isMerchantView && (
+          <PermissionGuard permissions={[Permission.MANAGE_MERCHANTS]}>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleAddNew}
+            >
+              添加商户
+            </Button>
+          </PermissionGuard>
+        )}
       </Box>
 
       {error && (
@@ -353,16 +535,104 @@ export default function Merchants() {
         </Alert>
       )}
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: 'grey.100' }}>
-              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>商户信息</TableCell>
-              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>状态</TableCell>
-              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>余额</TableCell>
-              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>支付配置</TableCell>
-              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>额度使用</TableCell>
-              <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>创建时间</TableCell>
+      {/* 商户视图 - 显示自己的账户信息 */}
+      {isMerchantView && currentMerchant ? (
+        <Box>
+          {/* 基本信息卡片 */}
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', mb: 2 }}>
+              基本信息
+            </Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 2 }}>
+              <Box>
+                <Typography variant="body2" color="text.secondary">商户ID</Typography>
+                <Typography variant="body1" fontWeight="medium">{currentMerchant.merchantId}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">商户名称</Typography>
+                <Typography variant="body1" fontWeight="medium">{currentMerchant.name}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">状态</Typography>
+                <Chip
+                  label={getStatusDisplayName(currentMerchant.status)}
+                  color={getStatusColor(currentMerchant.status) as any}
+                  size="small"
+                />
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">默认支付商</Typography>
+                <Typography variant="body1" fontWeight="medium">{currentMerchant.defaultProvider}</Typography>
+              </Box>
+            </Box>
+          </Paper>
+
+          {/* 费率信息卡片 */}
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', mb: 2 }}>
+              费率设置
+            </Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
+              <Box>
+                <Typography variant="body2" color="text.secondary">充值费率</Typography>
+                <Typography variant="body1" fontWeight="medium">{currentMerchant.depositFee}%</Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">提现费率</Typography>
+                <Typography variant="body1" fontWeight="medium">{currentMerchant.withdrawalFee}%</Typography>
+              </Box>
+            </Box>
+          </Paper>
+
+          {/* 限额信息卡片 */}
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', mb: 2 }}>
+              限额设置
+            </Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
+              <Box>
+                <Typography variant="body2" color="text.secondary">每日额度</Typography>
+                <Typography variant="body1" fontWeight="medium">{formatCurrency(currentMerchant.limits.dailyLimit)}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">每月额度</Typography>
+                <Typography variant="body1" fontWeight="medium">{formatCurrency(currentMerchant.limits.monthlyLimit)}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">单笔限额</Typography>
+                <Typography variant="body1" fontWeight="medium">{formatCurrency(currentMerchant.limits.singleTransactionLimit)}</Typography>
+              </Box>
+            </Box>
+          </Paper>
+
+          {/* 操作按钮 */}
+          <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+            <Button
+              variant="outlined"
+              onClick={() => setPasswordDialogOpen(true)}
+            >
+              修改密码
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => setApiKeyDialogOpen(true)}
+            >
+              生成API密钥
+            </Button>
+          </Box>
+        </Box>
+      ) : (
+        /* 管理员视图 - 显示所有商户列表 */
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: 'grey.100' }}>
+                <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>商户信息</TableCell>
+                <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>状态</TableCell>
+                <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>余额</TableCell>
+                <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>支付配置</TableCell>
+                <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>额度使用</TableCell>
+                <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>创建时间</TableCell>
               <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>操作</TableCell>
             </TableRow>
           </TableHead>
@@ -507,6 +777,128 @@ export default function Merchants() {
           </TableBody>
         </Table>
       </TableContainer>
+      )}
+
+      {/* 密码修改对话框 */}
+      <Dialog 
+        open={passwordDialogOpen} 
+        onClose={() => setPasswordDialogOpen(false)} 
+        maxWidth="sm" 
+        fullWidth
+      >
+        <DialogTitle>
+          修改密码
+        </DialogTitle>
+        <form onSubmit={handlePasswordChange}>
+          <DialogContent>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <TextField
+                fullWidth
+                label="当前密码"
+                type="password"
+                value={passwordForm.currentPassword}
+                onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                required
+              />
+              <TextField
+                fullWidth
+                label="新密码"
+                type="password"
+                value={passwordForm.newPassword}
+                onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                required
+              />
+              <TextField
+                fullWidth
+                label="确认新密码"
+                type="password"
+                value={passwordForm.confirmPassword}
+                onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                required
+              />
+            </Box>
+          </DialogContent>
+          <DialogTitle sx={{ 
+            display: 'flex', 
+            justifyContent: 'flex-end', 
+            gap: 1,
+            borderTop: 1,
+            borderColor: 'divider',
+            pt: 2
+          }}>
+            <Button 
+              onClick={() => setPasswordDialogOpen(false)}
+              variant="outlined"
+            >
+              取消
+            </Button>
+            <Button 
+              type="submit" 
+              variant="contained" 
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={16} /> : '确认修改'}
+            </Button>
+          </DialogTitle>
+        </form>
+      </Dialog>
+
+      {/* API密钥生成对话框 */}
+      <Dialog 
+        open={apiKeyDialogOpen} 
+        onClose={() => setApiKeyDialogOpen(false)} 
+        maxWidth="sm" 
+        fullWidth
+      >
+        <DialogTitle>
+          生成API密钥
+        </DialogTitle>
+        <form onSubmit={handleGenerateApiKey}>
+          <DialogContent>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <TextField
+                fullWidth
+                label="密钥名称"
+                value={apiKeyForm.apiKeyName}
+                onChange={(e) => setApiKeyForm(prev => ({ ...prev, apiKeyName: e.target.value }))}
+                required
+                placeholder="例如：生产环境密钥"
+              />
+              <TextField
+                fullWidth
+                label="描述"
+                value={apiKeyForm.description}
+                onChange={(e) => setApiKeyForm(prev => ({ ...prev, description: e.target.value }))}
+                multiline
+                rows={3}
+                placeholder="密钥用途说明"
+              />
+            </Box>
+          </DialogContent>
+          <DialogTitle sx={{ 
+            display: 'flex', 
+            justifyContent: 'flex-end', 
+            gap: 1,
+            borderTop: 1,
+            borderColor: 'divider',
+            pt: 2
+          }}>
+            <Button 
+              onClick={() => setApiKeyDialogOpen(false)}
+              variant="outlined"
+            >
+              取消
+            </Button>
+            <Button 
+              type="submit" 
+              variant="contained" 
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={16} /> : '生成密钥'}
+            </Button>
+          </DialogTitle>
+        </form>
+      </Dialog>
 
       <Dialog 
         open={dialogOpen} 
@@ -786,6 +1178,91 @@ export default function Merchants() {
               />
             </Box>
           </DialogContent>
+        </form>
+      </Dialog>
+
+      {/* 修改密码对话框 */}
+      <Dialog open={passwordDialogOpen} onClose={() => setPasswordDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <Typography variant="h6">修改密码</Typography>
+        </DialogTitle>
+        <form onSubmit={handlePasswordChange}>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="当前密码"
+              type="password"
+              value={passwordForm.currentPassword}
+              onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+              required
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="新密码"
+              type="password"
+              value={passwordForm.newPassword}
+              onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+              required
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="确认新密码"
+              type="password"
+              value={passwordForm.confirmPassword}
+              onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+              required
+              sx={{ mb: 2 }}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setPasswordDialogOpen(false)}>取消</Button>
+            <Button type="submit" variant="contained" disabled={loading}>
+              {loading ? <CircularProgress size={16} /> : '确认修改'}
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      {/* 生成API密钥对话框 */}
+      <Dialog open={apiKeyDialogOpen} onClose={() => setApiKeyDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <Typography variant="h6">生成API密钥</Typography>
+        </DialogTitle>
+        <form onSubmit={handleGenerateApiKey}>
+          <DialogContent>
+            <TextField
+              fullWidth
+              label="API密钥名称"
+              value={apiKeyForm.apiKeyName}
+              onChange={(e) => setApiKeyForm(prev => ({ ...prev, apiKeyName: e.target.value }))}
+              required
+              placeholder="例如：生产环境API密钥"
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="描述"
+              value={apiKeyForm.description}
+              onChange={(e) => setApiKeyForm(prev => ({ ...prev, description: e.target.value }))}
+              multiline
+              rows={3}
+              placeholder="可选：描述这个API密钥的用途"
+              sx={{ mb: 2 }}
+            />
+            <Alert severity="info" sx={{ mb: 2 }}>
+              <Typography variant="body2">
+                生成新的API密钥后，旧的密钥将自动失效。请妥善保管您的API密钥。
+              </Typography>
+            </Alert>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setApiKeyDialogOpen(false)}>取消</Button>
+            <Button type="submit" variant="contained" disabled={loading}>
+              {loading ? <CircularProgress size={16} /> : '生成密钥'}
+            </Button>
+          </DialogActions>
         </form>
       </Dialog>
     </Box>

@@ -1,8 +1,8 @@
 // 用户角色枚举
 export enum UserRole {
-  ADMIN = 'ADMIN',
-  OPERATOR = 'OPERATOR', 
-  MERCHANT = 'MERCHANT'
+  ADMIN = 'admin',
+  OPERATOR = 'operator', 
+  MERCHANT = 'merchant'
 }
 
 // 权限枚举
@@ -15,6 +15,7 @@ export enum Permission {
   VIEW_ALL_ORDERS = 'VIEW_ALL_ORDERS',
   VIEW_OWN_TRANSACTIONS = 'VIEW_OWN_TRANSACTIONS',
   VIEW_ALL_TRANSACTIONS = 'VIEW_ALL_TRANSACTIONS',
+  VIEW_OWN_MERCHANT_DATA = 'VIEW_OWN_MERCHANT_DATA',
   MANAGE_USERS = 'MANAGE_USERS',
 
 }

@@ -58,7 +58,7 @@ const menuItems = [
     text: '商户管理',
     icon: <Business />,
     path: '/merchants',
-    permissions: [Permission.VIEW_ALL_MERCHANTS]
+    permissions: [Permission.VIEW_ALL_MERCHANTS, Permission.VIEW_OWN_MERCHANT_DATA]
   },
   {
     text: '支付管理',
@@ -70,7 +70,7 @@ const menuItems = [
     text: '支付统计',
     icon: <TrendingUp />,
     path: '/payment-data',
-    permissions: []
+    permissions: [Permission.VIEW_ALL_TRANSACTIONS, Permission.VIEW_OWN_TRANSACTIONS]
   },
   {
     text: '用户管理',
@@ -83,7 +83,7 @@ const menuItems = [
     text: '支付测试',
     icon: <Api />,
     path: '/cashgit-payment-test',
-    permissions: []
+    permissions: [Permission.VIEW_PAYMENT_CONFIG]
   },
 
 

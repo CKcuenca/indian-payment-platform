@@ -18,6 +18,8 @@ import Orders from './pages/Orders';
 import PaymentData from './pages/PaymentData';
 import LimitManagement from './pages/LimitManagement';
 
+
+
 import { useAuth } from './hooks/useAuth';
 import { Permission } from './types';
 
@@ -130,7 +132,7 @@ function App() {
           <Route
             path="/merchants"
             element={
-              <ProtectedRoute permissions={[Permission.VIEW_ALL_MERCHANTS]}>
+              <ProtectedRoute anyPermission={[Permission.VIEW_ALL_MERCHANTS, Permission.VIEW_OWN_MERCHANT_DATA]}>
                 <Layout>
                   <Merchants />
                 </Layout>
@@ -211,6 +213,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

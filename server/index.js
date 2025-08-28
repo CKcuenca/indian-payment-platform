@@ -159,6 +159,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/payment', require('./routes/payment'));
 app.use('/api/merchant', require('./routes/merchant')); // 无限流
+app.use('/api/merchant-profile', require('./routes/merchant-profile')); // 商户个人资料
 app.use('/api/providers', require('./routes/providers'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/payment-config', require('./routes/payment-config'));

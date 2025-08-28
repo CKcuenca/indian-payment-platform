@@ -110,6 +110,11 @@ class AuthService {
     return this.currentUser;
   }
 
+  // 获取当前token
+  getToken(): string | null {
+    return this.token;
+  }
+
   // 获取权限管理器
   getPermissionManager(): PermissionManager | null {
     return this.permissionManager;

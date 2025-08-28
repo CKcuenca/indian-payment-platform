@@ -65,7 +65,7 @@ function Orders() {
       };
       
       // 如果是商户用户，只能查看自己的订单
-      if (currentUser?.role === 'MERCHANT' && currentUser?.merchantId) {
+      if (currentUser?.role === 'merchant' && currentUser?.merchantId) {
         params.merchantId = currentUser.merchantId;
       }
       
@@ -166,7 +166,7 @@ function Orders() {
       };
       
       // 如果是商户用户，只能导出自己的订单
-      if (currentUser?.role === 'MERCHANT' && currentUser?.merchantId) {
+      if (currentUser?.role === 'merchant' && currentUser?.merchantId) {
         params.merchantId = currentUser.merchantId;
       }
       
@@ -284,7 +284,7 @@ function Orders() {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        {currentUser?.role === 'MERCHANT' ? '我的订单' : '订单管理'}
+        {currentUser?.role === 'merchant' ? '我的订单' : '订单管理'}
       </Typography>
 
       {error && (
@@ -341,7 +341,7 @@ function Orders() {
           <TableHead>
             <TableRow>
               <TableCell>订单ID</TableCell>
-              {currentUser?.role !== 'MERCHANT' && <TableCell>商户信息</TableCell>}
+                              {currentUser?.role !== 'merchant' && <TableCell>商户信息</TableCell>}
               <TableCell>支付账户</TableCell>
               <TableCell>UPI信息</TableCell>
               <TableCell>游戏信息</TableCell>
@@ -362,7 +362,7 @@ function Orders() {
                     {order.orderId}
                   </Typography>
                 </TableCell>
-                {currentUser?.role !== 'MERCHANT' && (
+                {currentUser?.role !== 'merchant' && (
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.main' }}>
@@ -512,7 +512,7 @@ function Orders() {
                 <Box>
                   <Typography variant="h6" gutterBottom>基本信息</Typography>
                   <Typography variant="body2"><strong>订单ID:</strong> {selectedOrder.orderId}</Typography>
-                  {currentUser?.role !== 'MERCHANT' && (
+                  {currentUser?.role !== 'merchant' && (
                     <Typography variant="body2"><strong>商户ID:</strong> {selectedOrder.merchantId}</Typography>
                   )}
                   <Typography variant="body2"><strong>订单类型:</strong> {getTypeText(selectedOrder.type)}</Typography>
