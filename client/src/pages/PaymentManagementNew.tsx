@@ -479,21 +479,28 @@ export default function PaymentManagementNew() {
                       value={formData.type}
                       onChange={(e) => {
                         const newType = e.target.value;
-                        const currentProvider = formData.providerName;
+                        console.log('选择支付商类型:', newType);
                         
-                        // 检查当前选中的支付商是否在新类型中可用
-                        let shouldResetProvider = false;
-                        if (newType === 'native') {
-                          shouldResetProvider = !['airpay', 'cashfree', 'razorpay', 'paytm', 'passpay', '4party_platform1', '4party_platform2', '4party_platform3'].includes(currentProvider);
-                        } else if (newType === 'wakeup') {
-                          shouldResetProvider = !['unispay'].includes(currentProvider);
-                        }
-                        
-                        setFormData({
-                          ...formData, 
-                          type: newType, 
-                          subType: newType === 'wakeup' ? 'wakeup' : 'third_party', // 重置子类型
-                          providerName: shouldResetProvider ? '' : currentProvider
+                        setFormData(prev => {
+                          const currentProvider = prev.providerName;
+                          
+                          // 检查当前选中的支付商是否在新类型中可用
+                          let shouldResetProvider = false;
+                          if (newType === 'native') {
+                            shouldResetProvider = !['airpay', 'cashfree', 'razorpay', 'paytm', 'passpay', '4party_platform1', '4party_platform2', '4party_platform3'].includes(currentProvider);
+                          } else if (newType === 'wakeup') {
+                            shouldResetProvider = !['unispay'].includes(currentProvider);
+                          }
+                          
+                          const newState = {
+                            ...prev, 
+                            type: newType, 
+                            subType: newType === 'wakeup' ? 'wakeup' : 'third_party', // 重置子类型
+                            providerName: shouldResetProvider ? '' : currentProvider
+                          };
+                          
+                          console.log('类型切换后新状态:', newState);
+                          return newState;
                         });
                       }}
                     >
@@ -522,20 +529,27 @@ export default function PaymentManagementNew() {
                         value={formData.subType}
                         onChange={(e) => {
                           const newSubType = e.target.value;
-                          const currentProvider = formData.providerName;
+                          console.log('选择分支类型:', newSubType);
                           
-                          // 检查当前选中的支付商是否在新子类型中可用
-                          let shouldResetProvider = false;
-                          if (newSubType === 'third_party') {
-                            shouldResetProvider = !['airpay', 'cashfree', 'razorpay', 'paytm'].includes(currentProvider);
-                          } else if (newSubType === 'fourth_party') {
-                            shouldResetProvider = !['passpay', '4party_platform1', '4party_platform2', '4party_platform3'].includes(currentProvider);
-                          }
-                          
-                          setFormData({
-                            ...formData,
-                            subType: newSubType,
-                            providerName: shouldResetProvider ? '' : currentProvider
+                          setFormData(prev => {
+                            const currentProvider = prev.providerName;
+                            
+                            // 检查当前选中的支付商是否在新子类型中可用
+                            let shouldResetProvider = false;
+                            if (newSubType === 'third_party') {
+                              shouldResetProvider = !['airpay', 'cashfree', 'razorpay', 'paytm'].includes(currentProvider);
+                            } else if (newSubType === 'fourth_party') {
+                              shouldResetProvider = !['passpay', '4party_platform1', '4party_platform2', '4party_platform3'].includes(currentProvider);
+                            }
+                            
+                            const newState = {
+                              ...prev,
+                              subType: newSubType,
+                              providerName: shouldResetProvider ? '' : currentProvider
+                            };
+                            
+                            console.log('分支类型切换后新状态:', newState);
+                            return newState;
                           });
                         }}
                       >
@@ -561,30 +575,43 @@ export default function PaymentManagementNew() {
                     <InputLabel>支付商</InputLabel>
                     <Select
                       value={formData.providerName}
-                      onChange={(e) => setFormData({...formData, providerName: e.target.value})}
+                      onChange={(e) => {
+                        const selectedProvider = e.target.value;
+                        console.log('选择支付商:', selectedProvider);
+                        console.log('选择前状态:', formData);
+                        
+                        setFormData(prev => {
+                          const newState = { ...prev, providerName: selectedProvider };
+                          console.log('选择后新状态:', newState);
+                          return newState;
+                        });
+                      }}
+                      disabled={!formData.type || !formData.subType}
                     >
                       {formData.type === 'native' ? (
-                        formData.subType === 'third_party' ? (
-                          <>
-                            <MenuItem value="airpay">AirPay (3方)</MenuItem>
-                            <MenuItem value="cashfree">CashFree (3方)</MenuItem>
-                            <MenuItem value="razorpay">Razorpay (3方)</MenuItem>
-                            <MenuItem value="paytm">Paytm (3方)</MenuItem>
-                          </>
-                        ) : (
-                          <>
-                            <MenuItem value="passpay">PassPay (4方平台)</MenuItem>
-                            <MenuItem value="4party_platform1">4方平台1 (统一API)</MenuItem>
-                            <MenuItem value="4party_platform2">4方平台2 (统一API)</MenuItem>
-                            <MenuItem value="4party_platform3">4方平台3 (统一API)</MenuItem>
-                          </>
-                        )
-                      ) : (
-                        <>
-                          <MenuItem value="unispay">UniSpay (唤醒)</MenuItem>
-                        </>
-                      )}
+                        formData.subType === 'third_party' ? [
+                          <MenuItem key="airpay" value="airpay">AirPay (3方)</MenuItem>,
+                          <MenuItem key="cashfree" value="cashfree">CashFree (3方)</MenuItem>,
+                          <MenuItem key="razorpay" value="razorpay">Razorpay (3方)</MenuItem>,
+                          <MenuItem key="paytm" value="paytm">Paytm (3方)</MenuItem>
+                        ] : formData.subType === 'fourth_party' ? [
+                          <MenuItem key="passpay" value="passpay">PassPay (4方平台)</MenuItem>,
+                          <MenuItem key="4party_platform1" value="4party_platform1">4方平台1 (统一API)</MenuItem>,
+                          <MenuItem key="4party_platform2" value="4party_platform2">4方平台2 (统一API)</MenuItem>,
+                          <MenuItem key="4party_platform3" value="4party_platform3">4方平台3 (统一API)</MenuItem>
+                        ] : [
+                          <MenuItem key="no-subtype" value="" disabled>请先选择分支类型</MenuItem>
+                        ]
+                      ) : formData.type === 'wakeup' ? [
+                        <MenuItem key="unispay" value="unispay">UniSpay (唤醒)</MenuItem>
+                      ] : [
+                        <MenuItem key="no-type" value="" disabled>请先选择支付商类型</MenuItem>
+                      ]}
                     </Select>
+                    {/* 调试信息 */}
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                      当前类型: {formData.type} | 子类型: {formData.subType} | 支付商: {formData.providerName || '未选择'}
+                    </Typography>
                   </FormControl>
                 </Box>
                 
