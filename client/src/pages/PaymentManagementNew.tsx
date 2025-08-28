@@ -104,8 +104,111 @@ export default function PaymentManagementNew() {
       //   setAccounts(response.data.data);
       // }
       
-      // 临时设置为空数组，等待API集成
-      setAccounts([]);
+      // 临时使用localStorage作为数据持久化方案
+      const savedAccounts = localStorage.getItem('paymentAccounts');
+      if (savedAccounts) {
+        try {
+          const parsedAccounts = JSON.parse(savedAccounts);
+          setAccounts(parsedAccounts);
+        } catch (parseError) {
+          console.error('解析本地存储的支付账户数据失败:', parseError);
+          setAccounts([]);
+        }
+      } else {
+        // 如果没有本地数据，创建一些示例数据
+        const sampleAccounts: PaymentAccount[] = [
+          {
+            _id: 'sample-1',
+            accountName: 'UniSpay主账户',
+            provider: {
+              name: 'unispay',
+              type: 'wakeup',
+              subType: 'wakeup',
+              accountId: 'USP001',
+              apiKey: '',
+              secretKey: 'sample_secret_key',
+              environment: 'production',
+              mchNo: 'MCH123456'
+            },
+            description: 'UniSpay主要支付账户，支持代收代付',
+            limits: {
+              collection: {
+                dailyLimit: 1000000,
+                monthlyLimit: 10000000,
+                singleTransactionLimit: 100000,
+                minTransactionAmount: 100
+              },
+              payout: {
+                dailyLimit: 500000,
+                monthlyLimit: 5000000,
+                singleTransactionLimit: 50000,
+                minTransactionAmount: 200
+              }
+            },
+            fees: {
+              collection: {
+                transactionFee: 5,
+                fixedFee: 0
+              },
+              payout: {
+                transactionFee: 3,
+                fixedFee: 6
+              }
+            },
+            priority: 1,
+            status: 'ACTIVE',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          },
+          {
+            _id: 'sample-2',
+            accountName: 'PassPay 4方平台',
+            provider: {
+              name: 'passpay',
+              type: 'native',
+              subType: 'fourth_party',
+              accountId: 'PP001',
+              apiKey: 'sample_api_key',
+              secretKey: 'sample_secret_key',
+              environment: 'sandbox',
+              mchNo: ''
+            },
+            description: 'PassPay 4方支付平台账户',
+            limits: {
+              collection: {
+                dailyLimit: 2000000,
+                monthlyLimit: 20000000,
+                singleTransactionLimit: 200000,
+                minTransactionAmount: 100
+              },
+              payout: {
+                dailyLimit: 1000000,
+                monthlyLimit: 10000000,
+                singleTransactionLimit: 100000,
+                minTransactionAmount: 100
+              }
+            },
+            fees: {
+              collection: {
+                transactionFee: 2.5,
+                fixedFee: 0
+              },
+              payout: {
+                transactionFee: 2.0,
+                fixedFee: 5
+              }
+            },
+            priority: 2,
+            status: 'ACTIVE',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ];
+        
+        setAccounts(sampleAccounts);
+        // 保存示例数据到本地存储
+        saveAccountsToStorage(sampleAccounts);
+      }
       
     } catch (err: any) {
       setError(err.message || '获取支付账户失败');
@@ -114,6 +217,15 @@ export default function PaymentManagementNew() {
     }
   };
   
+  // 保存账户数据到本地存储
+  const saveAccountsToStorage = (accounts: PaymentAccount[]) => {
+    try {
+      localStorage.setItem('paymentAccounts', JSON.stringify(accounts));
+    } catch (error) {
+      console.error('保存支付账户数据到本地存储失败:', error);
+    }
+  };
+
   // 组件加载时获取数据
   React.useEffect(() => {
     fetchAccounts();
@@ -281,11 +393,16 @@ export default function PaymentManagementNew() {
 
       if (editingAccount) {
         // 更新现有账户
-        setAccounts(prev => prev.map(account => 
-          account._id === editingAccount._id 
-            ? { ...account, ...accountData, updatedAt: new Date().toISOString() }
-            : account
-        ));
+        setAccounts(prev => {
+          const updatedAccounts = prev.map(account => 
+            account._id === editingAccount._id 
+              ? { ...account, ...accountData, updatedAt: new Date().toISOString() }
+              : account
+          );
+          // 保存到本地存储
+          saveAccountsToStorage(updatedAccounts);
+          return updatedAccounts;
+        });
       } else {
         // 添加新账户
         const newAccount = {
@@ -294,7 +411,12 @@ export default function PaymentManagementNew() {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
-        setAccounts(prev => [...prev, newAccount]);
+        setAccounts(prev => {
+          const updatedAccounts = [...prev, newAccount];
+          // 保存到本地存储
+          saveAccountsToStorage(updatedAccounts);
+          return updatedAccounts;
+        });
       }
       
       setDialogOpen(false);
@@ -315,7 +437,12 @@ export default function PaymentManagementNew() {
         // await api.delete(`/payment-config/${accountId}`);
         
         // 临时从本地状态中删除
-        setAccounts(prev => prev.filter(account => account._id !== accountId));
+        setAccounts(prev => {
+          const updatedAccounts = prev.filter(account => account._id !== accountId);
+          // 保存到本地存储
+          saveAccountsToStorage(updatedAccounts);
+          return updatedAccounts;
+        });
         
       } catch (err: any) {
         setError(err.message || '删除失败');
@@ -363,9 +490,14 @@ export default function PaymentManagementNew() {
   return (
     <Box sx={{ p: 0 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" color="primary" fontWeight="bold">
-          支付管理
-        </Typography>
+        <Box>
+          <Typography variant="h4" color="primary" fontWeight="bold">
+            支付管理
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+            💾 数据暂时保存在本地存储中，页面刷新后数据不会丢失
+          </Typography>
+        </Box>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
