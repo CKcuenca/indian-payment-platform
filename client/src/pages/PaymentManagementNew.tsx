@@ -52,10 +52,20 @@ interface PaymentAccount {
   };
   description: string;
   limits: {
-    dailyLimit: number;
-    monthlyLimit: number;
-    singleTransactionLimit: number;
-    minTransactionAmount: number;
+    // 代收限额
+    collection: {
+      dailyLimit: number;
+      monthlyLimit: number;
+      singleTransactionLimit: number;
+      minTransactionAmount: number;
+    };
+    // 代付限额
+    payout: {
+      dailyLimit: number;
+      monthlyLimit: number;
+      singleTransactionLimit: number;
+      minTransactionAmount: number;
+    };
   };
   fees: {
     transactionFee: number;
@@ -118,10 +128,16 @@ export default function PaymentManagementNew() {
     // UniSpay专用字段
     mchNo: '',
     description: '',
-    dailyLimit: 1000000,
-    monthlyLimit: 10000000,
-    singleTransactionLimit: 100000,
-    minTransactionAmount: 100,
+    // 代收限额
+    collectionDailyLimit: 1000000,
+    collectionMonthlyLimit: 10000000,
+    collectionSingleTransactionLimit: 100000,
+    collectionMinTransactionAmount: 100,
+    // 代付限额
+    payoutDailyLimit: 1000000,
+    payoutMonthlyLimit: 10000000,
+    payoutSingleTransactionLimit: 100000,
+    payoutMinTransactionAmount: 100,
     transactionFee: 0.5,
     fixedFee: 0,
     priority: 1,
@@ -144,10 +160,16 @@ export default function PaymentManagementNew() {
       // UniSpay专用字段
       mchNo: '',
       description: '',
-      dailyLimit: 1000000,
-      monthlyLimit: 10000000,
-      singleTransactionLimit: 100000,
-      minTransactionAmount: 100,
+      // 代收限额
+      collectionDailyLimit: 1000000,
+      collectionMonthlyLimit: 10000000,
+      collectionSingleTransactionLimit: 100000,
+      collectionMinTransactionAmount: 100,
+      // 代付限额
+      payoutDailyLimit: 1000000,
+      payoutMonthlyLimit: 10000000,
+      payoutSingleTransactionLimit: 100000,
+      payoutMinTransactionAmount: 100,
       transactionFee: 0.5,
       fixedFee: 0,
       priority: 1,
@@ -170,10 +192,16 @@ export default function PaymentManagementNew() {
       // UniSpay专用字段
       mchNo: account.provider.mchNo || '',
       description: account.description || '',
-      dailyLimit: account.limits.dailyLimit,
-      monthlyLimit: account.limits.monthlyLimit,
-      singleTransactionLimit: account.limits.singleTransactionLimit,
-      minTransactionAmount: account.limits.minTransactionAmount,
+      // 代收限额
+      collectionDailyLimit: account.limits.collection?.dailyLimit || 1000000,
+      collectionMonthlyLimit: account.limits.collection?.monthlyLimit || 10000000,
+      collectionSingleTransactionLimit: account.limits.collection?.singleTransactionLimit || 100000,
+      collectionMinTransactionAmount: account.limits.collection?.minTransactionAmount || 100,
+      // 代付限额
+      payoutDailyLimit: account.limits.payout?.dailyLimit || 1000000,
+      payoutMonthlyLimit: account.limits.payout?.monthlyLimit || 10000000,
+      payoutSingleTransactionLimit: account.limits.payout?.singleTransactionLimit || 100000,
+      payoutMinTransactionAmount: account.limits.payout?.minTransactionAmount || 100,
       transactionFee: account.fees.transactionFee,
       fixedFee: account.fees.fixedFee,
       priority: account.priority,
@@ -202,10 +230,18 @@ export default function PaymentManagementNew() {
         },
         description: formData.description,
         limits: {
-          dailyLimit: formData.dailyLimit,
-          monthlyLimit: formData.monthlyLimit,
-          singleTransactionLimit: formData.singleTransactionLimit,
-          minTransactionAmount: formData.minTransactionAmount
+          collection: {
+            dailyLimit: formData.collectionDailyLimit,
+            monthlyLimit: formData.collectionMonthlyLimit,
+            singleTransactionLimit: formData.collectionSingleTransactionLimit,
+            minTransactionAmount: formData.collectionMinTransactionAmount
+          },
+          payout: {
+            dailyLimit: formData.payoutDailyLimit,
+            monthlyLimit: formData.payoutMonthlyLimit,
+            singleTransactionLimit: formData.payoutSingleTransactionLimit,
+            minTransactionAmount: formData.payoutMinTransactionAmount
+          }
         },
         fees: {
           transactionFee: formData.transactionFee,
@@ -344,6 +380,8 @@ export default function PaymentManagementNew() {
                   <TableCell>支付商</TableCell>
                   <TableCell>类型</TableCell>
                   <TableCell>环境</TableCell>
+                  <TableCell>代收限额</TableCell>
+                  <TableCell>代付限额</TableCell>
                   <TableCell>状态</TableCell>
                   <TableCell>优先级</TableCell>
                   <TableCell>操作</TableCell>
@@ -394,9 +432,41 @@ export default function PaymentManagementNew() {
                       />
                     </TableCell>
                     <TableCell>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          日: {account.limits.collection?.dailyLimit?.toLocaleString() || '0'}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          月: {account.limits.collection?.monthlyLimit?.toLocaleString() || '0'}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          单笔: {account.limits.collection?.singleTransactionLimit?.toLocaleString() || '0'}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          最小: {account.limits.collection?.minTransactionAmount?.toLocaleString() || '0'}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          日: {account.limits.payout?.dailyLimit?.toLocaleString() || '0'}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          月: {account.limits.payout?.monthlyLimit?.toLocaleString() || '0'}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          单笔: {account.limits.payout?.singleTransactionLimit?.toLocaleString() || '0'}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          最小: {account.limits.payout?.minTransactionAmount?.toLocaleString() || '0'}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
                       <Chip
                         label={account.status}
-                        color={account.status === 'ACTIVE' ? 'success' : 'default'}
+                        color={account.status === 'success' ? 'success' : 'default'}
                         size="small"
                       />
                     </TableCell>
@@ -718,11 +788,11 @@ export default function PaymentManagementNew() {
                 </Box>
               </Box>
 
-              {/* 限额配置 */}
+              {/* 代收限额配置 */}
               <Box>
                 <Divider sx={{ my: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  限额配置
+                <Typography variant="h6" gutterBottom color="primary">
+                  代收限额配置
                 </Typography>
               </Box>
               
@@ -732,8 +802,9 @@ export default function PaymentManagementNew() {
                     fullWidth
                     label="日限额"
                     type="number"
-                    value={formData.dailyLimit}
-                    onChange={(e) => setFormData({...formData, dailyLimit: parseInt(e.target.value)})}
+                    value={formData.collectionDailyLimit}
+                    onChange={(e) => setFormData({...formData, collectionDailyLimit: parseInt(e.target.value)})}
+                    helperText="代收每日最大限额"
                     required
                   />
                 </Box>
@@ -743,8 +814,9 @@ export default function PaymentManagementNew() {
                     fullWidth
                     label="月限额"
                     type="number"
-                    value={formData.monthlyLimit}
-                    onChange={(e) => setFormData({...formData, monthlyLimit: parseInt(e.target.value)})}
+                    value={formData.collectionMonthlyLimit}
+                    onChange={(e) => setFormData({...formData, collectionMonthlyLimit: parseInt(e.target.value)})}
+                    helperText="代收每月最大限额"
                     required
                   />
                 </Box>
@@ -754,8 +826,9 @@ export default function PaymentManagementNew() {
                     fullWidth
                     label="单笔限额"
                     type="number"
-                    value={formData.singleTransactionLimit}
-                    onChange={(e) => setFormData({...formData, singleTransactionLimit: parseInt(e.target.value)})}
+                    value={formData.collectionSingleTransactionLimit}
+                    onChange={(e) => setFormData({...formData, collectionSingleTransactionLimit: parseInt(e.target.value)})}
+                    helperText="代收单笔最大限额"
                     required
                   />
                 </Box>
@@ -765,8 +838,67 @@ export default function PaymentManagementNew() {
                     fullWidth
                     label="最小交易金额"
                     type="number"
-                    value={formData.minTransactionAmount}
-                    onChange={(e) => setFormData({...formData, minTransactionAmount: parseInt(e.target.value)})}
+                    value={formData.collectionMinTransactionAmount}
+                    onChange={(e) => setFormData({...formData, collectionMinTransactionAmount: parseInt(e.target.value)})}
+                    helperText="代收最小交易金额"
+                    required
+                  />
+                </Box>
+              </Box>
+
+              {/* 代付限额配置 */}
+              <Box>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h6" gutterBottom color="secondary">
+                  代付限额配置
+                </Typography>
+              </Box>
+              
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                  <TextField
+                    fullWidth
+                    label="日限额"
+                    type="number"
+                    value={formData.payoutDailyLimit}
+                    onChange={(e) => setFormData({...formData, payoutDailyLimit: parseInt(e.target.value)})}
+                    helperText="代付每日最大限额"
+                    required
+                  />
+                </Box>
+                
+                <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                  <TextField
+                    fullWidth
+                    label="月限额"
+                    type="number"
+                    value={formData.payoutMonthlyLimit}
+                    onChange={(e) => setFormData({...formData, payoutMonthlyLimit: parseInt(e.target.value)})}
+                    helperText="代付每月最大限额"
+                    required
+                  />
+                </Box>
+                
+                <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                  <TextField
+                    fullWidth
+                    label="单笔限额"
+                    type="number"
+                    value={formData.payoutSingleTransactionLimit}
+                    onChange={(e) => setFormData({...formData, payoutSingleTransactionLimit: parseInt(e.target.value)})}
+                    helperText="代付单笔最大限额"
+                    required
+                  />
+                </Box>
+                
+                <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                  <TextField
+                    fullWidth
+                    label="最小交易金额"
+                    type="number"
+                    value={formData.payoutMinTransactionAmount}
+                    onChange={(e) => setFormData({...formData, payoutMinTransactionAmount: parseInt(e.target.value)})}
+                    helperText="代付最小交易金额"
                     required
                   />
                 </Box>
