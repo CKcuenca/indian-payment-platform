@@ -12,7 +12,7 @@ class UnispayProvider extends BaseProvider {
     this.baseUrl = config.environment === 'production' 
       ? 'https://asia666.unispay.xyz' 
       : 'https://test-api.unispay.com';
-    this.mchNo = config.accountId;
+    this.mchNo = config.mchNo;
     this.apiKey = config.apiKey;
     this.secretKey = config.secretKey;
   }

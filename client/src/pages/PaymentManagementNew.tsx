@@ -47,6 +47,8 @@ interface PaymentAccount {
     apiKey: string;
     secretKey: string;
     environment: string;
+    // UniSpay专用字段
+    mchNo?: string;
   };
   description: string;
   limits: {
@@ -113,6 +115,8 @@ export default function PaymentManagementNew() {
     apiKey: '',
     secretKey: '',
     environment: 'sandbox',
+    // UniSpay专用字段
+    mchNo: '',
     description: '',
     dailyLimit: 1000000,
     monthlyLimit: 10000000,
@@ -137,6 +141,8 @@ export default function PaymentManagementNew() {
       apiKey: '',
       secretKey: '',
       environment: 'sandbox',
+      // UniSpay专用字段
+      mchNo: '',
       description: '',
       dailyLimit: 1000000,
       monthlyLimit: 10000000,
@@ -161,6 +167,8 @@ export default function PaymentManagementNew() {
       apiKey: account.provider.apiKey,
       secretKey: account.provider.secretKey,
       environment: account.provider.environment,
+      // UniSpay专用字段
+      mchNo: account.provider.mchNo || '',
       description: account.description || '',
       dailyLimit: account.limits.dailyLimit,
       monthlyLimit: account.limits.monthlyLimit,
@@ -188,7 +196,9 @@ export default function PaymentManagementNew() {
           accountId: formData.accountId,
           apiKey: formData.apiKey,
           secretKey: formData.secretKey,
-          environment: formData.environment
+          environment: formData.environment,
+          // UniSpay专用字段
+          mchNo: formData.mchNo
         },
         description: formData.description,
         limits: {
@@ -344,19 +354,27 @@ export default function PaymentManagementNew() {
                   <TableRow key={account._id}>
                     <TableCell>{account.accountName}</TableCell>
                     <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Chip
-                          label={account.provider.name}
-                          color={getProviderColor(account.provider.name)}
-                          size="small"
-                        />
-                        {account.provider.type === 'native' && (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Chip
-                            label={account.provider.subType === 'third_party' ? '3方' : '4方'}
-                            color={account.provider.subType === 'third_party' ? 'success' : 'info'}
+                            label={account.provider.name}
+                            color={getProviderColor(account.provider.name)}
                             size="small"
-                            variant="outlined"
                           />
+                          {account.provider.type === 'native' && (
+                            <Chip
+                              label={account.provider.subType === 'third_party' ? '3方' : '4方'}
+                              color={account.provider.subType === 'third_party' ? 'success' : 'info'}
+                              size="small"
+                              variant="outlined"
+                            />
+                          )}
+                        </Box>
+                        {/* 显示UniSpay的商户号信息 */}
+                        {account.provider.name === 'unispay' && account.provider.mchNo && (
+                          <Typography variant="caption" color="text.secondary">
+                            商户号: {account.provider.mchNo}
+                          </Typography>
                         )}
                       </Box>
                     </TableCell>
@@ -668,6 +686,20 @@ export default function PaymentManagementNew() {
                     required
                   />
                 </Box>
+                
+                {/* UniSpay专用字段 - 仅在选择UniSpay时显示 */}
+                {formData.providerName === 'unispay' && (
+                  <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                    <TextField
+                      fullWidth
+                      label="商户号 (mchNo)"
+                      value={formData.mchNo}
+                      onChange={(e) => setFormData({...formData, mchNo: e.target.value})}
+                      helperText="UniSpay提供的商户号，用于API调用"
+                      required
+                    />
+                  </Box>
+                )}
                 
                 <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                   <TextField
