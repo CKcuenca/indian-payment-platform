@@ -146,30 +146,50 @@ function Transactions() {
   // 获取商户列表
   const fetchMerchants = useCallback(async () => {
     try {
-      // 从API获取商户数据，已清理模拟数据
-      // TODO: 替换为实际的API调用
-      // const response = await api.get('/merchants');
-      // setMerchants(response.data);
-      
-      // 临时设置为空数组，等待API集成
-      setMerchants([]);
+      // 从API获取商户数据
+      const response = await fetch('https://cashgit.com/api/merchant');
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          setMerchants(result.data);
+        } else {
+          setMerchants([]);
+        }
+      } else {
+        console.error('获取商户列表失败:', response.status);
+        setMerchants([]);
+      }
     } catch (err) {
       console.error('获取商户列表失败:', err);
+      setMerchants([]);
     }
   }, []);
 
   // 获取支付商列表
   const fetchProviders = useCallback(async () => {
     try {
-      // 从API获取支付商数据，已清理模拟数据
-      // TODO: 替换为实际的API调用
-      // const response = await api.get('/providers');
-      // setProviders(response.data);
-      
-      // 临时设置为空数组，等待API集成
-      setProviders([]);
+      // 从API获取支付商数据
+      const response = await fetch('https://cashgit.com/api/payment-config');
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          const providers = result.data.map((item: any) => ({
+            id: item._id,
+            name: item.provider.name,
+            type: item.provider.type || 'native',
+            environment: item.provider.environment
+          }));
+          setProviders(providers);
+        } else {
+          setProviders([]);
+        }
+      } else {
+        console.error('获取支付商列表失败:', response.status);
+        setProviders([]);
+      }
     } catch (err) {
       console.error('获取支付商列表失败:', err);
+      setProviders([]);
     }
   }, []);
 

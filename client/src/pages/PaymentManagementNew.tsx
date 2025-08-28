@@ -112,132 +112,76 @@ export default function PaymentManagementNew() {
       setLoading(true);
       setError(null);
       
-      // TODO: 替换为真实的API调用
-      // const response = await api.get('/payment-config');
-      // if (response.data.success) {
-      //   setAccounts(response.data.data);
-      // }
-      
-      // 临时使用localStorage作为数据持久化方案
-      const savedAccounts = localStorage.getItem('paymentAccounts');
-      if (savedAccounts) {
-        try {
-          const parsedAccounts = JSON.parse(savedAccounts);
-          setAccounts(parsedAccounts);
-        } catch (parseError) {
-          console.error('解析本地存储的支付账户数据失败:', parseError);
+      // 调用真实API获取支付配置数据
+      const response = await fetch('https://cashgit.com/api/payment-config');
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          // 转换后端数据格式为前端格式
+          const convertedAccounts: PaymentAccount[] = result.data.map((item: any) => ({
+            _id: item._id,
+            accountName: item.accountName,
+            provider: {
+              name: item.provider.name,
+              type: item.provider.type || 'native',
+              subType: item.provider.subType || 'third_party',
+              accountId: item.provider.accountId,
+              apiKey: item.provider.apiKey || '',
+              secretKey: item.provider.secretKey || '',
+              environment: item.provider.environment,
+              mchNo: item.provider.mchNo || ''
+            },
+            description: item.description || '',
+            collectionNotifyUrl: item.collectionNotifyUrl || '',
+            collectionReturnUrl: item.collectionReturnUrl || '',
+            payoutNotifyUrl: item.payoutNotifyUrl || '',
+            payoutReturnUrl: item.payoutReturnUrl || '',
+            limits: {
+              collection: {
+                dailyLimit: item.limits?.dailyLimit || 1000000,
+                monthlyLimit: item.limits?.monthlyLimit || 10000000,
+                singleTransactionLimit: item.limits?.singleTransactionLimit || 100000,
+                minTransactionAmount: item.limits?.minTransactionAmount || 100
+              },
+              payout: {
+                dailyLimit: item.limits?.dailyLimit || 500000,
+                monthlyLimit: item.limits?.monthlyLimit || 5000000,
+                singleTransactionLimit: item.limits?.singleTransactionLimit || 50000,
+                minTransactionAmount: item.limits?.minTransactionAmount || 200
+              }
+            },
+            fees: {
+              collection: {
+                transactionFee: item.fees?.transactionFee || 0.5,
+                fixedFee: item.fees?.fixedFee || 0
+              },
+              payout: {
+                transactionFee: item.fees?.transactionFee || 0.3,
+                fixedFee: item.fees?.fixedFee || 0
+              }
+            },
+            priority: item.priority || 1,
+            status: item.status || 'ACTIVE',
+            createdAt: item.createdAt || new Date().toISOString(),
+            updatedAt: item.updatedAt || new Date().toISOString()
+          }));
+          setAccounts(convertedAccounts);
+        } else {
           setAccounts([]);
         }
       } else {
-        // 如果没有本地数据，创建一些示例数据
-        const sampleAccounts: PaymentAccount[] = [
-          {
-            _id: 'sample-1',
-            accountName: 'UniSpay主账户',
-            provider: {
-              name: 'unispay',
-              type: 'wakeup',
-              subType: 'wakeup',
-              accountId: 'USP001',
-              apiKey: '',
-              secretKey: 'sample_secret_key',
-              environment: 'production',
-              mchNo: 'MCH123456'
-            },
-            description: 'UniSpay主要支付账户，支持代收代付',
-            collectionNotifyUrl: 'https://cashgit.com/api/webhook/unispay/collection',
-            collectionReturnUrl: 'https://cashgit.com/payment/return',
-            payoutNotifyUrl: 'https://cashgit.com/api/withdraw-webhook/unispay/withdraw',
-            payoutReturnUrl: 'https://cashgit.com/withdraw/return',
-            limits: {
-              collection: {
-                dailyLimit: 1000000,
-                monthlyLimit: 10000000,
-                singleTransactionLimit: 100000,
-                minTransactionAmount: 100
-              },
-              payout: {
-                dailyLimit: 500000,
-                monthlyLimit: 5000000,
-                singleTransactionLimit: 50000,
-                minTransactionAmount: 200
-              }
-            },
-            fees: {
-              collection: {
-                transactionFee: 5,
-                fixedFee: 0
-              },
-              payout: {
-                transactionFee: 3,
-                fixedFee: 6
-              }
-            },
-            priority: 1,
-            status: 'ACTIVE',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          },
-          {
-            _id: 'sample-2',
-            accountName: 'PassPay 4方平台',
-            provider: {
-              name: 'passpay',
-              type: 'native',
-              subType: 'fourth_party',
-              accountId: 'PP001',
-              apiKey: 'sample_api_key',
-              secretKey: 'sample_secret_key',
-              environment: 'sandbox',
-              mchNo: ''
-            },
-            description: 'PassPay 4方支付平台账户',
-            collectionNotifyUrl: 'https://cashgit.com/api/webhook/passpay/collection',
-            collectionReturnUrl: 'https://cashgit.com/payment/return',
-            payoutNotifyUrl: 'https://cashgit.com/api/webhook/passpay/payout',
-            payoutReturnUrl: 'https://cashgit.com/withdraw/return',
-            limits: {
-              collection: {
-                dailyLimit: 2000000,
-                monthlyLimit: 20000000,
-                singleTransactionLimit: 200000,
-                minTransactionAmount: 100
-              },
-              payout: {
-                dailyLimit: 1000000,
-                monthlyLimit: 10000000,
-                singleTransactionLimit: 100000,
-                minTransactionAmount: 100
-              }
-            },
-            fees: {
-              collection: {
-                transactionFee: 2.5,
-                fixedFee: 0
-              },
-              payout: {
-                transactionFee: 2.0,
-                fixedFee: 5
-              }
-            },
-            priority: 2,
-            status: 'ACTIVE',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-        ];
-        
-        setAccounts(sampleAccounts);
-        // 保存示例数据到本地存储
-        saveAccountsToStorage(sampleAccounts);
+        console.error('API请求失败:', response.status);
+        setError('获取支付账户数据失败');
+        setAccounts([]);
       }
-      
-    } catch (err: any) {
-      setError(err.message || '获取支付账户失败');
+    } catch (error) {
+      console.error('获取支付账户数据失败:', error);
+      setError('获取支付账户数据失败');
+      setAccounts([]);
     } finally {
       setLoading(false);
     }
-  }, [saveAccountsToStorage]);
+  }, []);
 
   // 组件加载时获取数据
   React.useEffect(() => {

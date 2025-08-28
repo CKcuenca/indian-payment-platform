@@ -83,14 +83,24 @@ export default function Merchants() {
   const fetchMerchants = async () => {
     try {
       setLoading(true);
-      // TODO: 替换为实际的API调用
-      // const response = await api.get('/merchants');
-      // setMerchants(response.data);
-      
-      // 临时设置为空数组，等待API集成
-      setMerchants([]);
+      // 调用真实API获取商户数据
+      const response = await fetch('https://cashgit.com/api/merchant');
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          setMerchants(result.data);
+        } else {
+          setMerchants([]);
+        }
+      } else {
+        console.error('API请求失败:', response.status);
+        setError('获取商户数据失败');
+        setMerchants([]);
+      }
     } catch (err: any) {
-      setError(err.message || '获取商户数据失败');
+      console.error('获取商户数据失败:', err);
+      setError('获取商户数据失败');
+      setMerchants([]);
     } finally {
       setLoading(false);
     }

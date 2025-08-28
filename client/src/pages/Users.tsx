@@ -71,14 +71,24 @@ export default function Users() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      // TODO: 替换为实际的API调用
-      // const response = await api.get('/users');
-      // setUsers(response.data);
-      
-      // 临时设置为空数组，等待API集成
-      setUsers([]);
+      // 调用真实API获取用户数据
+      const response = await fetch('https://cashgit.com/api/users');
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.data) {
+          setUsers(result.data);
+        } else {
+          setUsers([]);
+        }
+      } else {
+        console.error('API请求失败:', response.status);
+        setError('获取用户数据失败');
+        setUsers([]);
+      }
     } catch (err: any) {
-      setError(err.message || '获取用户数据失败');
+      console.error('获取用户数据失败:', err);
+      setError('获取用户数据失败');
+      setUsers([]);
     } finally {
       setLoading(false);
     }
