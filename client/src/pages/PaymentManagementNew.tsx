@@ -68,8 +68,16 @@ interface PaymentAccount {
     };
   };
   fees: {
-    transactionFee: number;
-    fixedFee: number;
+    // 代收费率
+    collection: {
+      transactionFee: number;
+      fixedFee: number;
+    };
+    // 代付费率
+    payout: {
+      transactionFee: number;
+      fixedFee: number;
+    };
   };
   priority: number;
   status: string;
@@ -138,8 +146,12 @@ export default function PaymentManagementNew() {
     payoutMonthlyLimit: 10000000,
     payoutSingleTransactionLimit: 100000,
     payoutMinTransactionAmount: 100,
-    transactionFee: 0.5,
-    fixedFee: 0,
+            // 代收费率
+        collectionTransactionFee: 0.5,
+        collectionFixedFee: 0,
+        // 代付费率
+        payoutTransactionFee: 0.3,
+        payoutFixedFee: 6,
     priority: 1,
     status: 'ACTIVE'
   });
@@ -170,8 +182,12 @@ export default function PaymentManagementNew() {
       payoutMonthlyLimit: 10000000,
       payoutSingleTransactionLimit: 100000,
       payoutMinTransactionAmount: 100,
-      transactionFee: 0.5,
-      fixedFee: 0,
+      // 代收费率
+      collectionTransactionFee: 5, // UniSpay代收5%
+      collectionFixedFee: 0,
+      // 代付费率
+      payoutTransactionFee: 3, // UniSpay代付3%
+      payoutFixedFee: 6, // UniSpay代付固定费用6卢比
       priority: 1,
       status: 'ACTIVE'
     });
@@ -202,8 +218,12 @@ export default function PaymentManagementNew() {
       payoutMonthlyLimit: account.limits.payout?.monthlyLimit || 10000000,
       payoutSingleTransactionLimit: account.limits.payout?.singleTransactionLimit || 100000,
       payoutMinTransactionAmount: account.limits.payout?.minTransactionAmount || 100,
-      transactionFee: account.fees.transactionFee,
-      fixedFee: account.fees.fixedFee,
+      // 代收费率
+      collectionTransactionFee: account.fees.collection?.transactionFee || 0.5,
+      collectionFixedFee: account.fees.collection?.fixedFee || 0,
+      // 代付费率
+      payoutTransactionFee: account.fees.payout?.transactionFee || 0.3,
+      payoutFixedFee: account.fees.payout?.fixedFee || 6,
       priority: account.priority,
       status: account.status
     });
@@ -244,8 +264,16 @@ export default function PaymentManagementNew() {
           }
         },
         fees: {
-          transactionFee: formData.transactionFee,
-          fixedFee: formData.fixedFee
+          // 代收费率
+          collection: {
+            transactionFee: formData.collectionTransactionFee,
+            fixedFee: formData.collectionFixedFee
+          },
+          // 代付费率
+          payout: {
+            transactionFee: formData.payoutTransactionFee,
+            fixedFee: formData.payoutFixedFee
+          }
         },
         priority: formData.priority,
         status: formData.status
@@ -382,6 +410,8 @@ export default function PaymentManagementNew() {
                   <TableCell>环境</TableCell>
                   <TableCell>代收限额</TableCell>
                   <TableCell>代付限额</TableCell>
+                  <TableCell>代收费率</TableCell>
+                  <TableCell>代付费率</TableCell>
                   <TableCell>状态</TableCell>
                   <TableCell>优先级</TableCell>
                   <TableCell>操作</TableCell>
@@ -460,6 +490,26 @@ export default function PaymentManagementNew() {
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
                           最小: {account.limits.payout?.minTransactionAmount?.toLocaleString() || '0'}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          费率: {account.fees.collection?.transactionFee || '0'}%
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          固定: {account.fees.collection?.fixedFee || '0'} 卢比
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          费率: {account.fees.payout?.transactionFee || '0'}%
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          固定: {account.fees.payout?.fixedFee || '0'} 卢比
                         </Typography>
                       </Box>
                     </TableCell>
@@ -904,11 +954,11 @@ export default function PaymentManagementNew() {
                 </Box>
               </Box>
 
-              {/* 费率配置 */}
+              {/* 代收费率配置 */}
               <Box>
                 <Divider sx={{ my: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  费率配置
+                <Typography variant="h6" gutterBottom color="primary">
+                  代收费率配置
                 </Typography>
               </Box>
               
@@ -916,11 +966,12 @@ export default function PaymentManagementNew() {
                 <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                   <TextField
                     fullWidth
-                    label="交易费率 (%)"
+                    label="代收交易费率 (%)"
                     type="number"
-                    value={formData.transactionFee}
-                    onChange={(e) => setFormData({...formData, transactionFee: parseFloat(e.target.value)})}
+                    value={formData.collectionTransactionFee}
+                    onChange={(e) => setFormData({...formData, collectionTransactionFee: parseFloat(e.target.value)})}
                     inputProps={{ step: 0.01, min: 0 }}
+                    helperText="代收交易费率，如5%输入5"
                     required
                   />
                 </Box>
@@ -928,11 +979,47 @@ export default function PaymentManagementNew() {
                 <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                   <TextField
                     fullWidth
-                    label="固定费用"
+                    label="代收固定费用"
                     type="number"
-                    value={formData.fixedFee}
-                    onChange={(e) => setFormData({...formData, fixedFee: parseFloat(e.target.value)})}
+                    value={formData.collectionFixedFee}
+                    onChange={(e) => setFormData({...formData, collectionFixedFee: parseFloat(e.target.value)})}
                     inputProps={{ step: 0.01, min: 0 }}
+                    helperText="代收固定费用，如0"
+                  />
+                </Box>
+              </Box>
+
+              {/* 代付费率配置 */}
+              <Box>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h6" gutterBottom color="secondary">
+                  代付费率配置
+                </Typography>
+              </Box>
+              
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                  <TextField
+                    fullWidth
+                    label="代付交易费率 (%)"
+                    type="number"
+                    value={formData.payoutTransactionFee}
+                    onChange={(e) => setFormData({...formData, payoutTransactionFee: parseFloat(e.target.value)})}
+                    inputProps={{ step: 0.01, min: 0 }}
+                    helperText="代付交易费率，如3%输入3"
+                    required
+                  />
+                </Box>
+                
+                <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                  <TextField
+                    fullWidth
+                    label="代付固定费用"
+                    type="number"
+                    value={formData.payoutFixedFee}
+                    onChange={(e) => setFormData({...formData, payoutFixedFee: parseFloat(e.target.value)})}
+                    inputProps={{ step: 0.01, min: 0 }}
+                    helperText="代付固定费用，如6卢比输入6"
                   />
                 </Box>
               </Box>
