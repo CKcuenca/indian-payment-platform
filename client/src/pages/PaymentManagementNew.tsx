@@ -35,6 +35,7 @@ import {
 } from '@mui/icons-material';
 
 import api from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
 
 // 支付账户类型定义
@@ -93,6 +94,7 @@ interface PaymentAccount {
 }
 
 export default function PaymentManagementNew() {
+  const { currentUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
   
   // 支付账户状态
@@ -369,7 +371,9 @@ export default function PaymentManagementNew() {
         payoutNotifyUrl: formData.payoutNotifyUrl,
         payoutReturnUrl: formData.payoutReturnUrl,
         priority: formData.priority,
-        status: formData.status
+        status: formData.status,
+        // 添加必需的merchantId字段
+        merchantId: currentUser?.merchantId || 'admin'
       };
 
       if (editingAccount) {
