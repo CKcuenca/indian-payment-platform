@@ -114,6 +114,14 @@ export default function PaymentManagementNew() {
       setLoading(true);
       setError(null);
       
+      // 清除本地存储的缓存数据，确保获取最新数据
+      try {
+        localStorage.removeItem('paymentAccounts');
+        console.log('🧹 已清除本地存储的支付账户缓存');
+      } catch (error) {
+        console.log('清除本地存储失败:', error);
+      }
+      
       // 使用统一的api服务
       const response = await api.get('/api/payment-config');
       console.log('🔍 支付配置API响应:', response.data);
