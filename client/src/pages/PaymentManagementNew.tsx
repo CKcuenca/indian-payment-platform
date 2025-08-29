@@ -381,30 +381,30 @@ export default function PaymentManagementNew() {
 
       if (editingAccount) {
         // 更新现有账户
-        setAccounts(prev => {
-          const updatedAccounts = prev.map(account => 
-            account._id === editingAccount._id 
-              ? { ...account, ...accountData, updatedAt: new Date().toISOString() }
-              : account
-          );
-          // 保存到本地存储
-          saveAccountsToStorage(updatedAccounts);
-          return updatedAccounts;
-        });
+        try {
+          const updateResponse = await api.put(`/api/payment-config/${editingAccount._id}`, accountData);
+          if (updateResponse.data.success) {
+            // 更新成功后重新获取数据
+            await fetchAccounts();
+          } else {
+            throw new Error(updateResponse.data.error || '更新失败');
+          }
+        } catch (error) {
+          throw new Error('更新支付账户失败');
+        }
       } else {
-        // 添加新账户
-        const newAccount = {
-          _id: Date.now().toString(),
-          ...accountData,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        setAccounts(prev => {
-          const updatedAccounts = [...prev, newAccount];
-          // 保存到本地存储
-          saveAccountsToStorage(updatedAccounts);
-          return updatedAccounts;
-        });
+        // 添加新账户 - 调用后端API
+        try {
+          const createResponse = await api.post('/api/payment-config', accountData);
+          if (createResponse.data.success) {
+            // 创建成功后重新获取数据
+            await fetchAccounts();
+          } else {
+            throw new Error(createResponse.data.error || '创建失败');
+          }
+        } catch (error) {
+          throw new Error('创建支付账户失败');
+        }
       }
       
       setDialogOpen(false);
@@ -416,24 +416,25 @@ export default function PaymentManagementNew() {
     }
   };
 
-  const handleDelete = (accountId: string) => {
+  const handleDelete = async (accountId: string) => {
     if (window.confirm('确定要删除这个支付账户吗？')) {
       try {
         setError(null);
+        setLoading(true);
         
-        // TODO: 调用删除API
-        // await api.delete(`/payment-config/${accountId}`);
-        
-        // 临时从本地状态中删除
-        setAccounts(prev => {
-          const updatedAccounts = prev.filter(account => account._id !== accountId);
-          // 保存到本地存储
-          saveAccountsToStorage(updatedAccounts);
-          return updatedAccounts;
-        });
+        // 调用删除API
+        const deleteResponse = await api.delete(`/api/payment-config/${accountId}`);
+        if (deleteResponse.data.success) {
+          // 删除成功后重新获取数据
+          await fetchAccounts();
+        } else {
+          throw new Error(deleteResponse.data.error || '删除失败');
+        }
         
       } catch (err: any) {
         setError(err.message || '删除失败');
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -478,7 +479,7 @@ export default function PaymentManagementNew() {
             支付管理
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-            💾 数据暂时保存在本地存储中，页面刷新后数据不会丢失
+            ✅ 数据已连接到后端数据库，支持实时同步
           </Typography>
         </Box>
         <Button
