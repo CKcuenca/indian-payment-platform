@@ -131,6 +131,31 @@ router.get('/merchants', async (req, res) => {
   }
 });
 
+// 删除商户
+router.delete('/merchants/:merchantId', async (req, res) => {
+  try {
+    const { merchantId } = req.params;
+    const Merchant = require('../models/merchant');
+
+    // 检查商户是否存在
+    const merchant = await Merchant.findOne({ merchantId });
+    if (!merchant) {
+      return res.status(404).json({ error: '商户不存在' });
+    }
+
+    // 删除商户
+    await Merchant.deleteOne({ merchantId });
+
+    res.json({
+      success: true,
+      message: '商户删除成功'
+    });
+  } catch (error) {
+    console.error('Delete merchant error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // 获取平台统计
 router.get('/stats', async (req, res) => {
   try {

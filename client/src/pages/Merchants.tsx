@@ -405,9 +405,17 @@ export default function Merchants() {
     if (window.confirm('确定要删除这个商户吗？这将同时删除相关的订单和交易记录。')) {
       try {
         setLoading(true);
-        // 在实际项目中，这里会调用API删除商户
-        setMerchants(merchants.filter(merchant => merchant.merchantId !== merchantId));
-        setError(null);
+        
+        // 调用后端API删除商户
+        const response = await api.delete(`/api/admin/merchants/${merchantId}`);
+        
+        if (response.data.success) {
+          // 删除成功后，从本地状态中移除
+          setMerchants(merchants.filter(merchant => merchant.merchantId !== merchantId));
+          setError(null);
+        } else {
+          throw new Error(response.data.error || '删除失败');
+        }
       } catch (err: any) {
         setError(err.message || '删除失败');
       } finally {
