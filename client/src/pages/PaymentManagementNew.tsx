@@ -372,8 +372,8 @@ export default function PaymentManagementNew() {
         payoutReturnUrl: formData.payoutReturnUrl,
         priority: formData.priority,
         status: formData.status,
-        // 添加必需的merchantId字段
-        merchantId: currentUser?.merchantId || 'admin'
+        // merchantId字段现在是可选的，系统级配置不需要
+        // merchantId: currentUser?.merchantId || 'admin'
       };
 
       if (editingAccount) {

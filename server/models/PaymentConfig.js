@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 
 const paymentConfigSchema = new mongoose.Schema({
-  // 关联的商户ID
+  // 关联的商户ID（可选，用于系统级配置）
   merchantId: {
     type: String,
-    required: true,
-    index: true
+    required: false,
+    index: true,
+    default: 'system'  // 系统级配置默认值
   },
   
   // 支付账户基本信息
