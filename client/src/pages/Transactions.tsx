@@ -151,7 +151,9 @@ function Transactions() {
       // 使用统一的api服务
       const response = await api.get('/api/merchant');
       if (response.data.success && response.data.data) {
-        setMerchants(response.data.data.merchants || response.data.data);
+        // 后端返回的数据结构是 { merchants: [...], pagination: {...} }
+        const merchantsData = response.data.data.merchants || response.data.data;
+        setMerchants(merchantsData);
       } else {
         setMerchants([]);
       }

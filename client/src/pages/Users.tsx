@@ -76,7 +76,9 @@ export default function Users() {
       // 使用统一的api服务
       const response = await api.get('/api/users');
       if (response.data.success && response.data.data) {
-        setUsers(response.data.data);
+        // 后端返回的数据结构是 { users: [...], pagination: {...} }
+        const usersData = response.data.data.users || response.data.data;
+        setUsers(usersData);
       } else {
         setUsers([]);
       }

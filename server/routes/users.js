@@ -1,7 +1,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const User = require('../models/user');
-const { apiKeyAuth } = require('../middleware/auth');
+
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 
@@ -190,7 +190,7 @@ router.post('/', [
 });
 
 // 获取单个用户信息
-router.get('/:userId', apiKeyAuth, async (req, res) => {
+router.get('/:userId', authenticateToken, async (req, res) => {
   try {
     const { userId } = req.params;
     
@@ -314,7 +314,7 @@ router.put('/:userId', [
 });
 
 // 删除用户
-router.delete('/:userId', apiKeyAuth, async (req, res) => {
+router.delete('/:userId', authenticateToken, async (req, res) => {
   try {
     const { userId } = req.params;
     

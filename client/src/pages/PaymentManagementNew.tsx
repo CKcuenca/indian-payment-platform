@@ -117,6 +117,7 @@ export default function PaymentManagementNew() {
       // 使用统一的api服务
       const response = await api.get('/api/payment-config');
       if (response.data.success && response.data.data) {
+        // 后端返回的数据结构可能是数组或对象
         // 转换后端数据格式为前端格式
         const convertedAccounts: PaymentAccount[] = response.data.data.map((item: any) => ({
           _id: item._id,
