@@ -73,6 +73,12 @@ export default function Merchants() {
     description: ''
   });
 
+  // 支付配置相关状态
+  const [paymentConfigs, setPaymentConfigs] = useState<any[]>([]);
+  const [loadingPaymentConfigs, setLoadingPaymentConfigs] = useState(false);
+  
+
+
   const [formData, setFormData] = useState({
     merchantId: '',
     name: '',
@@ -109,6 +115,8 @@ export default function Merchants() {
       console.log('🔍 useEffect - 设置为管理员视图');
       // 如果是管理员，获取所有商户列表
       fetchMerchants();
+      // 获取支付配置列表
+      fetchPaymentConfigs();
     }
   }, []);
 
@@ -185,6 +193,33 @@ export default function Merchants() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 获取支付配置列表
+  const fetchPaymentConfigs = async () => {
+    try {
+      setLoadingPaymentConfigs(true);
+      console.log('🔍 开始获取支付配置...');
+      
+      const response = await api.get('/api/payment-config');
+      console.log('🔍 支付配置API响应:', response);
+      
+      if (response.data.success) {
+        console.log('🔍 支付配置数据:', response.data.data);
+        setPaymentConfigs(response.data.data || []);
+      } else {
+        console.warn('🔍 API返回数据格式异常:', response.data);
+      }
+    } catch (err: any) {
+      console.error('🔍 获取支付配置失败:', err);
+      console.error('🔍 错误详情:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+    } finally {
+      setLoadingPaymentConfigs(false);
     }
   };
 
@@ -1059,17 +1094,28 @@ export default function Merchants() {
                   onChange={(e) => setFormData(prev => ({ ...prev, selectedPaymentConfigs: Array.from(e.target.value as string[]) }))}
                   renderValue={(selected) => (
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {selected.map((value) => (
-                        <Chip key={value} label={value} />
-                      ))}
+                      {selected.map((value) => {
+                        const config = paymentConfigs.find(pc => pc._id === value);
+                        return <Chip key={value} label={config?.accountName || value} />;
+                      })}
                     </Box>
                   )}
+                  disabled={loadingPaymentConfigs}
                 >
-                  {/* 假设支付配置列表可以从API获取 */}
-                  <MenuItem value="AirPay">AirPay</MenuItem>
-                  <MenuItem value="Cashfree">Cashfree</MenuItem>
-                  <MenuItem value="PayPal">PayPal</MenuItem>
-                  <MenuItem value="Stripe">Stripe</MenuItem>
+                  {loadingPaymentConfigs ? (
+                    <MenuItem disabled>
+                      <CircularProgress size={16} sx={{ mr: 1 }} />
+                      加载中...
+                    </MenuItem>
+                  ) : paymentConfigs.length === 0 ? (
+                    <MenuItem disabled>暂无支付配置</MenuItem>
+                  ) : (
+                    paymentConfigs.map((config) => (
+                      <MenuItem key={config._id} value={config._id}>
+                        {config.accountName} ({config.provider.name})
+                      </MenuItem>
+                    ))
+                  )}
                 </Select>
               </FormControl>
 
@@ -1080,11 +1126,22 @@ export default function Merchants() {
                   label="默认支付商"
                   onChange={(e) => setFormData(prev => ({ ...prev, defaultProvider: e.target.value }))}
                   required
+                  disabled={loadingPaymentConfigs || paymentConfigs.length === 0}
                 >
-                  <MenuItem value="AirPay">AirPay</MenuItem>
-                  <MenuItem value="Cashfree">Cashfree</MenuItem>
-                  <MenuItem value="PayPal">PayPal</MenuItem>
-                  <MenuItem value="Stripe">Stripe</MenuItem>
+                  {loadingPaymentConfigs ? (
+                    <MenuItem disabled>
+                      <CircularProgress size={16} sx={{ mr: 1 }} />
+                      加载中...
+                    </MenuItem>
+                  ) : paymentConfigs.length === 0 ? (
+                    <MenuItem disabled>请先添加支付配置</MenuItem>
+                  ) : (
+                    paymentConfigs.map((config) => (
+                      <MenuItem key={config._id} value={config._id}>
+                        {config.accountName} ({config.provider.name})
+                      </MenuItem>
+                    ))
+                  )}
                 </Select>
               </FormControl>
 
