@@ -45,6 +45,7 @@ import { PermissionGuard } from '../components/PermissionGuard';
 import { Permission } from '../types';
 import { formatAmount, formatDate as formatDateUtil } from '../utils/formatters';
 import { authService } from '../services/authService';
+import api from '../services/api'; // Added import for api service
 
 // 模拟商户数据 - 已清理，改为从API获取
 // const mockMerchants: Merchant[] = [];
@@ -124,54 +125,63 @@ export default function Merchants() {
         return;
       }
       
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/merchant-profile/profile`, {
-        headers: {
-          'Authorization': `Bearer ${authService.getToken()}`
-        }
-      });
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.data) {
-          // 转换API数据格式以匹配前端期望
-          const apiData = result.data;
-          const convertedData = {
-            merchantId: apiData.merchantId,
-            name: apiData.name,
-            email: apiData.email,
-            status: apiData.status,
-            defaultProvider: apiData.paymentConfig?.defaultProvider || 'airpay',
-            depositFee: (apiData.paymentConfig?.fees?.deposit || 0.01) * 100, // 转换为百分比
-            withdrawalFee: (apiData.paymentConfig?.fees?.withdrawal || 0.01) * 100, // 转换为百分比
-            minDeposit: apiData.paymentConfig?.limits?.minDeposit || 100,
-            maxDeposit: apiData.paymentConfig?.limits?.maxDeposit || 5000000,
-            minWithdrawal: apiData.paymentConfig?.limits?.minWithdrawal || 100,
-            maxWithdrawal: apiData.paymentConfig?.limits?.maxWithdrawal || 5000000,
-            limits: {
-              dailyLimit: apiData.paymentConfig?.limits?.dailyLimit || 50000000,
-              monthlyLimit: apiData.paymentConfig?.limits?.monthlyLimit || 500000000,
-              singleTransactionLimit: apiData.paymentConfig?.limits?.maxDeposit || 5000000,
-            },
-            balance: 0, // 默认余额
-            usage: {
-              dailyUsed: 0,
-              monthlyUsed: 0,
-              lastResetDate: new Date().toISOString()
-            },
-            createdAt: apiData.createdAt || new Date(),
-            updatedAt: apiData.updatedAt || new Date()
-          };
-          
-          console.log('🔍 转换后的商户数据:', convertedData);
-          setCurrentMerchant(convertedData);
-        } else {
-          setError(result.message || '获取商户信息失败');
-        }
+      // 使用统一的api服务
+      const response = await api.get('/api/merchant-profile/profile');
+      console.log('🔍 API响应:', response);
+      
+      if (response.data.success && response.data.data) {
+        // 转换API数据格式以匹配前端期望
+        const apiData = response.data.data;
+        const convertedData = {
+          merchantId: apiData.merchantId,
+          name: apiData.name,
+          email: apiData.email,
+          status: apiData.status,
+          defaultProvider: apiData.paymentConfig?.defaultProvider || 'airpay',
+          depositFee: (apiData.paymentConfig?.fees?.deposit || 0.01) * 100, // 转换为百分比
+          withdrawalFee: (apiData.paymentConfig?.fees?.withdrawal || 0.01) * 100, // 转换为百分比
+          minDeposit: apiData.paymentConfig?.limits?.minDeposit || 100,
+          maxDeposit: apiData.paymentConfig?.limits?.maxDeposit || 5000000,
+          minWithdrawal: apiData.paymentConfig?.limits?.minWithdrawal || 100,
+          maxWithdrawal: apiData.paymentConfig?.limits?.maxWithdrawal || 5000000,
+          limits: {
+            dailyLimit: apiData.paymentConfig?.limits?.dailyLimit || 50000000,
+            monthlyLimit: apiData.paymentConfig?.limits?.monthlyLimit || 500000000,
+            singleTransactionLimit: apiData.paymentConfig?.limits?.maxDeposit || 5000000,
+          },
+          balance: 0, // 默认余额
+          usage: {
+            dailyUsed: 0,
+            monthlyUsed: 0,
+            lastResetDate: new Date().toISOString()
+          },
+          createdAt: apiData.createdAt || new Date(),
+          updatedAt: apiData.updatedAt || new Date()
+        };
+        
+        console.log('🔍 转换后的商户数据:', convertedData);
+        setCurrentMerchant(convertedData);
       } else {
-        setError('获取商户信息失败');
+        setError(response.data.message || '获取商户信息失败');
       }
     } catch (err: any) {
       console.error('获取商户信息失败:', err);
-      setError('获取商户信息失败');
+      console.error('错误详情:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        headers: err.response?.headers
+      });
+      
+      if (err.response?.status === 401) {
+        setError('认证失败，请重新登录');
+      } else if (err.response?.status === 403) {
+        setError('权限不足，无法访问此功能');
+      } else if (err.response?.status === 404) {
+        setError('API端点不存在');
+      } else {
+        setError(`获取商户信息失败: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -181,27 +191,40 @@ export default function Merchants() {
   const fetchMerchants = async () => {
     try {
       setLoading(true);
-      // 调用真实API获取商户数据
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/merchant`, {
-        headers: {
-          'Authorization': `Bearer ${authService.getToken()}`
-        }
-      });
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.data) {
-          setMerchants(result.data);
-        } else {
-          setMerchants([]);
-        }
+      console.log('🔍 fetchMerchants - 开始获取商户列表');
+      
+      // 使用统一的api服务
+      const response = await api.get('/api/merchant');
+      console.log('🔍 商户列表API响应:', response);
+      
+      if (response.data.success && response.data.data) {
+        setMerchants(response.data.data.merchants || response.data.data);
+        setError(null);
       } else {
-        console.error('API请求失败:', response.status);
-        setError('获取商户数据失败');
+        console.warn('API返回数据格式异常:', response.data);
         setMerchants([]);
+        setError('获取商户数据失败：数据格式异常');
       }
     } catch (err: any) {
-      console.error('获取商户数据失败:', err);
-      setError('获取商户数据失败');
+      console.error('获取商户列表失败:', err);
+      console.error('错误详情:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+        headers: err.response?.headers
+      });
+      
+      if (err.response?.status === 401) {
+        setError('认证失败，请重新登录');
+      } else if (err.response?.status === 403) {
+        setError('权限不足，只有管理员可以查看商户列表');
+      } else if (err.response?.status === 404) {
+        setError('API端点不存在');
+      } else if (err.response?.status === 500) {
+        setError('服务器内部错误');
+      } else {
+        setError(`获取商户数据失败: ${err.message}`);
+      }
       setMerchants([]);
     } finally {
       setLoading(false);
@@ -281,33 +304,37 @@ export default function Merchants() {
     setError(null);
     
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/merchant-profile/change-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          currentPassword: passwordForm.currentPassword,
-          newPassword: passwordForm.newPassword
-        })
+      const response = await api.post('/api/merchant-profile/change-password', {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
       });
       
-      const result = await response.json();
-      
-      if (response.ok && result.success) {
+      if (response.data.success) {
         setPasswordDialogOpen(false);
         setPasswordForm({
           currentPassword: '',
           newPassword: '',
           confirmPassword: ''
         });
-        // 可以显示成功消息
+        alert('密码修改成功！');
       } else {
-        setError(result.message || '修改密码失败');
+        setError(response.data.message || '修改密码失败');
       }
     } catch (err: any) {
-      setError('网络错误，请稍后重试');
       console.error('修改密码失败:', err);
+      console.error('错误详情:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+      
+      if (err.response?.status === 401) {
+        setError('认证失败，请重新登录');
+      } else if (err.response?.status === 400) {
+        setError(err.response.data.message || '密码格式不正确');
+      } else {
+        setError(`修改密码失败: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -320,32 +347,36 @@ export default function Merchants() {
     setError(null);
     
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/merchant-profile/generate-api-key`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name: apiKeyForm.apiKeyName,
-          description: apiKeyForm.description
-        })
+      const response = await api.post('/api/merchant-profile/generate-api-key', {
+        name: apiKeyForm.apiKeyName,
+        description: apiKeyForm.description
       });
       
-      const result = await response.json();
-      
-      if (response.ok && result.success) {
+      if (response.data.success) {
         setApiKeyDialogOpen(false);
         setApiKeyForm({
           apiKeyName: '',
           description: ''
         });
-        // 可以显示成功消息
+        alert('API密钥生成成功！');
       } else {
-        setError(result.message || '生成API密钥失败');
+        setError(response.data.message || '生成API密钥失败');
       }
     } catch (err: any) {
-      setError('网络错误，请稍后重试');
       console.error('生成API密钥失败:', err);
+      console.error('错误详情:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+      
+      if (err.response?.status === 401) {
+        setError('认证失败，请重新登录');
+      } else if (err.response?.status === 400) {
+        setError(err.response.data.message || '参数格式不正确');
+      } else {
+        setError(`生成API密钥失败: ${err.message}`);
+      }
     } finally {
       setLoading(false);
     }

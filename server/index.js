@@ -3,7 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
 const { globalErrorHandler } = require('./middleware/error-handler');
-require('dotenv').config();
+require('dotenv').config({ path: '../env.production' });
 
 // 设置全局时区为印度标准时间 (IST)
 process.env.TZ = 'Asia/Kolkata';
