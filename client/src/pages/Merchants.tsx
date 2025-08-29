@@ -509,8 +509,8 @@ export default function Merchants() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.merchantId || !formData.name) {
-      setError('请填写商户ID和商户名称');
+    if (!formData.name) {
+      setError('请填写商户名称');
       return;
     }
 
@@ -521,16 +521,6 @@ export default function Merchants() {
 
     if (formData.withdrawal.limits.maxAmount <= formData.withdrawal.limits.minAmount) {
       setError('最大提现金额必须大于最小提现金额');
-      return;
-    }
-
-    if (formData.selectedPaymentConfigs.length === 0) {
-      setError('请至少选择一个支付配置');
-      return;
-    }
-
-    if (!formData.defaultProvider) {
-      setError('请选择默认支付商');
       return;
     }
 
@@ -606,13 +596,12 @@ export default function Merchants() {
       } else {
         // 创建新商户
         const newMerchantData = {
-          merchantId: formData.merchantId,
           name: formData.name,
           email: formData.email,
           status: formData.status,
           balance: 0,
-          defaultProvider: formData.defaultProvider,
-          paymentConfigs: formData.selectedPaymentConfigs,
+          defaultProvider: formData.defaultProvider || 'AirPay',
+          paymentConfigs: formData.selectedPaymentConfigs || [],
           
           // 代收（充值）配置
           deposit: {
