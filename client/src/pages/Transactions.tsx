@@ -46,6 +46,7 @@ import { saveAs } from 'file-saver';
 import { Transaction } from '../types';
 import { merchantService } from '../services/merchantService';
 import { formatAmount, formatDate as formatDateUtil } from '../utils/formatters';
+import { authService } from '../services/authService';
 
 function Transactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -147,7 +148,11 @@ function Transactions() {
   const fetchMerchants = useCallback(async () => {
     try {
       // 从API获取商户数据
-      const response = await fetch('https://cashgit.com/api/merchant');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/merchant`, {
+        headers: {
+          'Authorization': `Bearer ${authService.getToken()}`
+        }
+      });
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data) {
@@ -169,7 +174,11 @@ function Transactions() {
   const fetchProviders = useCallback(async () => {
     try {
       // 从API获取支付商数据
-      const response = await fetch('https://cashgit.com/api/payment-config');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/payment-config`, {
+        headers: {
+          'Authorization': `Bearer ${authService.getToken()}`
+        }
+      });
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data) {

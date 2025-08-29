@@ -33,6 +33,7 @@ import {
   Smartphone,
   AccountBalanceWallet
 } from '@mui/icons-material';
+import { authService } from '../services/authService';
 
 
 // 支付账户类型定义
@@ -113,7 +114,11 @@ export default function PaymentManagementNew() {
       setError(null);
       
       // 调用真实API获取支付配置数据
-      const response = await fetch('https://cashgit.com/api/payment-config');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/payment-config`, {
+        headers: {
+          'Authorization': `Bearer ${authService.getToken()}`
+        }
+      });
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data) {
