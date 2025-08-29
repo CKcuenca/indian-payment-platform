@@ -33,7 +33,8 @@ import {
   Smartphone,
   AccountBalanceWallet
 } from '@mui/icons-material';
-import { authService } from '../services/authService';
+
+import api from '../services/api';
 
 
 // 支付账户类型定义
@@ -113,70 +114,59 @@ export default function PaymentManagementNew() {
       setLoading(true);
       setError(null);
       
-      // 调用真实API获取支付配置数据
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/payment-config`, {
-        headers: {
-          'Authorization': `Bearer ${authService.getToken()}`
-        }
-      });
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.data) {
-          // 转换后端数据格式为前端格式
-          const convertedAccounts: PaymentAccount[] = result.data.map((item: any) => ({
-            _id: item._id,
-            accountName: item.accountName,
-            provider: {
-              name: item.provider.name,
-              type: item.provider.type || 'native',
-              subType: item.provider.subType || 'third_party',
-              accountId: item.provider.accountId,
-              apiKey: item.provider.apiKey || '',
-              secretKey: item.provider.secretKey || '',
-              environment: item.provider.environment,
-              mchNo: item.provider.mchNo || ''
+      // 使用统一的api服务
+      const response = await api.get('/api/payment-config');
+      if (response.data.success && response.data.data) {
+        // 转换后端数据格式为前端格式
+        const convertedAccounts: PaymentAccount[] = response.data.data.map((item: any) => ({
+          _id: item._id,
+          accountName: item.accountName,
+          provider: {
+            name: item.provider.name,
+            type: item.provider.type || 'native',
+            subType: item.provider.subType || 'third_party',
+            accountId: item.provider.accountId,
+            apiKey: item.provider.apiKey || '',
+            secretKey: item.provider.secretKey || '',
+            environment: item.provider.environment,
+            mchNo: item.provider.mchNo || ''
+          },
+          description: item.description || '',
+          collectionNotifyUrl: item.collectionNotifyUrl || '',
+          collectionReturnUrl: item.collectionReturnUrl || '',
+          payoutNotifyUrl: item.payoutNotifyUrl || '',
+          payoutReturnUrl: item.payoutReturnUrl || '',
+          limits: {
+            collection: {
+              dailyLimit: item.limits?.dailyLimit || 1000000,
+              monthlyLimit: item.limits?.monthlyLimit || 10000000,
+              singleTransactionLimit: item.limits?.singleTransactionLimit || 100000,
+              minTransactionAmount: item.limits?.minTransactionAmount || 100
             },
-            description: item.description || '',
-            collectionNotifyUrl: item.collectionNotifyUrl || '',
-            collectionReturnUrl: item.collectionReturnUrl || '',
-            payoutNotifyUrl: item.payoutNotifyUrl || '',
-            payoutReturnUrl: item.payoutReturnUrl || '',
-            limits: {
-              collection: {
-                dailyLimit: item.limits?.dailyLimit || 1000000,
-                monthlyLimit: item.limits?.monthlyLimit || 10000000,
-                singleTransactionLimit: item.limits?.singleTransactionLimit || 100000,
-                minTransactionAmount: item.limits?.minTransactionAmount || 100
-              },
-              payout: {
-                dailyLimit: item.limits?.dailyLimit || 500000,
-                monthlyLimit: item.limits?.monthlyLimit || 5000000,
-                singleTransactionLimit: item.limits?.singleTransactionLimit || 50000,
-                minTransactionAmount: item.limits?.minTransactionAmount || 200
-              }
+            payout: {
+              dailyLimit: item.limits?.dailyLimit || 500000,
+              monthlyLimit: item.limits?.monthlyLimit || 5000000,
+              singleTransactionLimit: item.limits?.singleTransactionLimit || 50000,
+              minTransactionAmount: item.limits?.minTransactionAmount || 200
+            }
+          },
+          fees: {
+            collection: {
+              transactionFee: item.fees?.transactionFee || 0.5,
+              fixedFee: item.fees?.fixedFee || 0
             },
-            fees: {
-              collection: {
-                transactionFee: item.fees?.transactionFee || 0.5,
-                fixedFee: item.fees?.fixedFee || 0
-              },
-              payout: {
-                transactionFee: item.fees?.transactionFee || 0.3,
-                fixedFee: item.fees?.fixedFee || 0
-              }
-            },
-            priority: item.priority || 1,
-            status: item.status || 'ACTIVE',
-            createdAt: item.createdAt || new Date().toISOString(),
-            updatedAt: item.updatedAt || new Date().toISOString()
-          }));
-          setAccounts(convertedAccounts);
-        } else {
-          setAccounts([]);
-        }
+            payout: {
+              transactionFee: item.fees?.transactionFee || 0.3,
+              fixedFee: item.fees?.fixedFee || 0
+            }
+          },
+          priority: item.priority || 1,
+          status: item.status || 'ACTIVE',
+          createdAt: item.createdAt || new Date().toISOString(),
+          updatedAt: item.updatedAt || new Date().toISOString()
+        }));
+        setAccounts(convertedAccounts);
       } else {
-        console.error('API请求失败:', response.status);
-        setError('获取支付账户数据失败');
         setAccounts([]);
       }
     } catch (error) {

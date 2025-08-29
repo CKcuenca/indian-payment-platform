@@ -39,7 +39,8 @@ import {
 import { User, UserRole } from '../types';
 import { PermissionGuard } from '../components/PermissionGuard';
 import { Permission } from '../types';
-import { authService } from '../services/authService';
+
+import api from '../services/api';
 
 // 模拟用户数据 - 已清理，改为从API获取
 // const mockUsers: User[] = [];
@@ -72,22 +73,11 @@ export default function Users() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      // 调用真实API获取用户数据
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users`, {
-        headers: {
-          'Authorization': `Bearer ${authService.getToken()}`
-        }
-      });
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.data) {
-          setUsers(result.data);
-        } else {
-          setUsers([]);
-        }
+      // 使用统一的api服务
+      const response = await api.get('/api/users');
+      if (response.data.success && response.data.data) {
+        setUsers(response.data.data);
       } else {
-        console.error('API请求失败:', response.status);
-        setError('获取用户数据失败');
         setUsers([]);
       }
     } catch (err: any) {

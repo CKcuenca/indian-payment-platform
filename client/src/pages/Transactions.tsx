@@ -46,7 +46,8 @@ import { saveAs } from 'file-saver';
 import { Transaction } from '../types';
 import { merchantService } from '../services/merchantService';
 import { formatAmount, formatDate as formatDateUtil } from '../utils/formatters';
-import { authService } from '../services/authService';
+
+import api from '../services/api';
 
 function Transactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -147,21 +148,11 @@ function Transactions() {
   // 获取商户列表
   const fetchMerchants = useCallback(async () => {
     try {
-      // 从API获取商户数据
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/merchant`, {
-        headers: {
-          'Authorization': `Bearer ${authService.getToken()}`
-        }
-      });
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.data) {
-          setMerchants(result.data);
-        } else {
-          setMerchants([]);
-        }
+      // 使用统一的api服务
+      const response = await api.get('/api/merchant');
+      if (response.data.success && response.data.data) {
+        setMerchants(response.data.data.merchants || response.data.data);
       } else {
-        console.error('获取商户列表失败:', response.status);
         setMerchants([]);
       }
     } catch (err) {
@@ -173,27 +164,17 @@ function Transactions() {
   // 获取支付商列表
   const fetchProviders = useCallback(async () => {
     try {
-      // 从API获取支付商数据
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/payment-config`, {
-        headers: {
-          'Authorization': `Bearer ${authService.getToken()}`
-        }
-      });
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.data) {
-          const providers = result.data.map((item: any) => ({
-            id: item._id,
-            name: item.provider.name,
-            type: item.provider.type || 'native',
-            environment: item.provider.environment
-          }));
-          setProviders(providers);
-        } else {
-          setProviders([]);
-        }
+      // 使用统一的api服务
+      const response = await api.get('/api/payment-config');
+      if (response.data.success && response.data.data) {
+        const providers = response.data.data.map((item: any) => ({
+          id: item._id,
+          name: item.provider.name,
+          type: item.provider.type || 'native',
+          environment: item.provider.environment
+        }));
+        setProviders(providers);
       } else {
-        console.error('获取支付商列表失败:', response.status);
         setProviders([]);
       }
     } catch (err) {
