@@ -138,6 +138,8 @@ export interface Merchant {
     monthlyUsed: number;     // 本月已使用额度
     lastResetDate: string;   // 上次重置日期
   };
+  // 支付配置关联
+  paymentConfigs?: string[]; // 关联的支付配置ID列表
   createdAt: string;
   updatedAt: string;
 }

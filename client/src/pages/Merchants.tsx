@@ -90,6 +90,7 @@ export default function Merchants() {
       monthlyLimit: 1000000000,
       singleTransactionLimit: 10000000,
     },
+    selectedPaymentConfigs: [] as string[], // 新增：用于存储支付配置的ID
   });
 
   useEffect(() => {
@@ -250,6 +251,7 @@ export default function Merchants() {
         monthlyLimit: 1000000000,
         singleTransactionLimit: 10000000,
       },
+      selectedPaymentConfigs: [], // 新增：添加默认值
     });
     setDialogOpen(true);
   };
@@ -273,6 +275,7 @@ export default function Merchants() {
         monthlyLimit: merchant.limits.monthlyLimit,
         singleTransactionLimit: merchant.limits.singleTransactionLimit,
       },
+      selectedPaymentConfigs: merchant.paymentConfigs || [], // 修复：使用可选链和默认值
     });
     setDialogOpen(true);
   };
@@ -400,38 +403,28 @@ export default function Merchants() {
       return;
     }
 
-    if (!formData.limits?.dailyLimit || !formData.limits?.monthlyLimit || !formData.limits?.singleTransactionLimit) {
-      setError('请填写所有额度限制字段');
+    if (formData.selectedPaymentConfigs.length === 0) {
+      setError('请至少选择一个支付配置');
       return;
     }
 
-    if (formData.limits.dailyLimit <= 0 || formData.limits.monthlyLimit <= 0 || formData.limits.singleTransactionLimit <= 0) {
-      setError('额度限制必须大于0');
+    if (!formData.defaultProvider) {
+      setError('请选择默认支付商');
       return;
     }
 
-    if (formData.limits.monthlyLimit < formData.limits.dailyLimit) {
-      setError('每月额度限制必须大于或等于每日额度限制');
-      return;
-    }
-
-    if (formData.limits.dailyLimit < formData.limits.singleTransactionLimit) {
-      setError('每日额度限制必须大于或等于单笔交易限额');
-      return;
-    }
+    setLoading(true);
+    setError(null);
 
     try {
-      setLoading(true);
-      
       if (editingMerchant) {
-        // 更新现有商户
-        const updatedMerchant: Merchant = {
-          ...editingMerchant,
-          merchantId: formData.merchantId,
+        // 更新商户
+        const updateData = {
           name: formData.name,
           email: formData.email,
           status: formData.status,
           defaultProvider: formData.defaultProvider,
+          paymentConfigs: formData.selectedPaymentConfigs, // 修复：直接使用ID数组
           depositFee: formData.depositFee,
           withdrawalFee: formData.withdrawalFee,
           minDeposit: formData.minDeposit,
@@ -445,18 +438,30 @@ export default function Merchants() {
           },
           updatedAt: new Date().toISOString(),
         };
-        setMerchants(merchants.map(merchant => 
-          merchant.merchantId === editingMerchant.merchantId ? updatedMerchant : merchant
-        ));
+
+        const response = await api.put(`/api/merchants/${editingMerchant.merchantId}`, updateData);
+        
+        if (response.data.success) {
+          setMerchants(merchants.map(merchant => 
+            merchant.merchantId === editingMerchant.merchantId 
+              ? { ...merchant, ...updateData }
+              : merchant
+          ));
+          setDialogOpen(false);
+          setError(null);
+        } else {
+          throw new Error(response.data.error || '更新失败');
+        }
       } else {
         // 创建新商户
-        const newMerchant: Merchant = {
+        const newMerchantData = {
           merchantId: formData.merchantId,
           name: formData.name,
           email: formData.email,
           status: formData.status,
           balance: 0,
           defaultProvider: formData.defaultProvider,
+          paymentConfigs: formData.selectedPaymentConfigs, // 修复：直接使用ID数组
           depositFee: formData.depositFee,
           withdrawalFee: formData.withdrawalFee,
           minDeposit: formData.minDeposit,
@@ -476,13 +481,19 @@ export default function Merchants() {
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
-        setMerchants([...merchants, newMerchant]);
+
+        const response = await api.post('/api/merchants', newMerchantData);
+        
+        if (response.data.success) {
+          setMerchants([...merchants, response.data.data]);
+          setDialogOpen(false);
+          setError(null);
+        } else {
+          throw new Error(response.data.error || '创建失败');
+        }
       }
-      
-      setDialogOpen(false);
-      setError(null);
     } catch (err: any) {
-      setError(err.message || '保存失败');
+      setError(err.message || '操作失败');
     } finally {
       setLoading(false);
     }
@@ -1038,6 +1049,30 @@ export default function Merchants() {
                 </Typography>
               </Box>
 
+              {/* 支付配置选择 */}
+              <FormControl fullWidth>
+                <InputLabel>支付配置</InputLabel>
+                <Select
+                  multiple
+                  value={formData.selectedPaymentConfigs}
+                  label="支付配置"
+                  onChange={(e) => setFormData(prev => ({ ...prev, selectedPaymentConfigs: Array.from(e.target.value as string[]) }))}
+                  renderValue={(selected) => (
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selected.map((value) => (
+                        <Chip key={value} label={value} />
+                      ))}
+                    </Box>
+                  )}
+                >
+                  {/* 假设支付配置列表可以从API获取 */}
+                  <MenuItem value="AirPay">AirPay</MenuItem>
+                  <MenuItem value="Cashfree">Cashfree</MenuItem>
+                  <MenuItem value="PayPal">PayPal</MenuItem>
+                  <MenuItem value="Stripe">Stripe</MenuItem>
+                </Select>
+              </FormControl>
+
               <FormControl fullWidth>
                 <InputLabel>默认支付商</InputLabel>
                 <Select
@@ -1048,6 +1083,8 @@ export default function Merchants() {
                 >
                   <MenuItem value="AirPay">AirPay</MenuItem>
                   <MenuItem value="Cashfree">Cashfree</MenuItem>
+                  <MenuItem value="PayPal">PayPal</MenuItem>
+                  <MenuItem value="Stripe">Stripe</MenuItem>
                 </Select>
               </FormControl>
 
