@@ -208,7 +208,7 @@ export default function Layout({ children }: LayoutProps) {
               唤醒对接文档
             </Button>
             <Typography variant="body2" sx={{ mr: 2 }}>
-              {currentUser?.displayName || currentUser?.username}
+              {currentUser?.fullName || currentUser?.username}
             </Typography>
             <IconButton
               size="large"

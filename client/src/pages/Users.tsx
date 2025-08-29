@@ -55,12 +55,12 @@ export default function Users() {
 
   const [formData, setFormData] = useState({
     username: '',
-    displayName: '',
+    fullName: '',
     email: '',
     role: UserRole.OPERATOR,
     password: '',
     confirmPassword: '',
-    isActive: true,
+    status: 'active' as 'active' | 'inactive' | 'suspended' | 'pending',
     merchantId: '',
   });
 
@@ -95,12 +95,12 @@ export default function Users() {
     setEditingUser(null);
     setFormData({
       username: '',
-      displayName: '',
+      fullName: '',
       email: '',
       role: UserRole.OPERATOR,
       password: '',
       confirmPassword: '',
-      isActive: true,
+      status: 'active',
       merchantId: '',
     });
     setDialogOpen(true);
@@ -110,12 +110,12 @@ export default function Users() {
     setEditingUser(user);
     setFormData({
       username: user.username,
-      displayName: user.displayName,
+      fullName: user.fullName,
       email: user.email,
       role: user.role,
       password: '',
       confirmPassword: '',
-      isActive: user.isActive,
+      status: user.status,
       merchantId: user.merchantId || '',
     });
     setDialogOpen(true);
@@ -153,7 +153,7 @@ export default function Users() {
       setLoading(true);
       // 在实际项目中，这里会调用API更新用户状态
       setUsers(users.map(user => 
-        user.id === id ? { ...user, isActive: !user.isActive } : user
+        user.id === id ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' } : user
       ));
       setError(null);
     } catch (err: any) {
@@ -166,7 +166,7 @@ export default function Users() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.username || !formData.displayName || !formData.email) {
+    if (!formData.username || !formData.fullName || !formData.email) {
       setError('请填写所有必填字段');
       return;
     }
@@ -189,10 +189,10 @@ export default function Users() {
         const updatedUser: User = {
           ...editingUser,
           username: formData.username,
-          displayName: formData.displayName,
+          fullName: formData.fullName,
           email: formData.email,
           role: formData.role,
-          isActive: formData.isActive,
+          status: formData.status,
           merchantId: formData.role === UserRole.MERCHANT ? formData.merchantId : undefined,
           updatedAt: new Date().toISOString(),
         };
@@ -204,10 +204,10 @@ export default function Users() {
         const newUser: User = {
           id: Date.now().toString(),
           username: formData.username,
-          displayName: formData.displayName,
+          fullName: formData.fullName,
           email: formData.email,
           role: formData.role,
-          isActive: formData.isActive,
+          status: formData.status,
           merchantId: formData.role === UserRole.MERCHANT ? formData.merchantId : undefined,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -352,11 +352,11 @@ export default function Users() {
                 <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                     <Avatar sx={{ width: 32, height: 32 }}>
-                      {user.displayName.charAt(0)}
+                      {user.fullName?.charAt(0) || user.username?.charAt(0) || '?'}
                     </Avatar>
                     <Box>
                       <Typography variant="body2" fontWeight="medium">
-                        {user.displayName}
+                        {user.fullName || user.username}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         {user.username}
@@ -383,8 +383,8 @@ export default function Users() {
                 </TableCell>
                 <TableCell>
                   <Chip
-                    label={user.isActive ? '启用' : '禁用'}
-                    color={user.isActive ? 'success' : 'error'}
+                    label={user.status === 'active' ? '启用' : '禁用'}
+                    color={user.status === 'active' ? 'success' : 'error'}
                     size="small"
                   />
                 </TableCell>
@@ -401,14 +401,14 @@ export default function Users() {
                 <TableCell>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <PermissionGuard permissions={[Permission.MANAGE_USERS]}>
-                      <Tooltip title={user.isActive ? '禁用用户' : '启用用户'}>
+                      <Tooltip title={user.status === 'active' ? '禁用用户' : '启用用户'}>
                         <IconButton
                           size="small"
-                          color={user.isActive ? 'warning' : 'success'}
+                          color={user.status === 'active' ? 'warning' : 'success'}
                           onClick={() => handleToggleStatus(user.id)}
                           disabled={user.username === 'admin'}
                         >
-                          {user.isActive ? <LockIcon /> : <LockOpenIcon />}
+                          {user.status === 'active' ? <LockIcon /> : <LockOpenIcon />}
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="编辑用户">
@@ -502,9 +502,9 @@ export default function Users() {
 
               <TextField
                 fullWidth
-                label="显示名称"
-                value={formData.displayName}
-                onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
+                label="姓名"
+                value={formData.fullName}
+                onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
                 required
               />
 
@@ -582,8 +582,8 @@ export default function Users() {
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={formData.isActive}
-                      onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                      checked={formData.status === 'active'}
+                      onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.checked ? 'active' : 'inactive' }))}
                     />
                   }
                   label="启用用户"

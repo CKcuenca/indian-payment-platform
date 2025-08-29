@@ -24,12 +24,12 @@ export enum Permission {
 export interface User {
   id: string;
   username: string;
-  displayName: string;
+  fullName: string;
   email: string;
   role: UserRole;
   permissions: Permission[];
   merchantId?: string; // 如果是商户角色，关联的商户ID
-  isActive: boolean;
+  status: 'active' | 'inactive' | 'suspended' | 'pending';
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
