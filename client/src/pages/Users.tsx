@@ -55,8 +55,6 @@ export default function Users() {
 
   const [formData, setFormData] = useState({
     username: '',
-    fullName: '',
-    email: '',
     role: UserRole.OPERATOR,
     password: '',
     confirmPassword: '',
@@ -95,8 +93,6 @@ export default function Users() {
     setEditingUser(null);
     setFormData({
       username: '',
-      fullName: '',
-      email: '',
       role: UserRole.OPERATOR,
       password: '',
       confirmPassword: '',
@@ -110,8 +106,6 @@ export default function Users() {
     setEditingUser(user);
     setFormData({
       username: user.username,
-      fullName: user.fullName,
-      email: user.email,
       role: user.role,
       password: '',
       confirmPassword: '',
@@ -166,8 +160,8 @@ export default function Users() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.username || !formData.fullName || !formData.email) {
-      setError('请填写所有必填字段');
+    if (!formData.username) {
+      setError('请填写用户名');
       return;
     }
 
@@ -189,8 +183,6 @@ export default function Users() {
         const updatedUser: User = {
           ...editingUser,
           username: formData.username,
-          fullName: formData.fullName,
-          email: formData.email,
           role: formData.role,
           status: formData.status,
           merchantId: formData.role === UserRole.MERCHANT ? formData.merchantId : undefined,
@@ -204,8 +196,8 @@ export default function Users() {
         const newUser: User = {
           id: Date.now().toString(),
           username: formData.username,
-          fullName: formData.fullName,
-          email: formData.email,
+          fullName: formData.username, // 使用用户名作为显示名称
+          email: `${formData.username}@cashgit.com`, // 生成默认邮箱
           role: formData.role,
           status: formData.status,
           merchantId: formData.role === UserRole.MERCHANT ? formData.merchantId : undefined,
@@ -371,7 +363,7 @@ export default function Users() {
                     size="small"
                   />
                 </TableCell>
-                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.email || `${user.username}@cashgit.com`}</TableCell>
                 <TableCell>
                   {user.merchantId ? (
                     <Chip label={user.merchantId} size="small" variant="outlined" />
@@ -500,22 +492,7 @@ export default function Users() {
                 disabled={!!editingUser}
               />
 
-              <TextField
-                fullWidth
-                label="姓名"
-                value={formData.fullName}
-                onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                required
-              />
 
-              <TextField
-                fullWidth
-                label="邮箱"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                required
-              />
 
               <FormControl fullWidth>
                 <InputLabel>角色</InputLabel>
