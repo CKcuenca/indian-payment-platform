@@ -18,7 +18,16 @@ const validateRequest = (req, res, next) => {
 // 创建商户
 router.post('/merchants', [
   body('name').notEmpty().withMessage('Name is required'),
-  body('email').optional().isEmail().withMessage('Email must be valid if provided'),
+  body('email').optional().custom((value) => {
+    if (value && value.trim() !== '') {
+      // 如果email有值且不是空字符串，则验证邮箱格式
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) {
+        throw new Error('Email must be valid if provided');
+      }
+    }
+    return true;
+  }).withMessage('Email must be valid if provided'),
   body('status').optional().isIn(['ACTIVE', 'INACTIVE', 'SUSPENDED']).withMessage('Invalid status'),
   body('defaultProvider').optional().isString().withMessage('Default provider must be a string'),
   body('paymentConfigs').optional().isArray().withMessage('Payment configs must be an array'),
