@@ -590,7 +590,7 @@ export default function Merchants() {
           updatedAt: new Date().toISOString(),
         };
 
-        const response = await api.put(`/admin/merchants/${editingMerchant.merchantId}`, updateData);
+        const response = await api.put(`/api/admin/merchants/${editingMerchant.merchantId}`, updateData);
         
         if (response.data.success) {
           setMerchants(merchants.map(merchant => 
@@ -658,7 +658,7 @@ export default function Merchants() {
           updatedAt: new Date().toISOString(),
         };
 
-        const response = await api.post('/admin/merchants', newMerchantData);
+        const response = await api.post('/api/admin/merchants', newMerchantData);
         
         if (response.data.success) {
           setMerchants([...merchants, response.data.data]);
