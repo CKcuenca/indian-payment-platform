@@ -85,18 +85,38 @@ export default function Merchants() {
     email: '',
     status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE' | 'SUSPENDED',
     defaultProvider: 'AirPay',
-    depositFee: 0.5,
-    withdrawalFee: 1.0,
-    minDeposit: 100,
-    maxDeposit: 100000,
-    minWithdrawal: 500,
-    maxWithdrawal: 50000,
-    limits: {
-      dailyLimit: 100000000,
-      monthlyLimit: 1000000000,
-      singleTransactionLimit: 10000000,
+    
+    // 代收（充值）配置
+    deposit: {
+      fee: {
+        percentage: 5.0,        // 默认5%
+        fixedAmount: 0,         // 默认无固定费用
+      },
+      limits: {
+        minAmount: 100,
+        maxAmount: 100000,
+        dailyLimit: 100000000,
+        monthlyLimit: 1000000000,
+        singleTransactionLimit: 10000000,
+      },
     },
-    selectedPaymentConfigs: [] as string[], // 新增：用于存储支付配置的ID
+    
+    // 代付（提现）配置
+    withdrawal: {
+      fee: {
+        percentage: 3.0,        // 默认3%
+        fixedAmount: 6,         // 默认6卢比
+      },
+      limits: {
+        minAmount: 500,
+        maxAmount: 50000,
+        dailyLimit: 100000000,
+        monthlyLimit: 1000000000,
+        singleTransactionLimit: 10000000,
+      },
+    },
+    
+    selectedPaymentConfigs: [] as string[], // 用于存储支付配置的ID
   });
 
   useEffect(() => {
@@ -144,26 +164,52 @@ export default function Merchants() {
         const convertedData = {
           merchantId: apiData.merchantId,
           name: apiData.name,
-          email: apiData.email,
+          email: apiData.status,
           status: apiData.status,
           defaultProvider: apiData.paymentConfig?.defaultProvider || 'airpay',
-          depositFee: (apiData.paymentConfig?.fees?.deposit || 0.01) * 100, // 转换为百分比
-          withdrawalFee: (apiData.paymentConfig?.fees?.withdrawal || 0.01) * 100, // 转换为百分比
-          minDeposit: apiData.paymentConfig?.limits?.minDeposit || 100,
-          maxDeposit: apiData.paymentConfig?.limits?.maxDeposit || 5000000,
-          minWithdrawal: apiData.paymentConfig?.limits?.minWithdrawal || 100,
-          maxWithdrawal: apiData.paymentConfig?.limits?.maxWithdrawal || 5000000,
-          limits: {
-            dailyLimit: apiData.paymentConfig?.limits?.dailyLimit || 50000000,
-            monthlyLimit: apiData.paymentConfig?.limits?.monthlyLimit || 500000000,
-            singleTransactionLimit: apiData.paymentConfig?.limits?.maxDeposit || 5000000,
+          
+          // 代收（充值）配置
+          deposit: {
+            fee: {
+              percentage: (apiData.paymentConfig?.fees?.deposit || 0.01) * 100,
+              fixedAmount: 0,
+            },
+            limits: {
+              minAmount: apiData.paymentConfig?.limits?.minDeposit || 100,
+              maxAmount: apiData.paymentConfig?.limits?.maxDeposit || 5000000,
+              dailyLimit: apiData.paymentConfig?.limits?.dailyLimit || 50000000,
+              monthlyLimit: apiData.paymentConfig?.limits?.monthlyLimit || 500000000,
+              singleTransactionLimit: apiData.paymentConfig?.limits?.maxDeposit || 5000000,
+            },
+            usage: {
+              dailyUsed: 0,
+              monthlyUsed: 0,
+              lastResetDate: new Date().toISOString()
+            },
           },
-          balance: 0, // 默认余额
-          usage: {
-            dailyUsed: 0,
-            monthlyUsed: 0,
-            lastResetDate: new Date().toISOString()
+          
+          // 代付（提现）配置
+          withdrawal: {
+            fee: {
+              percentage: (apiData.paymentConfig?.fees?.withdrawal || 0.01) * 100,
+              fixedAmount: 6,
+            },
+            limits: {
+              minAmount: apiData.paymentConfig?.limits?.minWithdrawal || 100,
+              maxAmount: apiData.paymentConfig?.limits?.maxWithdrawal || 5000000,
+              dailyLimit: apiData.paymentConfig?.limits?.dailyLimit || 50000000,
+              monthlyLimit: apiData.paymentConfig?.limits?.monthlyLimit || 500000000,
+              singleTransactionLimit: apiData.paymentConfig?.limits?.maxWithdrawal || 5000000,
+            },
+            usage: {
+              dailyUsed: 0,
+              monthlyUsed: 0,
+              lastResetDate: new Date().toISOString()
+            },
           },
+          
+          balance: 0,
+          paymentConfigs: [],
           createdAt: apiData.createdAt || new Date(),
           updatedAt: apiData.updatedAt || new Date()
         };
@@ -275,18 +321,38 @@ export default function Merchants() {
       email: '',
       status: 'ACTIVE',
       defaultProvider: 'AirPay',
-      depositFee: 0.5,
-      withdrawalFee: 1.0,
-      minDeposit: 100,
-      maxDeposit: 100000,
-      minWithdrawal: 500,
-      maxWithdrawal: 50000,
-      limits: {
-        dailyLimit: 100000000,
-        monthlyLimit: 1000000000,
-        singleTransactionLimit: 10000000,
+      
+      // 代收（充值）配置
+      deposit: {
+        fee: {
+          percentage: 5.0,        // 默认5%
+          fixedAmount: 0,         // 默认无固定费用
+        },
+        limits: {
+          minAmount: 100,
+          maxAmount: 100000,
+          dailyLimit: 100000000,
+          monthlyLimit: 1000000000,
+          singleTransactionLimit: 10000000,
+        },
       },
-      selectedPaymentConfigs: [], // 新增：添加默认值
+      
+      // 代付（提现）配置
+      withdrawal: {
+        fee: {
+          percentage: 3.0,        // 默认3%
+          fixedAmount: 6,         // 默认6卢比
+        },
+        limits: {
+          minAmount: 500,
+          maxAmount: 50000,
+          dailyLimit: 100000000,
+          monthlyLimit: 1000000000,
+          singleTransactionLimit: 10000000,
+        },
+      },
+      
+      selectedPaymentConfigs: [],
     });
     setDialogOpen(true);
   };
@@ -299,18 +365,38 @@ export default function Merchants() {
       email: merchant.email,
       status: merchant.status,
       defaultProvider: merchant.defaultProvider,
-      depositFee: merchant.depositFee,
-      withdrawalFee: merchant.withdrawalFee,
-      minDeposit: merchant.minDeposit,
-      maxDeposit: merchant.maxDeposit,
-      minWithdrawal: merchant.minWithdrawal,
-      maxWithdrawal: merchant.maxWithdrawal,
-      limits: {
-        dailyLimit: merchant.limits.dailyLimit,
-        monthlyLimit: merchant.limits.monthlyLimit,
-        singleTransactionLimit: merchant.limits.singleTransactionLimit,
+      
+      // 代收（充值）配置
+      deposit: {
+        fee: {
+          percentage: merchant.deposit?.fee?.percentage || 5.0,
+          fixedAmount: merchant.deposit?.fee?.fixedAmount || 0,
+        },
+        limits: {
+          minAmount: merchant.deposit?.limits?.minAmount || 100,
+          maxAmount: merchant.deposit?.limits?.maxAmount || 100000,
+          dailyLimit: merchant.deposit?.limits?.dailyLimit || 100000000,
+          monthlyLimit: merchant.deposit?.limits?.monthlyLimit || 1000000000,
+          singleTransactionLimit: merchant.deposit?.limits?.singleTransactionLimit || 10000000,
+        },
       },
-      selectedPaymentConfigs: merchant.paymentConfigs || [], // 修复：使用可选链和默认值
+      
+      // 代付（提现）配置
+      withdrawal: {
+        fee: {
+          percentage: merchant.withdrawal?.fee?.percentage || 3.0,
+          fixedAmount: merchant.withdrawal?.fee?.fixedAmount || 6,
+        },
+        limits: {
+          minAmount: merchant.withdrawal?.limits?.minAmount || 500,
+          maxAmount: merchant.withdrawal?.limits?.maxAmount || 50000,
+          dailyLimit: merchant.withdrawal?.limits?.dailyLimit || 100000000,
+          monthlyLimit: merchant.withdrawal?.limits?.monthlyLimit || 1000000000,
+          singleTransactionLimit: merchant.withdrawal?.limits?.singleTransactionLimit || 10000000,
+        },
+      },
+      
+      selectedPaymentConfigs: merchant.paymentConfigs || [],
     });
     setDialogOpen(true);
   };
@@ -428,12 +514,12 @@ export default function Merchants() {
       return;
     }
 
-    if (formData.maxDeposit <= formData.minDeposit) {
+    if (formData.deposit.limits.maxAmount <= formData.deposit.limits.minAmount) {
       setError('最大充值金额必须大于最小充值金额');
       return;
     }
 
-    if (formData.maxWithdrawal <= formData.minWithdrawal) {
+    if (formData.withdrawal.limits.maxAmount <= formData.withdrawal.limits.minAmount) {
       setError('最大提现金额必须大于最小提现金额');
       return;
     }
@@ -459,18 +545,48 @@ export default function Merchants() {
           email: formData.email,
           status: formData.status,
           defaultProvider: formData.defaultProvider,
-          paymentConfigs: formData.selectedPaymentConfigs, // 修复：直接使用ID数组
-          depositFee: formData.depositFee,
-          withdrawalFee: formData.withdrawalFee,
-          minDeposit: formData.minDeposit,
-          maxDeposit: formData.maxDeposit,
-          minWithdrawal: formData.minWithdrawal,
-          maxWithdrawal: formData.maxWithdrawal,
-          limits: {
-            dailyLimit: formData.limits.dailyLimit,
-            monthlyLimit: formData.limits.monthlyLimit,
-            singleTransactionLimit: formData.limits.singleTransactionLimit,
+          paymentConfigs: formData.selectedPaymentConfigs,
+          
+          // 代收（充值）配置
+          deposit: {
+            fee: {
+              percentage: formData.deposit.fee.percentage,
+              fixedAmount: formData.deposit.fee.fixedAmount,
+            },
+            limits: {
+              minAmount: formData.deposit.limits.minAmount,
+              maxAmount: formData.deposit.limits.maxAmount,
+              dailyLimit: formData.deposit.limits.dailyLimit,
+              monthlyLimit: formData.deposit.limits.monthlyLimit,
+              singleTransactionLimit: formData.deposit.limits.singleTransactionLimit,
+            },
+            usage: {
+              dailyUsed: 0,
+              monthlyUsed: 0,
+              lastResetDate: new Date().toISOString(),
+            },
           },
+          
+          // 代付（提现）配置
+          withdrawal: {
+            fee: {
+              percentage: formData.withdrawal.fee.percentage,
+              fixedAmount: formData.withdrawal.fee.fixedAmount,
+            },
+            limits: {
+              minAmount: formData.withdrawal.limits.minAmount,
+              maxAmount: formData.withdrawal.limits.maxAmount,
+              dailyLimit: formData.withdrawal.limits.dailyLimit,
+              monthlyLimit: formData.withdrawal.limits.monthlyLimit,
+              singleTransactionLimit: formData.withdrawal.limits.singleTransactionLimit,
+            },
+            usage: {
+              dailyUsed: 0,
+              monthlyUsed: 0,
+              lastResetDate: new Date().toISOString(),
+            },
+          },
+          
           updatedAt: new Date().toISOString(),
         };
 
@@ -496,23 +612,48 @@ export default function Merchants() {
           status: formData.status,
           balance: 0,
           defaultProvider: formData.defaultProvider,
-          paymentConfigs: formData.selectedPaymentConfigs, // 修复：直接使用ID数组
-          depositFee: formData.depositFee,
-          withdrawalFee: formData.withdrawalFee,
-          minDeposit: formData.minDeposit,
-          maxDeposit: formData.maxDeposit,
-          minWithdrawal: formData.minWithdrawal,
-          maxWithdrawal: formData.maxWithdrawal,
-          limits: {
-            dailyLimit: formData.limits.dailyLimit,
-            monthlyLimit: formData.limits.monthlyLimit,
-            singleTransactionLimit: formData.limits.singleTransactionLimit,
+          paymentConfigs: formData.selectedPaymentConfigs,
+          
+          // 代收（充值）配置
+          deposit: {
+            fee: {
+              percentage: formData.deposit.fee.percentage,
+              fixedAmount: formData.deposit.fee.fixedAmount,
+            },
+            limits: {
+              minAmount: formData.deposit.limits.minAmount,
+              maxAmount: formData.deposit.limits.maxAmount,
+              dailyLimit: formData.deposit.limits.dailyLimit,
+              monthlyLimit: formData.deposit.limits.monthlyLimit,
+              singleTransactionLimit: formData.deposit.limits.singleTransactionLimit,
+            },
+            usage: {
+              dailyUsed: 0,
+              monthlyUsed: 0,
+              lastResetDate: new Date().toISOString(),
+            },
           },
-          usage: {
-            dailyUsed: 0,
-            monthlyUsed: 0,
-            lastResetDate: new Date().toISOString(),
+          
+          // 代付（提现）配置
+          withdrawal: {
+            fee: {
+              percentage: formData.withdrawal.fee.percentage,
+              fixedAmount: formData.withdrawal.fee.fixedAmount,
+            },
+            limits: {
+              minAmount: formData.withdrawal.limits.minAmount,
+              maxAmount: formData.withdrawal.limits.maxAmount,
+              dailyLimit: formData.withdrawal.limits.dailyLimit,
+              monthlyLimit: formData.withdrawal.limits.monthlyLimit,
+              singleTransactionLimit: formData.withdrawal.limits.singleTransactionLimit,
+            },
+            usage: {
+              dailyUsed: 0,
+              monthlyUsed: 0,
+              lastResetDate: new Date().toISOString(),
+            },
           },
+          
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -655,33 +796,58 @@ export default function Merchants() {
             </Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
               <Box>
-                <Typography variant="body2" color="text.secondary">充值费率</Typography>
-                <Typography variant="body1" fontWeight="medium">{currentMerchant.depositFee}%</Typography>
+                <Typography variant="body2" color="text.secondary">代收费率</Typography>
+                <Typography variant="body1" fontWeight="medium">
+                  {currentMerchant.deposit?.fee?.percentage || 0}% + ₹{currentMerchant.deposit?.fee?.fixedAmount || 0}
+                </Typography>
               </Box>
               <Box>
-                <Typography variant="body2" color="text.secondary">提现费率</Typography>
-                <Typography variant="body1" fontWeight="medium">{currentMerchant.withdrawalFee}%</Typography>
+                <Typography variant="body2" color="text.secondary">代付费率</Typography>
+                <Typography variant="body1" fontWeight="medium">
+                  {currentMerchant.withdrawal?.fee?.percentage || 0}% + ₹{currentMerchant.withdrawal?.fee?.fixedAmount || 0}
+                </Typography>
               </Box>
             </Box>
           </Paper>
 
-          {/* 限额信息卡片 */}
+          {/* 代收（充值）限额信息卡片 */}
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', mb: 2 }}>
-              限额设置
+              代收（充值）限额设置
             </Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
               <Box>
                 <Typography variant="body2" color="text.secondary">每日额度</Typography>
-                <Typography variant="body1" fontWeight="medium">{formatCurrency(currentMerchant.limits.dailyLimit)}</Typography>
+                <Typography variant="body1" fontWeight="medium">{formatCurrency(currentMerchant.deposit.limits.dailyLimit)}</Typography>
               </Box>
               <Box>
                 <Typography variant="body2" color="text.secondary">每月额度</Typography>
-                <Typography variant="body1" fontWeight="medium">{formatCurrency(currentMerchant.limits.monthlyLimit)}</Typography>
+                <Typography variant="body1" fontWeight="medium">{formatCurrency(currentMerchant.deposit.limits.monthlyLimit)}</Typography>
               </Box>
               <Box>
                 <Typography variant="body2" color="text.secondary">单笔限额</Typography>
-                <Typography variant="body1" fontWeight="medium">{formatCurrency(currentMerchant.limits.singleTransactionLimit)}</Typography>
+                <Typography variant="body1" fontWeight="medium">{formatCurrency(currentMerchant.deposit.limits.singleTransactionLimit)}</Typography>
+              </Box>
+            </Box>
+          </Paper>
+
+          {/* 代付（提现）限额信息卡片 */}
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', mb: 2 }}>
+              代付（提现）限额设置
+            </Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 2 }}>
+              <Box>
+                <Typography variant="body2" color="text.secondary">每日额度</Typography>
+                <Typography variant="body1" fontWeight="medium">{formatCurrency(currentMerchant.withdrawal.limits.dailyLimit)}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">每月额度</Typography>
+                <Typography variant="body1" fontWeight="medium">{formatCurrency(currentMerchant.withdrawal.limits.monthlyLimit)}</Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">单笔限额</Typography>
+                <Typography variant="body1" fontWeight="medium">{formatCurrency(currentMerchant.withdrawal.limits.singleTransactionLimit)}</Typography>
               </Box>
             </Box>
           </Paper>
@@ -786,8 +952,8 @@ export default function Merchants() {
                       默认支付商: {merchant.defaultProvider}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      充值费率: {merchant.depositFee}% | 
-                      提现费率: {merchant.withdrawalFee}%
+                      代收费率: {merchant.deposit?.fee?.percentage || 0}% + ₹{merchant.deposit?.fee?.fixedAmount || 0} | 
+                      代付费率: {merchant.withdrawal?.fee?.percentage || 0}% + ₹{merchant.withdrawal?.fee?.fixedAmount || 0}
                     </Typography>
                   </Box>
                 </TableCell>
@@ -797,19 +963,19 @@ export default function Merchants() {
                       每日额度
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {formatCurrency(merchant.usage.dailyUsed)} / {formatCurrency(merchant.limits.dailyLimit)}
+                      {formatCurrency(merchant.deposit?.usage?.dailyUsed || 0)} / {formatCurrency(merchant.deposit?.limits?.dailyLimit || 0)}
                     </Typography>
                     <Box sx={{ mt: 1 }}>
                       <Typography variant="body2" fontWeight="medium">
                         每月额度
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {formatCurrency(merchant.usage.monthlyUsed)} / {formatCurrency(merchant.limits.monthlyLimit)}
+                        {formatCurrency(merchant.deposit?.usage?.monthlyUsed || 0)} / {formatCurrency(merchant.deposit?.limits?.monthlyLimit || 0)}
                       </Typography>
                     </Box>
                     <Box sx={{ mt: 1 }}>
                       <Typography variant="caption" color="text.secondary">
-                        单笔限额: {formatCurrency(merchant.limits.singleTransactionLimit)}
+                        单笔限额: {formatCurrency(merchant.deposit?.limits?.singleTransactionLimit || 0)}
                       </Typography>
                     </Box>
                   </Box>
@@ -1145,30 +1311,101 @@ export default function Merchants() {
                 </Select>
               </FormControl>
 
+              {/* 代收（充值）费率配置 */}
+              <Box sx={{ gridColumn: '1 / -1' }}>
+                <Typography variant="h6" gutterBottom>
+                  代收（充值）费率配置
+                </Typography>
+              </Box>
+              
               <TextField
                 fullWidth
-                label="充值费率 (%)"
+                label="代收费率比例 (%)"
                 type="number"
-                value={formData.depositFee}
-                onChange={(e) => setFormData(prev => ({ ...prev, depositFee: parseFloat(e.target.value) }))}
+                value={formData.deposit.fee.percentage}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  deposit: { 
+                    ...prev.deposit, 
+                    fee: { 
+                      ...prev.deposit.fee, 
+                      percentage: parseFloat(e.target.value) 
+                    } 
+                  } 
+                }))}
                 inputProps={{ step: 0.1, min: 0, max: 10 }}
                 required
               />
 
               <TextField
                 fullWidth
-                label="提现费率 (%)"
+                label="代收固定费用 (₹)"
                 type="number"
-                value={formData.withdrawalFee}
-                onChange={(e) => setFormData(prev => ({ ...prev, withdrawalFee: parseFloat(e.target.value) }))}
+                value={formData.deposit.fee.fixedAmount}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  deposit: { 
+                    ...prev.deposit, 
+                    fee: { 
+                      ...prev.deposit.fee, 
+                      fixedAmount: parseFloat(e.target.value) 
+                    } 
+                  } 
+                }))}
+                inputProps={{ step: 0.01, min: 0 }}
+                required
+              />
+
+              {/* 代付（提现）费率配置 */}
+              <Box sx={{ gridColumn: '1 / -1' }}>
+                <Typography variant="h6" gutterBottom>
+                  代付（提现）费率配置
+                </Typography>
+              </Box>
+              
+              <TextField
+                fullWidth
+                label="代付费率比例 (%)"
+                type="number"
+                value={formData.withdrawal.fee.percentage}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  withdrawal: { 
+                    ...prev.withdrawal, 
+                    fee: { 
+                      ...prev.withdrawal.fee, 
+                      percentage: parseFloat(e.target.value) 
+                    } 
+                  } 
+                }))}
                 inputProps={{ step: 0.1, min: 0, max: 10 }}
                 required
               />
 
+              <TextField
+                fullWidth
+                label="代付固定费用 (₹)"
+                type="number"
+                value={formData.withdrawal.fee.fixedAmount}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  withdrawal: { 
+                    ...prev.withdrawal, 
+                    fee: { 
+                      ...prev.withdrawal.fee, 
+                      fixedAmount: parseFloat(e.target.value) 
+                    } 
+                  } 
+                }))}
+                inputProps={{ step: 0.01, min: 0 }}
+                required
+              />
+
+              {/* 代收（充值）限额设置 */}
               <Box sx={{ gridColumn: '1 / -1' }}>
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="h6" gutterBottom>
-                  限额设置
+                  代收（充值）限额设置
                 </Typography>
               </Box>
 
@@ -1176,8 +1413,17 @@ export default function Merchants() {
                 fullWidth
                 label="最小充值金额 (₹)"
                 type="number"
-                value={formData.minDeposit}
-                onChange={(e) => setFormData(prev => ({ ...prev, minDeposit: parseInt(e.target.value) }))}
+                value={formData.deposit.limits.minAmount}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  deposit: { 
+                    ...prev.deposit, 
+                    limits: { 
+                      ...prev.deposit.limits, 
+                      minAmount: parseInt(e.target.value) 
+                    } 
+                  } 
+                }))}
                 inputProps={{ min: 1 }}
                 required
               />
@@ -1186,18 +1432,44 @@ export default function Merchants() {
                 fullWidth
                 label="最大充值金额 (₹)"
                 type="number"
-                value={formData.maxDeposit}
-                onChange={(e) => setFormData(prev => ({ ...prev, maxDeposit: parseInt(e.target.value) }))}
+                value={formData.deposit.limits.maxAmount}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  deposit: { 
+                    ...prev.deposit, 
+                    limits: { 
+                      ...prev.deposit.limits, 
+                      maxAmount: parseInt(e.target.value) 
+                    } 
+                  } 
+                }))}
                 inputProps={{ min: 1 }}
                 required
               />
+
+              {/* 代付（提现）限额设置 */}
+              <Box sx={{ gridColumn: '1 / -1' }}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h6" gutterBottom>
+                  代付（提现）限额设置
+                </Typography>
+              </Box>
 
               <TextField
                 fullWidth
                 label="最小提现金额 (₹)"
                 type="number"
-                value={formData.minWithdrawal}
-                onChange={(e) => setFormData(prev => ({ ...prev, minWithdrawal: parseInt(e.target.value) }))}
+                value={formData.withdrawal.limits.minAmount}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  withdrawal: { 
+                    ...prev.withdrawal, 
+                    limits: { 
+                      ...prev.withdrawal.limits, 
+                      minAmount: parseInt(e.target.value) 
+                    } 
+                  } 
+                }))}
                 inputProps={{ min: 1 }}
                 required
               />
@@ -1206,40 +1478,56 @@ export default function Merchants() {
                 fullWidth
                 label="最大提现金额 (₹)"
                 type="number"
-                value={formData.maxWithdrawal}
-                onChange={(e) => setFormData(prev => ({ ...prev, maxWithdrawal: parseInt(e.target.value) }))}
+                value={formData.withdrawal.limits.maxAmount}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  withdrawal: { 
+                    ...prev.withdrawal, 
+                    limits: { 
+                      ...prev.withdrawal.limits, 
+                      maxAmount: parseInt(e.target.value) 
+                    } 
+                  } 
+                }))}
                 inputProps={{ min: 1 }}
                 required
               />
 
+              {/* 代收（充值）额度限制 */}
               <Box sx={{ gridColumn: '1 / -1' }}>
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="h6" gutterBottom>
-                  额度限制
+                  代收（充值）额度限制
                 </Typography>
               </Box>
 
               <TextField
                 fullWidth
-                label="每日额度限制 (₹)"
+                label="每日充值额度限制 (₹)"
                 type="text"
-                value={formData.limits?.dailyLimit ? formatAmount(formData.limits.dailyLimit) : ''}
+                value={formData.deposit.limits.dailyLimit ? formatAmount(formData.deposit.limits.dailyLimit) : ''}
                 onChange={(e) => {
                   const value = e.target.value.replace(/[^\d]/g, '');
                   if (value) {
                     setFormData(prev => ({ 
                       ...prev, 
-                      limits: { 
-                        ...prev.limits, 
-                        dailyLimit: parseInt(value) * 100 
+                      deposit: { 
+                        ...prev.deposit, 
+                        limits: { 
+                          ...prev.deposit.limits, 
+                          dailyLimit: parseInt(value) * 100 
+                        } 
                       } 
                     }));
                   } else {
                     setFormData(prev => ({ 
                       ...prev, 
-                      limits: { 
-                        ...prev.limits, 
-                        dailyLimit: 0 
+                      deposit: { 
+                        ...prev.deposit, 
+                        limits: { 
+                          ...prev.deposit.limits, 
+                          dailyLimit: 0 
+                        } 
                       } 
                     }));
                   }
@@ -1250,25 +1538,31 @@ export default function Merchants() {
 
               <TextField
                 fullWidth
-                label="每月额度限制 (₹)"
+                label="每月充值额度限制 (₹)"
                 type="text"
-                value={formData.limits?.monthlyLimit ? formatAmount(formData.limits.monthlyLimit) : ''}
+                value={formData.deposit.limits.monthlyLimit ? formatAmount(formData.deposit.limits.monthlyLimit) : ''}
                 onChange={(e) => {
                   const value = e.target.value.replace(/[^\d]/g, '');
                   if (value) {
                     setFormData(prev => ({ 
                       ...prev, 
-                      limits: { 
-                        ...prev.limits, 
-                        monthlyLimit: parseInt(value) * 100 
+                      deposit: { 
+                        ...prev.deposit, 
+                        limits: { 
+                          ...prev.deposit.limits, 
+                          monthlyLimit: parseInt(value) * 100 
+                        } 
                       } 
                     }));
                   } else {
                     setFormData(prev => ({ 
                       ...prev, 
-                      limits: { 
-                        ...prev.limits, 
-                        monthlyLimit: 0 
+                      deposit: { 
+                        ...prev.deposit, 
+                        limits: { 
+                          ...prev.deposit.limits, 
+                          monthlyLimit: 0 
+                        } 
                       } 
                     }));
                   }
@@ -1279,25 +1573,144 @@ export default function Merchants() {
 
               <TextField
                 fullWidth
-                label="单笔交易限额 (₹)"
+                label="单笔充值限额 (₹)"
                 type="text"
-                value={formData.limits?.singleTransactionLimit ? formatAmount(formData.limits.singleTransactionLimit) : ''}
+                value={formData.deposit.limits.singleTransactionLimit ? formatAmount(formData.deposit.limits.singleTransactionLimit) : ''}
                 onChange={(e) => {
                   const value = e.target.value.replace(/[^\d]/g, '');
                   if (value) {
                     setFormData(prev => ({ 
                       ...prev, 
-                      limits: { 
-                        ...prev.limits, 
-                        singleTransactionLimit: parseInt(value) * 100 
+                      deposit: { 
+                        ...prev.deposit, 
+                        limits: { 
+                          ...prev.deposit.limits, 
+                          singleTransactionLimit: parseInt(value) * 100 
+                        } 
                       } 
                     }));
                   } else {
                     setFormData(prev => ({ 
                       ...prev, 
-                      limits: { 
-                        ...prev.limits, 
-                        singleTransactionLimit: 0 
+                      deposit: { 
+                        ...prev.deposit, 
+                        limits: { 
+                          ...prev.deposit.limits, 
+                          singleTransactionLimit: 0 
+                        } 
+                      } 
+                    }));
+                  }
+                }}
+                helperText="例如：100000 表示 ₹100,000"
+                required
+              />
+
+              {/* 代付（提现）额度限制 */}
+              <Box sx={{ gridColumn: '1 / -1' }}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h6" gutterBottom>
+                  代付（提现）额度限制
+                </Typography>
+              </Box>
+
+              <TextField
+                fullWidth
+                label="每日提现额度限制 (₹)"
+                type="text"
+                value={formData.withdrawal.limits.dailyLimit ? formatAmount(formData.withdrawal.limits.dailyLimit) : ''}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^\d]/g, '');
+                  if (value) {
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      withdrawal: { 
+                        ...prev.withdrawal, 
+                        limits: { 
+                          ...prev.withdrawal.limits, 
+                          dailyLimit: parseInt(value) * 100 
+                        } 
+                      } 
+                    }));
+                  } else {
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      withdrawal: { 
+                        ...prev.withdrawal, 
+                        limits: { 
+                          ...prev.withdrawal.limits, 
+                          dailyLimit: 0 
+                        } 
+                      } 
+                    }));
+                  }
+                }}
+                helperText="例如：1000000 表示 ₹1,000,000"
+                required
+              />
+
+              <TextField
+                fullWidth
+                label="每月提现额度限制 (₹)"
+                type="text"
+                value={formData.withdrawal.limits.monthlyLimit ? formatAmount(formData.withdrawal.limits.monthlyLimit) : ''}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^\d]/g, '');
+                  if (value) {
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      withdrawal: { 
+                        ...prev.withdrawal, 
+                        limits: { 
+                          ...prev.withdrawal.limits, 
+                          monthlyLimit: parseInt(value) * 100 
+                        } 
+                      } 
+                    }));
+                  } else {
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      withdrawal: { 
+                        ...prev.withdrawal, 
+                        limits: { 
+                          ...prev.withdrawal.limits, 
+                          monthlyLimit: 0 
+                        } 
+                      } 
+                    }));
+                  }
+                }}
+                helperText="例如：10000000 表示 ₹10,000,000"
+                required
+              />
+
+              <TextField
+                fullWidth
+                label="单笔提现限额 (₹)"
+                type="text"
+                value={formData.withdrawal.limits.singleTransactionLimit ? formatAmount(formData.withdrawal.limits.singleTransactionLimit) : ''}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^\d]/g, '');
+                  if (value) {
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      withdrawal: { 
+                        ...prev.withdrawal, 
+                        limits: { 
+                          ...prev.withdrawal.limits, 
+                          singleTransactionLimit: parseInt(value) * 100 
+                        } 
+                      } 
+                    }));
+                  } else {
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      withdrawal: { 
+                        ...prev.withdrawal, 
+                        limits: { 
+                          ...prev.withdrawal.limits, 
+                          singleTransactionLimit: 0 
+                        } 
                       } 
                     }));
                   }

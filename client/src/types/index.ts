@@ -120,24 +120,53 @@ export interface Merchant {
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
   balance: number;
   defaultProvider: string;
-  depositFee: number;
-  withdrawalFee: number;
-  minDeposit: number;
-  maxDeposit: number;
-  minWithdrawal: number;
-  maxWithdrawal: number;
-  // 额度限制
-  limits: {
-    dailyLimit: number;      // 每日额度限制
-    monthlyLimit: number;    // 每月额度限制
-    singleTransactionLimit: number;  // 单笔交易限额
+  
+  // 代收（充值）配置
+  deposit: {
+    // 费率配置 - 固定比例 + 固定金额
+    fee: {
+      percentage: number;    // 固定比例，如 5 表示 5%
+      fixedAmount: number;   // 固定金额，如 0 表示无固定费用
+    };
+    // 限额配置
+    limits: {
+      minAmount: number;     // 最小充值金额
+      maxAmount: number;     // 最大充值金额
+      dailyLimit: number;    // 每日充值限额
+      monthlyLimit: number;  // 每月充值限额
+      singleTransactionLimit: number; // 单笔充值限额
+    };
+    // 使用情况
+    usage: {
+      dailyUsed: number;     // 今日已使用充值额度
+      monthlyUsed: number;   // 本月已使用充值额度
+      lastResetDate: string; // 上次重置日期
+    };
   };
-  // 额度使用情况
-  usage: {
-    dailyUsed: number;       // 今日已使用额度
-    monthlyUsed: number;     // 本月已使用额度
-    lastResetDate: string;   // 上次重置日期
+  
+  // 代付（提现）配置
+  withdrawal: {
+    // 费率配置 - 固定比例 + 固定金额
+    fee: {
+      percentage: number;    // 固定比例，如 3 表示 3%
+      fixedAmount: number;   // 固定金额，如 6 表示 6卢比
+    };
+    // 限额配置
+    limits: {
+      minAmount: number;     // 最小提现金额
+      maxAmount: number;     // 最大提现金额
+      dailyLimit: number;    // 每日提现限额
+      monthlyLimit: number;  // 每月提现限额
+      singleTransactionLimit: number; // 单笔提现限额
+    };
+    // 使用情况
+    usage: {
+      dailyUsed: number;     // 今日已使用提现额度
+      monthlyUsed: number;   // 本月已使用提现额度
+      lastResetDate: string; // 上次重置日期
+    };
   };
+  
   // 支付配置关联
   paymentConfigs?: string[]; // 关联的支付配置ID列表
   createdAt: string;
