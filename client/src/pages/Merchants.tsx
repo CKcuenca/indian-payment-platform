@@ -124,7 +124,7 @@ export default function Merchants() {
         return;
       }
       
-      const response = await fetch(`http://localhost:3001/api/merchant-profile/profile`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/merchant-profile/profile`, {
         headers: {
           'Authorization': `Bearer ${authService.getToken()}`
         }
@@ -182,7 +182,11 @@ export default function Merchants() {
     try {
       setLoading(true);
       // 调用真实API获取商户数据
-      const response = await fetch('https://cashgit.com/api/merchant');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/merchant`, {
+        headers: {
+          'Authorization': `Bearer ${authService.getToken()}`
+        }
+      });
       if (response.ok) {
         const result = await response.json();
         if (result.success && result.data) {
@@ -277,7 +281,7 @@ export default function Merchants() {
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:3001/api/merchant-profile/change-password', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/merchant-profile/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -316,7 +320,7 @@ export default function Merchants() {
     setError(null);
     
     try {
-      const response = await fetch('http://localhost:3001/api/merchant-profile/generate-api-key', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/merchant-profile/generate-api-key`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
