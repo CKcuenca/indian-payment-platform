@@ -469,3 +469,52 @@ export interface AggregatedStats {
   avgSuccessRate: number;
   avgProcessingTime: number;
 }
+
+// 支付账户接口
+export interface PaymentAccount {
+  _id: string;
+  accountName: string;
+  provider: {
+    name: string;
+    type: string;
+    subType: string;
+    accountId: string;
+    apiKey: string;
+    secretKey: string;
+    environment: string;
+    mchNo?: string;
+  };
+  description: string;
+  collectionNotifyUrl: string;
+  collectionReturnUrl: string;
+  payoutNotifyUrl: string;
+  payoutReturnUrl: string;
+  limits: {
+    collection: {
+      dailyLimit: number;
+      monthlyLimit: number;
+      singleTransactionLimit: number;
+      minTransactionAmount: number;
+    };
+    payout: {
+      dailyLimit: number;
+      monthlyLimit: number;
+      singleTransactionLimit: number;
+      minTransactionAmount: number;
+    };
+  };
+  fees: {
+    collection: {
+      transactionFee: number;
+      fixedFee: number;
+    };
+    payout: {
+      transactionFee: number;
+      fixedFee: number;
+    };
+  };
+  priority: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}

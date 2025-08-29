@@ -116,58 +116,65 @@ export default function PaymentManagementNew() {
       
       // 使用统一的api服务
       const response = await api.get('/api/payment-config');
+      console.log('🔍 支付配置API响应:', response.data);
+      
       if (response.data.success && response.data.data) {
-        // 后端返回的数据结构可能是数组或对象
-        // 转换后端数据格式为前端格式
-        const convertedAccounts: PaymentAccount[] = response.data.data.map((item: any) => ({
-          _id: item._id,
-          accountName: item.accountName,
-          provider: {
-            name: item.provider.name,
-            type: item.provider.type || 'native',
-            subType: item.provider.subType || 'third_party',
-            accountId: item.provider.accountId,
-            apiKey: item.provider.apiKey || '',
-            secretKey: item.provider.secretKey || '',
-            environment: item.provider.environment,
-            mchNo: item.provider.mchNo || ''
-          },
-          description: item.description || '',
-          collectionNotifyUrl: item.collectionNotifyUrl || '',
-          collectionReturnUrl: item.collectionReturnUrl || '',
-          payoutNotifyUrl: item.payoutNotifyUrl || '',
-          payoutReturnUrl: item.payoutReturnUrl || '',
-          limits: {
-            collection: {
-              dailyLimit: item.limits?.dailyLimit || 1000000,
-              monthlyLimit: item.limits?.monthlyLimit || 10000000,
-              singleTransactionLimit: item.limits?.singleTransactionLimit || 100000,
-              minTransactionAmount: item.limits?.minTransactionAmount || 100
+        // 后端返回的数据结构是数组
+        const convertedAccounts: PaymentAccount[] = response.data.data.map((item: any) => {
+          console.log('🔍 转换支付配置项:', item);
+          return {
+            _id: item._id,
+            accountName: item.accountName,
+            provider: {
+              name: item.provider.name,
+              type: item.provider.type || 'native',
+              subType: item.provider.subType || 'third_party',
+              accountId: item.provider.accountId,
+              apiKey: item.provider.apiKey || '',
+              secretKey: item.provider.secretKey || '',
+              environment: item.provider.environment,
+              mchNo: item.provider.mchNo || ''
             },
-            payout: {
-              dailyLimit: item.limits?.dailyLimit || 500000,
-              monthlyLimit: item.limits?.monthlyLimit || 5000000,
-              singleTransactionLimit: item.limits?.singleTransactionLimit || 50000,
-              minTransactionAmount: item.limits?.minTransactionAmount || 200
-            }
-          },
-          fees: {
-            collection: {
-              transactionFee: item.fees?.transactionFee || 0.5,
-              fixedFee: item.fees?.fixedFee || 0
+            description: item.description || '',
+            collectionNotifyUrl: item.collectionNotifyUrl || '',
+            collectionReturnUrl: item.collectionReturnUrl || '',
+            payoutNotifyUrl: item.payoutNotifyUrl || '',
+            payoutReturnUrl: item.payoutReturnUrl || '',
+            limits: {
+              collection: {
+                dailyLimit: item.limits?.dailyLimit || 1000000,
+                monthlyLimit: item.limits?.monthlyLimit || 10000000,
+                singleTransactionLimit: item.limits?.singleTransactionLimit || 100000,
+                minTransactionAmount: item.limits?.minTransactionAmount || 100
+              },
+              payout: {
+                dailyLimit: item.limits?.dailyLimit || 500000,
+                monthlyLimit: item.limits?.monthlyLimit || 5000000,
+                singleTransactionLimit: item.limits?.singleTransactionLimit || 50000,
+                minTransactionAmount: item.limits?.minTransactionAmount || 200
+              }
             },
-            payout: {
-              transactionFee: item.fees?.transactionFee || 0.3,
-              fixedFee: item.fees?.fixedFee || 0
-            }
-          },
-          priority: item.priority || 1,
-          status: item.status || 'ACTIVE',
-          createdAt: item.createdAt || new Date().toISOString(),
-          updatedAt: item.updatedAt || new Date().toISOString()
-        }));
+            fees: {
+              collection: {
+                transactionFee: item.fees?.transactionFee || 0.5,
+                fixedFee: item.fees?.fixedFee || 0
+              },
+              payout: {
+                transactionFee: item.fees?.transactionFee || 0.3,
+                fixedFee: item.fees?.fixedFee || 0
+              }
+            },
+            priority: item.priority || 1,
+            status: item.status || 'ACTIVE',
+            createdAt: item.createdAt || new Date().toISOString(),
+            updatedAt: item.updatedAt || new Date().toISOString()
+          };
+        });
+        
+        console.log('🔍 转换后的支付账户:', convertedAccounts);
         setAccounts(convertedAccounts);
       } else {
+        console.log('🔍 API返回数据格式异常:', response.data);
         setAccounts([]);
       }
     } catch (error) {
