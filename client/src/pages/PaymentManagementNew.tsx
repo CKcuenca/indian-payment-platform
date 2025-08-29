@@ -99,14 +99,7 @@ export default function PaymentManagementNew() {
   const [accounts, setAccounts] = useState<PaymentAccount[]>([]);
   const [loading, setLoading] = useState(false);
   
-  // 保存账户数据到本地存储
-  const saveAccountsToStorage = React.useCallback((accounts: PaymentAccount[]) => {
-    try {
-      localStorage.setItem('paymentAccounts', JSON.stringify(accounts));
-    } catch (error) {
-      console.error('保存支付账户数据到本地存储失败:', error);
-    }
-  }, []);
+
 
   // 获取支付账户列表
   const fetchAccounts = React.useCallback(async () => {
