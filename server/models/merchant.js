@@ -17,7 +17,6 @@ const merchantSchema = new mongoose.Schema({
     required: false,
     unique: false
   },
-
   
   // 商户状态
   status: {
@@ -26,98 +25,137 @@ const merchantSchema = new mongoose.Schema({
     default: 'ACTIVE'
   },
   
-  // API密钥
-  apiKey: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  secretKey: {
-    type: String,
-    required: true
+  // 余额
+  balance: {
+    type: Number,
+    default: 0
   },
   
-  // 支付配置
-  paymentConfig: {
-    defaultProvider: {
-      type: String,
-      default: 'airpay'
-    },
-    providers: [{
-      name: String,
-      enabled: {
-        type: Boolean,
-        default: true
-      },
-      config: mongoose.Schema.Types.Mixed
-    }],
-    // 费率配置
-    fees: {
-      deposit: {
+  // 默认支付商
+  defaultProvider: {
+    type: String,
+    default: 'AirPay'
+  },
+  
+  // 用户绑定字段
+  userId: {
+    type: String,
+    required: false,
+    index: true
+  },
+  username: {
+    type: String,
+    required: false
+  },
+  userFullName: {
+    type: String,
+    required: false
+  },
+  
+  // 代收（充值）配置
+  deposit: {
+    fee: {
+      percentage: {
         type: Number,
-        default: 0.01 // 1%
+        default: 5.0
       },
-      withdrawal: {
+      fixedAmount: {
         type: Number,
-        default: 0.01 // 1%
+        default: 0
       }
     },
-    // 限额配置
     limits: {
-      minDeposit: {
+      minAmount: {
         type: Number,
-        default: 100 // 1卢比
+        default: 100
       },
-      maxDeposit: {
+      maxAmount: {
         type: Number,
-        default: 5000000 // 5万卢比
-      },
-      minWithdrawal: {
-        type: Number,
-        default: 100 // 1卢比
-      },
-      maxWithdrawal: {
-        type: Number,
-        default: 5000000 // 5万卢比
+        default: 100000
       },
       dailyLimit: {
         type: Number,
-        default: 50000000 // 50万卢比
+        default: 100000000
       },
       monthlyLimit: {
         type: Number,
-        default: 500000000 // 500万卢比
+        default: 1000000000
       },
-      allowLargeTransactions: {
-        type: Boolean,
-        default: false
-      },
-      maxLargeTransactionsPerDay: {
+      singleTransactionLimit: {
         type: Number,
-        default: 3
+        default: 10000000
+      }
+    },
+    usage: {
+      dailyUsed: {
+        type: Number,
+        default: 0
+      },
+      monthlyUsed: {
+        type: Number,
+        default: 0
+      },
+      lastResetDate: {
+        type: Date,
+        default: Date.now
       }
     }
   },
   
-  // 余额信息
-  balance: {
-    available: {
-      type: Number,
-      default: 0
+  // 代付（提现）配置
+  withdrawal: {
+    fee: {
+      percentage: {
+        type: Number,
+        default: 3.0
+      },
+      fixedAmount: {
+        type: Number,
+        default: 6
+      }
     },
-    frozen: {
-      type: Number,
-      default: 0
+    limits: {
+      minAmount: {
+        type: Number,
+        default: 500
+      },
+      maxAmount: {
+        type: Number,
+        default: 50000
+      },
+      dailyLimit: {
+        type: Number,
+        default: 100000000
+      },
+      monthlyLimit: {
+        type: Number,
+        default: 1000000000
+      },
+      singleTransactionLimit: {
+        type: Number,
+        default: 10000000
+      }
+    },
+    usage: {
+      dailyUsed: {
+        type: Number,
+        default: 0
+      },
+      monthlyUsed: {
+        type: Number,
+        default: 0
+      },
+      lastResetDate: {
+        type: Date,
+        default: Date.now
+      }
     }
   },
   
-  // 回调URL配置
-  callbackUrls: {
-    paymentSuccess: String,
-    paymentFailed: String,
-    withdrawalSuccess: String,
-    withdrawalFailed: String
-  },
+  // 支付配置关联
+  paymentConfigs: [{
+    type: String
+  }],
   
   // 创建和更新时间
   createdAt: {
@@ -136,14 +174,9 @@ merchantSchema.pre('save', function(next) {
   next();
 });
 
-// 生成API密钥的静态方法
-merchantSchema.statics.generateApiKey = function() {
-  return 'pk_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-};
-
-// 生成密钥的静态方法
-merchantSchema.statics.generateSecretKey = function() {
-  return 'sk_' + Math.random().toString(36).substr(2, 15) + Date.now().toString(36);
+// 生成商户ID的静态方法
+merchantSchema.statics.generateMerchantId = function() {
+  return 'MERCHANT_' + Date.now().toString(36).toUpperCase();
 };
 
 module.exports = mongoose.models.Merchant || mongoose.model('Merchant', merchantSchema);

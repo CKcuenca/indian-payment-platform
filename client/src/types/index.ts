@@ -121,6 +121,11 @@ export interface Merchant {
   balance: number;
   defaultProvider: string;
   
+  // 绑定用户管理中的商户用户
+  userId?: string;           // 关联的用户ID
+  username?: string;         // 关联的用户名
+  userFullName?: string;     // 关联用户的姓名
+  
   // 代收（充值）配置
   deposit: {
     // 费率配置 - 固定比例 + 固定金额

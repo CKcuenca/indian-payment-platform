@@ -33,10 +33,13 @@ router.post('/merchants', [
   body('paymentConfigs').optional().isArray().withMessage('Payment configs must be an array'),
   body('deposit').optional().isObject().withMessage('Deposit must be an object'),
   body('withdrawal').optional().isObject().withMessage('Withdrawal must be an object'),
+  body('userId').optional().isString().withMessage('User ID must be a string'),
+  body('username').optional().isString().withMessage('Username must be a string'),
+  body('userFullName').optional().isString().withMessage('User full name must be a string'),
   validateRequest
 ], async (req, res) => {
   try {
-    const { name, email, status, defaultProvider, paymentConfigs, deposit, withdrawal } = req.body;
+    const { name, email, status, defaultProvider, paymentConfigs, deposit, withdrawal, userId, username, userFullName } = req.body;
     const Merchant = require('../models/merchant');
 
     // 检查邮箱是否已存在（如果提供了邮箱）
@@ -47,17 +50,13 @@ router.post('/merchants', [
       }
     }
 
-    // 生成商户ID和密钥
-    const merchantId = 'MERCHANT_' + Date.now().toString(36).toUpperCase();
-    const apiKey = Merchant.generateApiKey();
-    const secretKey = Merchant.generateSecretKey();
+    // 生成商户ID
+    const merchantId = Merchant.generateMerchantId ? Merchant.generateMerchantId() : 'MERCHANT_' + Date.now().toString(36).toUpperCase();
 
     // 创建商户 - 保存完整的前端数据结构
     const merchantData = {
       merchantId,
       name,
-      apiKey,
-      secretKey,
       status: status || 'ACTIVE',
       defaultProvider: defaultProvider || 'AirPay',
       paymentConfigs: paymentConfigs || [],
@@ -68,6 +67,9 @@ router.post('/merchants', [
     
     // 只有当字段有值时才添加
     if (email) merchantData.email = email;
+    if (userId) merchantData.userId = userId;
+    if (username) merchantData.username = username;
+    if (userFullName) merchantData.userFullName = userFullName;
     
     const merchant = new Merchant(merchantData);
 
@@ -76,8 +78,6 @@ router.post('/merchants', [
     const responseData = {
       merchantId: merchant.merchantId,
       name: merchant.name,
-      apiKey: merchant.apiKey,
-      secretKey: merchant.secretKey,
       status: merchant.status,
       defaultProvider: merchant.defaultProvider,
       paymentConfigs: merchant.paymentConfigs,
@@ -87,6 +87,9 @@ router.post('/merchants', [
     
     // 只有当字段有值时才添加到响应中
     if (merchant.email) responseData.email = merchant.email;
+    if (merchant.userId) responseData.userId = merchant.userId;
+    if (merchant.username) responseData.userName = merchant.username;
+    if (merchant.userFullName) responseData.userFullName = merchant.userFullName;
     
     res.json({
       success: true,
@@ -94,6 +97,76 @@ router.post('/merchants', [
     });
   } catch (error) {
     console.error('Create merchant error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// 更新商户
+router.put('/merchants/:merchantId', [
+  body('name').optional().isString().withMessage('Name must be a string'),
+  body('email').optional().custom((value) => {
+    if (value && value.trim() !== '') {
+      // 如果email有值且不是空字符串，则验证邮箱格式
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) {
+        throw new Error('Email must be valid if provided');
+      }
+    }
+    return true;
+  }).withMessage('Email must be valid if provided'),
+  body('status').optional().isIn(['ACTIVE', 'INACTIVE', 'SUSPENDED']).withMessage('Invalid status'),
+  body('defaultProvider').optional().isString().withMessage('Default provider must be a string'),
+  body('paymentConfigs').optional().isArray().withMessage('Payment configs must be an array'),
+  body('deposit').optional().isObject().withMessage('Deposit must be an object'),
+  body('withdrawal').optional().isObject().withMessage('Withdrawal must be an object'),
+  body('userId').optional().isString().withMessage('User ID must be a string'),
+  body('username').optional().isString().withMessage('Username must be a string'),
+  body('userFullName').optional().isString().withMessage('User full name must be a string'),
+  validateRequest
+], async (req, res) => {
+  try {
+    const { merchantId } = req.params;
+    const { name, email, status, defaultProvider, paymentConfigs, deposit, withdrawal, userId, username, userFullName } = req.body;
+    const Merchant = require('../models/merchant');
+
+    // 查找商户
+    const merchant = await Merchant.findOne({ merchantId });
+    if (!merchant) {
+      return res.status(404).json({ error: '商户不存在' });
+    }
+
+    // 检查邮箱是否已存在（如果提供了邮箱且与当前不同）
+    if (email && email !== merchant.email) {
+      const existingMerchant = await Merchant.findOne({ email });
+      if (existingMerchant) {
+        return res.status(400).json({ error: 'Email already exists' });
+      }
+    }
+
+    // 更新商户数据
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) updateData.email = email;
+    if (status !== undefined) updateData.status = status;
+    if (defaultProvider !== undefined) updateData.defaultProvider = defaultProvider;
+    if (paymentConfigs !== undefined) updateData.paymentConfigs = paymentConfigs;
+    if (deposit !== undefined) updateData.deposit = deposit;
+    if (withdrawal !== undefined) updateData.withdrawal = withdrawal;
+    if (userId !== undefined) updateData.userId = userId;
+    if (username !== undefined) updateData.username = username;
+    if (userFullName !== undefined) updateData.userFullName = userFullName;
+    
+    updateData.updatedAt = new Date();
+
+    // 更新商户
+    await Merchant.updateOne({ merchantId }, updateData);
+
+    res.json({
+      success: true,
+      message: '商户更新成功'
+    });
+  } catch (error) {
+    console.error('Update merchant error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -106,7 +179,6 @@ router.get('/merchants', async (req, res) => {
 
     const Merchant = require('../models/merchant');
     const merchants = await Merchant.find()
-      .select('-secretKey')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));

@@ -19,7 +19,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
-
+  FormHelperText,
   Chip,
   IconButton,
   Alert,
@@ -77,6 +77,10 @@ export default function Merchants() {
   const [paymentConfigs, setPaymentConfigs] = useState<any[]>([]);
   const [loadingPaymentConfigs, setLoadingPaymentConfigs] = useState(false);
   
+  // 用户管理相关状态 - 用于绑定商户用户
+  const [users, setUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  
 
 
   const [formData, setFormData] = useState({
@@ -85,6 +89,11 @@ export default function Merchants() {
     email: '',
     status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE' | 'SUSPENDED',
     defaultProvider: 'AirPay',
+    
+    // 用户绑定字段
+    userId: '',
+    username: '',
+    userFullName: '',
     
     // 代收（充值）配置
     deposit: {
@@ -137,6 +146,8 @@ export default function Merchants() {
       fetchMerchants();
       // 获取支付配置列表
       fetchPaymentConfigs();
+      // 获取用户列表 - 用于绑定商户用户
+      fetchUsers();
     }
   }, []);
 
@@ -269,6 +280,28 @@ export default function Merchants() {
     }
   };
 
+  // 获取用户列表 - 用于绑定商户用户
+  const fetchUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const response = await api.get('/api/users');
+      
+      if (response.data.success && response.data.data) {
+        // 只获取商户角色的用户
+        const allUsers = response.data.data.users || response.data.data;
+        const merchantUsers = allUsers.filter((user: any) => user.role === 'merchant');
+        setUsers(merchantUsers);
+      } else {
+        setUsers([]);
+      }
+    } catch (err: any) {
+      console.error('获取用户数据失败:', err);
+      setUsers([]);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
   // 获取所有商户数据
   const fetchMerchants = async () => {
     try {
@@ -322,6 +355,11 @@ export default function Merchants() {
       status: 'ACTIVE',
       defaultProvider: 'AirPay',
       
+      // 用户绑定字段
+      userId: '',
+      username: '',
+      userFullName: '',
+      
       // 代收（充值）配置
       deposit: {
         fee: {
@@ -365,6 +403,11 @@ export default function Merchants() {
       email: merchant.email,
       status: merchant.status,
       defaultProvider: merchant.defaultProvider,
+      
+      // 用户绑定字段
+      userId: merchant.userId || '',
+      username: merchant.username || '',
+      userFullName: merchant.userFullName || '',
       
       // 代收（充值）配置
       deposit: {
@@ -522,6 +565,11 @@ export default function Merchants() {
       return;
     }
 
+    if (!formData.userId) {
+      setError('请选择绑定的用户');
+      return;
+    }
+
     if (formData.deposit.limits.maxAmount <= formData.deposit.limits.minAmount) {
       setError('最大充值金额必须大于最小充值金额');
       return;
@@ -544,6 +592,11 @@ export default function Merchants() {
           status: formData.status,
           defaultProvider: formData.defaultProvider,
           paymentConfigs: formData.selectedPaymentConfigs,
+          
+          // 用户绑定字段
+          userId: formData.userId,
+          username: formData.username,
+          userFullName: formData.userFullName,
           
           // 代收（充值）配置
           deposit: {
@@ -610,6 +663,11 @@ export default function Merchants() {
           balance: 0,
           defaultProvider: formData.defaultProvider || 'AirPay',
           paymentConfigs: formData.selectedPaymentConfigs || [],
+          
+          // 用户绑定字段
+          userId: formData.userId,
+          username: formData.username,
+          userFullName: formData.userFullName,
           
           // 代收（充值）配置
           deposit: {
@@ -907,6 +965,11 @@ export default function Merchants() {
                       <Typography variant="caption" display="block" color="text.secondary">
                         {merchant.email}
                       </Typography>
+                      {merchant.username && (
+                        <Typography variant="caption" display="block" color="primary.main">
+                          绑定用户: {merchant.userFullName || merchant.username}
+                        </Typography>
+                      )}
                     </Box>
                   </Box>
                 </TableCell>
@@ -1202,14 +1265,16 @@ export default function Merchants() {
                   基本信息
                 </Typography>
               </Box>
-              <TextField
-                fullWidth
-                label="商户ID"
-                value={formData.merchantId}
-                onChange={(e) => setFormData(prev => ({ ...prev, merchantId: e.target.value }))}
-                required
-                disabled={!!editingMerchant}
-              />
+              {/* 商户ID是自动生成的，编辑时显示 */}
+              {editingMerchant && (
+                <TextField
+                  fullWidth
+                  label="商户ID"
+                  value={formData.merchantId}
+                  disabled
+                  helperText="商户ID不可修改"
+                />
+              )}
               <TextField
                 fullWidth
                 label="商户名称"
@@ -1217,6 +1282,46 @@ export default function Merchants() {
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 required
               />
+              
+              {/* 用户绑定选择 */}
+              <FormControl fullWidth>
+                <InputLabel>绑定用户 *</InputLabel>
+                <Select
+                  value={formData.userId}
+                  label="绑定用户 *"
+                  onChange={(e) => {
+                    const selectedUserId = e.target.value;
+                    const selectedUser = users.find(user => user.id === selectedUserId);
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      userId: selectedUserId,
+                      username: selectedUser?.username || '',
+                      userFullName: selectedUser?.fullName || ''
+                    }));
+                  }}
+                  required
+                  disabled={loadingUsers || users.length === 0}
+                >
+                  {loadingUsers ? (
+                    <MenuItem disabled>
+                      <CircularProgress size={16} sx={{ mr: 1 }} />
+                      加载中...
+                    </MenuItem>
+                  ) : users.length === 0 ? (
+                    <MenuItem disabled>暂无可用商户用户</MenuItem>
+                  ) : (
+                    users.map((user) => (
+                      <MenuItem key={user.id} value={user.id}>
+                        {user.fullName} ({user.username})
+                      </MenuItem>
+                    ))
+                  )}
+                </Select>
+                <FormHelperText>
+                  必须选择一个用户管理中的商户用户进行绑定
+                </FormHelperText>
+              </FormControl>
+              
               <TextField
                 fullWidth
                 label="邮箱"
