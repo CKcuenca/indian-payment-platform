@@ -1,6 +1,31 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { apiKeyAuth } = require('../middleware/auth');
+const jwt = require('jsonwebtoken');
+
+// JWT认证中间件（支持管理员和商户）
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      error: '访问令牌缺失'
+    });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key', (err, user) => {
+    if (err) {
+      return res.status(403).json({
+        success: false,
+        error: '访问令牌无效'
+      });
+    }
+    req.user = user;
+    next();
+  });
+};
 const { getIndianTimeISO } = require('../utils/timeUtils');
 const mongoose = require('mongoose');
 const Merchant = require('../models/merchant');
@@ -21,8 +46,16 @@ const validateRequest = (req, res, next) => {
 };
 
 // 获取商户列表（需要管理员权限）
-router.get('/', apiKeyAuth, async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
+    // 检查用户角色，只有管理员可以访问
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        error: '只有管理员用户可以访问此接口'
+      });
+    }
+    
     const { page = 1, limit = 10, status, search } = req.query;
     
     // 构建查询条件
