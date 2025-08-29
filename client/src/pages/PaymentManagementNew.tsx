@@ -35,7 +35,6 @@ import {
 } from '@mui/icons-material';
 
 import api from '../services/api';
-import { useAuth } from '../hooks/useAuth';
 
 
 // 支付账户类型定义
@@ -94,7 +93,6 @@ interface PaymentAccount {
 }
 
 export default function PaymentManagementNew() {
-  const { currentUser } = useAuth();
   const [error, setError] = useState<string | null>(null);
   
   // 支付账户状态
