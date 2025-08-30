@@ -42,10 +42,12 @@ router.get('/', async (req, res) => {
 // 创建新用户
 router.post('/', [
   body('username').notEmpty().withMessage('Username is required'),
-  body('password').notEmpty().withMessage('Password is required'),
+  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
   body('role').isIn(['admin', 'operator', 'merchant']).withMessage('Invalid role'),
   body('status').optional().isIn(['active', 'inactive', 'suspended', 'pending']).withMessage('Invalid status'),
   body('merchantId').optional().isString().withMessage('Merchant ID must be a string'),
+  body('fullName').optional().isString().withMessage('Full name must be a string'),
+  body('email').optional().isEmail().withMessage('Email must be valid if provided'),
   validateRequest
 ], async (req, res) => {
   try {

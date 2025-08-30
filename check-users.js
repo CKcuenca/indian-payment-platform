@@ -1,61 +1,55 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 
-async function checkUsers() {
+// 连接数据库
+mongoose.connect('mongodb://localhost:27017/payment-platform', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(async () => {
+  console.log('✅ 数据库连接成功');
+  
   try {
-    // 连接数据库
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/indian_payment_platform');
-    console.log('✅ 数据库连接成功');
+    // 获取用户模型
+    const User = require('./server/models/user');
     
-    // 检查用户集合
-    const collections = await mongoose.connection.db.listCollections().toArray();
-    console.log('\n📚 数据库集合:');
-    collections.forEach(col => console.log(`  - ${col.name}`));
+    // 查询所有用户
+    const users = await User.find().select('username role status createdAt email fullName');
     
-    // 如果有用户集合，检查用户数据
-    if (collections.some(col => col.name === 'users')) {
-      const User = require('./server/models/User');
-      const users = await User.find({});
-      
-      console.log('\n👥 用户数据:');
-      if (users.length === 0) {
-        console.log('  - 暂无用户数据');
-      } else {
-        users.forEach(user => {
-          console.log(`  - ID: ${user._id}`);
-          console.log(`    用户名: ${user.username}`);
-          console.log(`    角色: ${user.role}`);
-          console.log(`    商户ID: ${user.merchantId || '无'}`);
-          console.log(`    状态: ${user.isActive ? '激活' : '未激活'}`);
-          console.log('    ---');
-        });
-      }
+    console.log('\n📋 用户列表:');
+    console.log('='.repeat(80));
+    
+    if (users.length === 0) {
+      console.log('❌ 数据库中没有用户数据');
     } else {
-      console.log('\n⚠️ 未找到用户集合');
+      users.forEach((user, index) => {
+        console.log(`${index + 1}. 用户名: ${user.username}`);
+        console.log(`   角色: ${user.role}`);
+        console.log(`   状态: ${user.status}`);
+        console.log(`   姓名: ${user.fullName || '未设置'}`);
+        console.log(`   邮箱: ${user.email || '未设置'}`);
+        console.log(`   创建时间: ${user.createdAt}`);
+        console.log('   ' + '-'.repeat(60));
+      });
+      
+      console.log(`\n📊 总计: ${users.length} 个用户`);
     }
     
-    // 检查商户集合
-    const Merchant = require('./server/models/merchant');
-    const merchants = await Merchant.find({});
-    
-    console.log('\n🏢 商户数据:');
-    if (merchants.length === 0) {
-      console.log('  - 暂无商户数据');
+    // 特别检查 cgpay 用户
+    const cgpayUser = await User.findOne({ username: 'cgpay' });
+    if (cgpayUser) {
+      console.log('\n🎯 找到 cgpay 用户:');
+      console.log(JSON.stringify(cgpayUser, null, 2));
     } else {
-      merchants.forEach(merchant => {
-        console.log(`  - ID: ${merchant.merchantId}`);
-        console.log(`    名称: ${merchant.name}`);
-        console.log(`    状态: ${merchant.status}`);
-        console.log('    ---');
-      });
+      console.log('\n❌ 未找到 cgpay 用户');
     }
     
   } catch (error) {
-    console.error('❌ 检查用户数据失败:', error);
+    console.error('❌ 查询用户数据失败:', error);
   } finally {
-    await mongoose.disconnect();
+    // 关闭数据库连接
+    await mongoose.connection.close();
     console.log('\n🔌 数据库连接已关闭');
   }
-}
-
-checkUsers();
+}).catch(error => {
+  console.error('❌ 数据库连接失败:', error);
+});
