@@ -252,34 +252,7 @@ export default function Users() {
     }
   };
 
-  const getDefaultPermissions = (role: UserRole): Permission[] => {
-    switch (role) {
-      case UserRole.ADMIN:
-        return [
-          Permission.VIEW_ALL_MERCHANTS,
-          Permission.MANAGE_MERCHANTS,
-          Permission.VIEW_PAYMENT_CONFIG,
-          Permission.MANAGE_PAYMENT_CONFIG,
-          Permission.VIEW_ALL_ORDERS,
-          Permission.VIEW_ALL_TRANSACTIONS,
-          Permission.MANAGE_USERS,
 
-        ];
-      case UserRole.OPERATOR:
-        return [
-          Permission.VIEW_ALL_MERCHANTS,
-          Permission.VIEW_ALL_ORDERS,
-          Permission.VIEW_ALL_TRANSACTIONS
-        ];
-      case UserRole.MERCHANT:
-        return [
-          Permission.VIEW_OWN_ORDERS,
-          Permission.VIEW_OWN_TRANSACTIONS
-        ];
-      default:
-        return [];
-    }
-  };
 
   const getRoleColor = (role: UserRole) => {
     switch (role) {
