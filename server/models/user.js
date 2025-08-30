@@ -50,8 +50,8 @@ const userSchema = new mongoose.Schema({
   // 角色和权限
   role: {
     type: String,
-    enum: ['admin', 'operator', 'merchant', 'user'],
-    default: 'user'
+    enum: ['admin', 'operator', 'merchant'],
+    default: 'operator'
   },
   permissions: [{
     type: String,
@@ -72,8 +72,7 @@ const userSchema = new mongoose.Schema({
   
   // 商户关联
   merchantId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Merchant',
+    type: String,
     required: function() {
       return this.role === 'merchant';
     }
@@ -83,7 +82,7 @@ const userSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['active', 'inactive', 'suspended', 'pending'],
-    default: 'pending'
+    default: 'active'
   },
   lastLoginAt: Date,
   loginAttempts: {

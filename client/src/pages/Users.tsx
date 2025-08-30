@@ -125,9 +125,17 @@ export default function Users() {
     if (window.confirm('确定要删除这个用户吗？')) {
       try {
         setLoading(true);
-        // 在实际项目中，这里会调用API删除用户
-        setUsers(users.filter(user => user.id !== id));
-        setError(null);
+        
+        // 调用后端API删除用户
+        const response = await api.delete(`/api/users/${id}`);
+        
+        if (response.data.success) {
+          // 删除成功后，重新获取用户列表
+          await fetchUsers();
+          setError(null);
+        } else {
+          throw new Error(response.data.error || '删除失败');
+        }
       } catch (err: any) {
         setError(err.message || '删除失败');
       } finally {
@@ -145,11 +153,18 @@ export default function Users() {
 
     try {
       setLoading(true);
-      // 在实际项目中，这里会调用API更新用户状态
-      setUsers(users.map(user => 
-        user.id === id ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' } : user
-      ));
-      setError(null);
+      
+      // 调用后端API更新用户状态
+      const newStatus = user.status === 'active' ? 'inactive' : 'active';
+      const response = await api.put(`/api/users/${id}`, { status: newStatus });
+      
+      if (response.data.success) {
+        // 更新成功后，重新获取用户列表
+        await fetchUsers();
+        setError(null);
+      } else {
+        throw new Error(response.data.error || '更新失败');
+      }
     } catch (err: any) {
       setError(err.message || '更新失败');
     } finally {
@@ -179,37 +194,47 @@ export default function Users() {
       setLoading(true);
       
       if (editingUser) {
-        // 更新现有用户
-        const updatedUser: User = {
-          ...editingUser,
+        // 更新现有用户 - 调用后端API
+        const updateData = {
           username: formData.username,
           role: formData.role,
           status: formData.status,
           merchantId: formData.role === UserRole.MERCHANT ? formData.merchantId : undefined,
-          updatedAt: new Date().toISOString(),
         };
-        setUsers(users.map(user => 
-          user.id === editingUser.id ? updatedUser : user
-        ));
+        
+        const response = await api.put(`/api/users/${editingUser.id}`, updateData);
+        
+        if (response.data.success) {
+          // 更新成功后，重新获取用户列表
+          await fetchUsers();
+          setDialogOpen(false);
+          setError(null);
+        } else {
+          throw new Error(response.data.error || '更新失败');
+        }
       } else {
-        // 创建新用户
-        const newUser: User = {
-          id: Date.now().toString(),
+        // 创建新用户 - 调用后端API
+        const newUserData = {
           username: formData.username,
-          fullName: formData.username, // 使用用户名作为显示名称
-          email: `${formData.username}@cashgit.com`, // 生成默认邮箱
+          password: formData.password,
           role: formData.role,
           status: formData.status,
           merchantId: formData.role === UserRole.MERCHANT ? formData.merchantId : undefined,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          permissions: getDefaultPermissions(formData.role),
+          fullName: formData.username,
+          email: `${formData.username}@cashgit.com`,
         };
-        setUsers([...users, newUser]);
+        
+        const response = await api.post('/api/users', newUserData);
+        
+        if (response.data.success) {
+          // 创建成功后，重新获取用户列表
+          await fetchUsers();
+          setDialogOpen(false);
+          setError(null);
+        } else {
+          throw new Error(response.data.error || '创建失败');
+        }
       }
-      
-      setDialogOpen(false);
-      setError(null);
     } catch (err: any) {
       setError(err.message || '保存失败');
     } finally {

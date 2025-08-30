@@ -1,461 +1,207 @@
 const express = require('express');
-const { body, validationResult } = require('express-validator');
-const User = require('../models/user');
-
 const router = express.Router();
-const jwt = require('jsonwebtoken');
-
-// JWT认证中间件（支持管理员）
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      error: '访问令牌缺失'
-    });
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key', (err, user) => {
-    if (err) {
-      return res.status(403).json({
-        success: false,
-        error: '访问令牌无效'
-      });
-    }
-    req.user = user;
-    next();
-  });
-};
+const bcrypt = require('bcryptjs');
+const { body, validationResult } = require('express-validator');
 
 // 验证中间件
 const validateRequest = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      error: 'Validation failed',
-      details: errors.array()
+    return res.status(400).json({ 
+      error: 'Validation failed', 
+      details: errors.array() 
     });
   }
   next();
 };
 
-// 获取用户列表（需要管理员权限）
-router.get('/', authenticateToken, async (req, res) => {
+// 获取所有用户
+router.get('/', async (req, res) => {
   try {
-    // 检查用户角色，只有管理员可以访问
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: '只有管理员用户可以访问此接口'
-      });
-    }
+    const User = require('../models/user');
+    const users = await User.find().select('-password').sort({ createdAt: -1 });
     
-    const { page = 1, limit = 10, role, status, search } = req.query;
-    
-    // 构建查询条件
-    const query = {};
-    if (role) query.role = role;
-    if (status) query.status = status;
-    if (search) {
-      query.$or = [
-        { username: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { fullName: { $regex: search, $options: 'i' } }
-      ];
-    }
-
-    const pageNum = Math.max(1, parseInt(page) || 1);
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 10));
-
-    const users = await User.find(query)
-      .select('-password')
-      .populate('merchantId', 'name email')
-      .sort({ createdAt: -1 })
-      .skip((pageNum - 1) * limitNum)
-      .limit(limitNum);
-
-    const total = await User.countDocuments(query);
-
     res.json({
       success: true,
       data: {
         users,
         pagination: {
-          page: pageNum,
-          limit: limitNum,
-          total,
-          pages: Math.ceil(total / limitNum)
+          page: 1,
+          limit: users.length,
+          total: users.length,
+          pages: 1
         }
       }
     });
-
   } catch (error) {
     console.error('Get users error:', error);
-    res.status(500).json({
-      success: false,
-      error: '获取用户列表失败'
-    });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 // 创建新用户
 router.post('/', [
-  body('username').isString().isLength({ min: 3, max: 30 }).matches(/^[a-zA-Z0-9_]+$/).withMessage('用户名必须是3-30个字符，只能包含字母、数字和下划线'),
-  body('email').isEmail().withMessage('邮箱格式无效'),
-  body('password').isString().isLength({ min: 8 }).withMessage('密码至少8个字符'),
-  body('fullName').isString().isLength({ min: 1, max: 100 }).withMessage('姓名不能为空且不能超过100个字符'),
-  body('phone').optional().matches(/^\+?[1-9]\d{1,14}$/).withMessage('手机号格式无效'),
-  body('role').isIn(['admin', 'operator', 'merchant', 'user']).withMessage('角色值无效'),
-  body('merchantId').optional().isMongoId().withMessage('商户ID格式无效'),
-  body('status').optional().isIn(['active', 'inactive', 'suspended', 'pending']).withMessage('状态值无效')
-], validateRequest, async (req, res) => {
+  body('username').notEmpty().withMessage('Username is required'),
+  body('password').notEmpty().withMessage('Password is required'),
+  body('role').isIn(['admin', 'operator', 'merchant']).withMessage('Invalid role'),
+  body('status').optional().isIn(['active', 'inactive', 'suspended', 'pending']).withMessage('Invalid status'),
+  body('merchantId').optional().isString().withMessage('Merchant ID must be a string'),
+  validateRequest
+], async (req, res) => {
   try {
-    const {
-      username,
-      email,
-      password,
-      fullName,
-      phone,
-      role = 'user',
-      merchantId,
-      status = 'pending'
-    } = req.body;
+    const { username, password, role, status, merchantId, fullName, email } = req.body;
+    const User = require('../models/user');
 
     // 检查用户名是否已存在
-    const existingUsername = await User.findOne({ username });
-    if (existingUsername) {
-      return res.status(400).json({
-        success: false,
-        error: '用户名已存在'
-      });
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ error: '用户名已存在' });
     }
 
-    // 检查邮箱是否已存在
-    const existingEmail = await User.findOne({ email });
-    if (existingEmail) {
-      return res.status(400).json({
-        success: false,
-        error: '邮箱已被使用'
-      });
-    }
+    // 加密密码
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 验证商户角色必须关联商户ID
-    if (role === 'merchant' && !merchantId) {
-      return res.status(400).json({
-        success: false,
-        error: '商户角色必须关联商户ID'
-      });
-    }
-
-    // 获取默认权限
-    const defaultPermissions = User.getDefaultPermissions(role);
-
-    // 创建新用户
-    const newUser = new User({
+    // 创建用户
+    const userData = {
       username,
-      email,
-      password,
-      fullName,
-      phone,
+      password: hashedPassword,
       role,
-      merchantId: role === 'merchant' ? merchantId : undefined,
-      status,
-      permissions: defaultPermissions
-    });
+      status: status || 'active',
+      fullName: fullName || username,
+      email: email || `${username}@cashgit.com`,
+      permissions: getDefaultPermissions(role),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
 
-    await newUser.save();
+    // 如果是商户角色，添加商户ID
+    if (role === 'merchant' && merchantId) {
+      userData.merchantId = merchantId;
+    }
+
+    const user = new User(userData);
+    await user.save();
 
     // 返回用户信息（不包含密码）
-    const userResponse = newUser.toObject();
+    const userResponse = user.toObject();
     delete userResponse.password;
-
-    res.status(201).json({
-      success: true,
-      data: {
-        message: '用户创建成功',
-        user: userResponse
-      }
-    });
-
-  } catch (error) {
-    console.error('Create user error:', error);
-    res.status(500).json({
-      success: false,
-      error: '创建用户失败'
-    });
-  }
-});
-
-// 获取单个用户信息
-router.get('/:userId', authenticateToken, async (req, res) => {
-  try {
-    const { userId } = req.params;
-    
-    const user = await User.findById(userId)
-      .select('-password')
-      .populate('merchantId', 'name email');
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: '用户不存在'
-      });
-    }
 
     res.json({
       success: true,
-      data: { user }
+      data: userResponse
     });
-
   } catch (error) {
-    console.error('Get user error:', error);
-    res.status(500).json({
-      success: false,
-      error: '获取用户信息失败'
-    });
+    console.error('Create user error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// 更新用户信息
-router.put('/:userId', [
-  body('email').optional().isEmail().withMessage('邮箱格式无效'),
-  body('fullName').optional().isString().isLength({ min: 1, max: 100 }).withMessage('姓名不能为空且不能超过100个字符'),
-  body('phone').optional().matches(/^\+?[1-9]\d{1,14}$/).withMessage('手机号格式无效'),
-  body('role').optional().isIn(['admin', 'operator', 'merchant', 'user']).withMessage('角色值无效'),
-  body('merchantId').optional().isMongoId().withMessage('商户ID格式无效'),
-  body('status').optional().isIn(['active', 'inactive', 'suspended', 'pending']).withMessage('状态值无效'),
-  body('permissions').optional().isArray().withMessage('权限必须是数组')
-], validateRequest, async (req, res) => {
+// 更新用户
+router.put('/:id', [
+  body('username').optional().isString().withMessage('Username must be a string'),
+  body('role').optional().isIn(['admin', 'operator', 'merchant']).withMessage('Invalid role'),
+  body('status').optional().isIn(['active', 'inactive', 'suspended', 'pending']).withMessage('Invalid status'),
+  body('merchantId').optional().isString().withMessage('Merchant ID must be a string'),
+  validateRequest
+], async (req, res) => {
   try {
-    const { userId } = req.params;
-    const updateData = req.body;
+    const { id } = req.params;
+    const { username, role, status, merchantId, fullName, email } = req.body;
+    const User = require('../models/user');
 
     // 查找用户
-    const user = await User.findById(userId);
+    const user = await User.findById(id);
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: '用户不存在'
-      });
+      return res.status(404).json({ error: '用户不存在' });
     }
 
-    // 如果更新邮箱，检查是否与其他用户重复
-    if (updateData.email && updateData.email !== user.email) {
-      const existingEmail = await User.findOne({ email: updateData.email });
-      if (existingEmail) {
-        return res.status(400).json({
-          success: false,
-          error: '邮箱已被其他用户使用'
-        });
+    // 检查用户名是否已存在（如果修改了用户名）
+    if (username && username !== user.username) {
+      const existingUser = await User.findOne({ username });
+      if (existingUser) {
+        return res.status(400).json({ error: '用户名已存在' });
       }
     }
 
-    // 如果更新角色，验证商户角色必须关联商户ID
-    if (updateData.role === 'merchant' && !updateData.merchantId && !user.merchantId) {
-      return res.status(400).json({
-        success: false,
-        error: '商户角色必须关联商户ID'
-      });
+    // 更新用户数据
+    const updateData = {};
+    if (username !== undefined) updateData.username = username;
+    if (role !== undefined) updateData.role = role;
+    if (status !== undefined) updateData.status = status;
+    if (fullName !== undefined) updateData.fullName = fullName;
+    if (email !== undefined) updateData.email = email;
+    if (role === 'merchant' && merchantId !== undefined) updateData.merchantId = merchantId;
+    if (role !== 'merchant') updateData.merchantId = undefined; // 非商户角色移除商户ID
+    
+    updateData.updatedAt = new Date();
+
+    // 更新用户
+    await User.findByIdAndUpdate(id, updateData);
+
+    res.json({
+      success: true,
+      message: '用户更新成功'
+    });
+  } catch (error) {
+    console.error('Update user error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// 删除用户
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const User = require('../models/user');
+
+    // 查找用户
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ error: '用户不存在' });
     }
 
-    // 如果更新权限，验证权限格式
-    if (updateData.permissions) {
-      const validPermissions = [
+    // 删除用户
+    await User.findByIdAndDelete(id);
+
+    res.json({
+      success: true,
+      message: '用户删除成功'
+    });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// 获取默认权限
+function getDefaultPermissions(role) {
+  switch (role) {
+    case 'admin':
+      return [
         'VIEW_ALL_MERCHANTS',
         'MANAGE_MERCHANTS',
         'VIEW_PAYMENT_CONFIG',
         'MANAGE_PAYMENT_CONFIG',
         'VIEW_ALL_ORDERS',
-        'VIEW_OWN_ORDERS',
         'VIEW_ALL_TRANSACTIONS',
-        'VIEW_OWN_TRANSACTIONS',
         'MANAGE_USERS',
-        'SYSTEM_MONITORING',
+        'SYSTEM_MONITORING'
+      ];
+    case 'operator':
+      return [
+        'VIEW_ALL_MERCHANTS',
+        'VIEW_ALL_ORDERS',
+        'VIEW_ALL_TRANSACTIONS'
+      ];
+    case 'merchant':
+      return [
+        'VIEW_OWN_ORDERS',
+        'VIEW_OWN_TRANSACTIONS',
         'VIEW_OWN_MERCHANT_DATA'
       ];
-      
-      const invalidPermissions = updateData.permissions.filter(p => !validPermissions.includes(p));
-      if (invalidPermissions.length > 0) {
-        return res.status(400).json({
-          success: false,
-          error: `无效的权限: ${invalidPermissions.join(', ')}`
-        });
-      }
-    }
-
-    // 更新用户信息
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { 
-        ...updateData,
-        updatedAt: new Date()
-      },
-      { new: true, runValidators: true }
-    ).select('-password').populate('merchantId', 'name email');
-
-    res.json({
-      success: true,
-      data: {
-        message: '用户信息更新成功',
-        user: updatedUser
-      }
-    });
-
-  } catch (error) {
-    console.error('Update user error:', error);
-    res.status(500).json({
-      success: false,
-      error: '更新用户信息失败'
-    });
+    default:
+      return [];
   }
-});
-
-// 删除用户
-router.delete('/:userId', authenticateToken, async (req, res) => {
-  try {
-    const { userId } = req.params;
-    
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: '用户不存在'
-      });
-    }
-
-    // 不允许删除自己
-    if (userId === req.user?.id) {
-      return res.status(400).json({
-        success: false,
-        error: '不能删除自己的账户'
-      });
-    }
-
-    // 不允许删除最后一个管理员
-    if (user.role === 'admin') {
-      const adminCount = await User.countDocuments({ role: 'admin' });
-      if (adminCount <= 1) {
-        return res.status(400).json({
-          success: false,
-          error: '不能删除最后一个管理员'
-        });
-      }
-    }
-
-    await User.findByIdAndDelete(userId);
-
-    res.json({
-      success: true,
-      data: {
-        message: '用户删除成功'
-      }
-    });
-
-  } catch (error) {
-    console.error('Delete user error:', error);
-    res.status(500).json({
-      success: false,
-      error: '删除用户失败'
-    });
-  }
-});
-
-// 重置用户密码
-router.post('/:userId/reset-password', [
-  body('newPassword').isString().isLength({ min: 8 }).withMessage('新密码至少8个字符')
-], validateRequest, async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { newPassword } = req.body;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: '用户不存在'
-      });
-    }
-
-    // 更新密码
-    user.password = newPassword;
-    await user.save();
-
-    res.json({
-      success: true,
-      data: {
-        message: '密码重置成功'
-      }
-    });
-
-  } catch (error) {
-    console.error('Reset password error:', error);
-    res.status(500).json({
-      success: false,
-      error: '密码重置失败'
-    });
-  }
-});
-
-// 更新用户状态
-router.patch('/:userId/status', [
-  body('status').isIn(['active', 'inactive', 'suspended', 'pending']).withMessage('状态值无效')
-], validateRequest, async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const { status } = req.body;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        error: '用户不存在'
-      });
-    }
-
-    // 不允许停用自己
-    if (userId === req.user?.id && status !== 'active') {
-      return res.status(400).json({
-        success: false,
-        error: '不能停用自己的账户'
-      });
-    }
-
-    // 不允许停用最后一个管理员
-    if (user.role === 'admin' && status !== 'active') {
-      const activeAdminCount = await User.countDocuments({ role: 'admin', status: 'active' });
-      if (activeAdminCount <= 1) {
-        return res.status(400).json({
-          success: false,
-          error: '不能停用最后一个管理员'
-        });
-      }
-    }
-
-    user.status = status;
-    await user.save();
-
-    res.json({
-      success: true,
-      data: {
-        message: '用户状态更新成功',
-        user: {
-          id: user._id,
-          username: user.username,
-          status: user.status
-        }
-      }
-    });
-
-  } catch (error) {
-    console.error('Update user status error:', error);
-    res.status(500).json({
-      success: false,
-      error: '更新用户状态失败'
-    });
-  }
-});
+}
 
 module.exports = router;
