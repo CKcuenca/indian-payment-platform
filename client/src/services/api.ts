@@ -1,13 +1,30 @@
 import axios from 'axios';
 
-// 环境变量配置
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://cashgit.com';
+// 环境变量配置 - 根据环境自动选择API地址
+const getApiBaseUrl = () => {
+  // 如果明确设置了环境变量，使用它
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  
+  // 根据环境自动选择
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://api.cashgit.com'; // 生产环境
+  } else if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:3001'; // 开发环境
+  } else {
+    return 'http://localhost:3001'; // 默认开发环境
+  }
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 // 调试信息
 console.log('🔧 API配置信息:');
 console.log('  - REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
-console.log('  - 最终使用的API_BASE_URL:', API_BASE_URL);
-console.log('  - 当前环境:', process.env.NODE_ENV);
+console.log('  - NODE_ENV:', process.env.NODE_ENV);
+console.log('  - 自动选择的API_BASE_URL:', API_BASE_URL);
+console.log('  - 环境类型:', process.env.NODE_ENV === 'production' ? '生产环境' : '开发环境');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
