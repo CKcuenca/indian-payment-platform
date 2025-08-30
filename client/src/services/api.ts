@@ -1,19 +1,20 @@
 import axios from 'axios';
 
-// 环境变量配置 - 根据环境自动选择API地址
+// 环境变量配置 - 同一服务器部署时使用相对路径
 const getApiBaseUrl = () => {
-  // 如果明确设置了环境变量，使用它
+  // 1. 优先使用环境变量（最灵活）
   if (process.env.REACT_APP_API_URL) {
     return process.env.REACT_APP_API_URL;
   }
   
-  // 根据环境自动选择
+  // 2. 如果没有环境变量，根据环境选择
   if (process.env.NODE_ENV === 'production') {
-    return 'https://api.cashgit.com'; // 生产环境
-  } else if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:3001'; // 开发环境
+    // 生产环境：前端和后端在同一服务器
+    // 使用相对路径，请求会自动发送到当前域名
+    return '';
   } else {
-    return 'http://localhost:3001'; // 默认开发环境
+    // 开发环境：前端在3000端口，后端在3001端口
+    return 'http://localhost:3001';
   }
 };
 
