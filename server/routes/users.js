@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const { body, validationResult } = require('express-validator');
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 // 验证中间件
 const validateRequest = (req, res, next) => {
@@ -16,7 +17,7 @@ const validateRequest = (req, res, next) => {
 };
 
 // 获取所有用户
-router.get('/', async (req, res) => {
+router.get('/', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const User = require('../models/user');
     const users = await User.find().select('-password').sort({ createdAt: -1 });
@@ -40,7 +41,7 @@ router.get('/', async (req, res) => {
 });
 
 // 创建新用户
-router.post('/', [
+router.post('/', authenticateToken, requireAdmin, [
   body('username').notEmpty().withMessage('Username is required'),
   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
   body('role').isIn(['admin', 'operator', 'merchant']).withMessage('Invalid role'),
@@ -99,7 +100,7 @@ router.post('/', [
 });
 
 // 更新用户
-router.put('/:id', [
+router.put('/:id', authenticateToken, requireAdmin, [
   body('username').optional().isString().withMessage('Username must be a string'),
   body('role').optional().isIn(['admin', 'operator', 'merchant']).withMessage('Invalid role'),
   body('status').optional().isIn(['active', 'inactive', 'suspended', 'pending']).withMessage('Invalid status'),
@@ -151,7 +152,7 @@ router.put('/:id', [
 });
 
 // 删除用户
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const User = require('../models/user');
