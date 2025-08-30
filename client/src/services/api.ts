@@ -20,12 +20,15 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
-// 调试信息
-console.log('🔧 API配置信息:');
-console.log('  - REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
-console.log('  - NODE_ENV:', process.env.NODE_ENV);
-console.log('  - 自动选择的API_BASE_URL:', API_BASE_URL);
-console.log('  - 环境类型:', process.env.NODE_ENV === 'production' ? '生产环境' : '开发环境');
+  // 调试信息（仅开发环境）
+  const isProduction = process.env.NODE_ENV === 'production';
+  if (!isProduction) {
+    console.log('🔧 API配置信息:');
+    console.log('  - REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
+    console.log('  - NODE_ENV:', process.env.NODE_ENV);
+    console.log('  - 自动选择的API_BASE_URL:', API_BASE_URL);
+    console.log('  - 环境类型:', isProduction ? '生产环境' : '非生产环境');
+  }
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -48,13 +51,16 @@ api.interceptors.request.use((config) => {
     config.headers['Authorization'] = `Bearer ${token}`;
   }
   
-  // 调试信息
-  console.log('🔧 API请求:', {
-    url: config.url,
-    method: config.method,
-    headers: config.headers,
-    baseURL: config.baseURL
-  });
+  // 调试信息（仅开发环境）
+  const isProduction = process.env.NODE_ENV === 'production';
+  if (!isProduction) {
+    console.log('🔧 API请求:', {
+      url: config.url,
+      method: config.method,
+      headers: config.headers,
+      baseURL: config.baseURL
+    });
+  }
   
   return config;
 });
@@ -75,8 +81,14 @@ api.interceptors.response.use(
         console.error('Bad request:', error.response.data);
         break;
       case 401:
+        // 清除认证信息并重定向到登录页
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_data');
         localStorage.removeItem('apiKey');
-        window.location.href = '/login';
+        // 只在浏览器环境中重定向
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
         break;
       case 403:
         console.error('Forbidden:', error.response.data);
