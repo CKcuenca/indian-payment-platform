@@ -112,8 +112,8 @@ userSchema.virtual('isActive').get(function() {
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
-  // 检查密码是否已经是加密的（以$2b$开头）
-  if (this.password.startsWith('$2b$')) {
+  // 检查密码是否已经是加密的（以$2a$或$2b$开头）
+  if (this.password.startsWith('$2a$') || this.password.startsWith('$2b$')) {
     return next();
   }
   

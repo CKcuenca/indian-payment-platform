@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 
 // 连接数据库
 mongoose.connect('mongodb://localhost:27017/payment-platform', {
@@ -25,21 +24,18 @@ db.once('open', async () => {
       return;
     }
     
-    console.log('📋 找到商户用户:');
+    console.log('📋 商户用户信息:');
     console.log('用户名:', merchantUser.username);
     console.log('角色:', merchantUser.role);
     console.log('状态:', merchantUser.status);
+    console.log('密码哈希:', merchantUser.password);
+    console.log('密码是否以$2b$开头:', merchantUser.password.startsWith('$2b$'));
     
-    // 重置密码
-    const newPassword = 'test123456';
-    const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-    
-    merchantUser.password = hashedPassword;
-    await merchantUser.save();
-    
-    console.log('✅ 密码重置成功');
-    console.log('新密码:', newPassword);
+    // 测试密码验证
+    const bcrypt = require('bcryptjs');
+    const testPassword = 'test123456';
+    const isPasswordValid = await bcrypt.compare(testPassword, merchantUser.password);
+    console.log('密码验证结果:', isPasswordValid);
     
   } catch (error) {
     console.error('❌ 操作失败:', error);

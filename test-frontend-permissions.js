@@ -1,102 +1,123 @@
-// 模拟前端的权限检查逻辑
-console.log('🔍 测试前端权限检查逻辑\n');
+const axios = require('axios');
 
-// 模拟从数据库获取的用户数据
-const adminUser = {
-  username: 'admin',
-  role: 'admin',
-  permissions: [
-    'VIEW_ALL_MERCHANTS',
-    'MANAGE_MERCHANTS',
-    'VIEW_PAYMENT_CONFIG',
-    'MANAGE_PAYMENT_CONFIG',
-    'VIEW_ALL_ORDERS',
-    'VIEW_ALL_TRANSACTIONS',
-    'MANAGE_USERS'
-  ]
-};
+// 测试配置
+const BASE_URL = 'http://localhost:3001';
 
-console.log('📋 用户数据:');
-console.log('用户名:', adminUser.username);
-console.log('角色:', adminUser.role);
-console.log('权限:', adminUser.permissions);
+async function testFrontendPermissions() {
+  console.log('🔍 测试前端权限控制\n');
 
-// 模拟前端的权限枚举
-const Permission = {
-  VIEW_ALL_MERCHANTS: 'VIEW_ALL_MERCHANTS',
-  MANAGE_MERCHANTS: 'MANAGE_MERCHANTS',
-  VIEW_PAYMENT_CONFIG: 'VIEW_PAYMENT_CONFIG',
-  MANAGE_PAYMENT_CONFIG: 'MANAGE_PAYMENT_CONFIG',
-  VIEW_ALL_ORDERS: 'VIEW_ALL_ORDERS',
-  VIEW_ALL_TRANSACTIONS: 'VIEW_ALL_TRANSACTIONS',
-  MANAGE_USERS: 'MANAGE_USERS'
-};
+  try {
+    // 1. 测试管理员登录
+    console.log('1️⃣ 测试管理员登录...');
+    const adminLoginResponse = await axios.post(`${BASE_URL}/api/auth/login`, {
+      username: 'admin',
+      password: 'admin123'
+    });
 
-// 模拟权限检查函数
-function hasPermission(userPermissions, requiredPermission) {
-  return userPermissions.includes(requiredPermission);
-}
+    if (!adminLoginResponse.data.success) {
+      throw new Error('管理员登录失败');
+    }
 
-function hasAnyPermission(userPermissions, requiredPermissions) {
-  return requiredPermissions.some(permission => userPermissions.includes(permission));
-}
+    const adminToken = adminLoginResponse.data.data.token;
+    const adminUser = adminLoginResponse.data.data.user;
+    console.log('✅ 管理员登录成功');
+    console.log('管理员权限:', adminUser.permissions);
 
-// 测试权限检查
-console.log('\n🔍 权限检查测试:');
-console.log('是否有MANAGE_USERS权限:', hasPermission(adminUser.permissions, Permission.MANAGE_USERS));
-console.log('是否有VIEW_ALL_MERCHANTS权限:', hasPermission(adminUser.permissions, Permission.VIEW_ALL_MERCHANTS));
+    // 2. 测试运营人员登录
+    console.log('\n2️⃣ 测试运营人员登录...');
+    const operatorLoginResponse = await axios.post(`${BASE_URL}/api/auth/login`, {
+      username: 'test_operator_001',
+      password: 'test123456'
+    });
 
-// 测试多个权限检查
-const requiredPermissions = [Permission.MANAGE_USERS];
-console.log('是否有任意所需权限:', hasAnyPermission(adminUser.permissions, requiredPermissions));
+    if (!operatorLoginResponse.data.success) {
+      console.log('⚠️ 运营人员登录失败，可能需要先创建用户');
+      // 创建运营人员用户
+      console.log('创建运营人员用户...');
+      const createOperatorResponse = await axios.post(`${BASE_URL}/api/users`, {
+        username: 'test_operator_001',
+        password: 'test123456',
+        role: 'operator',
+        status: 'active',
+        fullName: '测试运营人员001'
+      }, {
+        headers: { 'Authorization': `Bearer ${adminToken}` }
+      });
 
-// 模拟PermissionGuard组件的逻辑
-function PermissionGuard(permissions = [], children) {
-  console.log('\n🔒 PermissionGuard权限检查:');
-  console.log('需要的权限:', permissions);
-  console.log('用户权限:', adminUser.permissions);
-  
-  if (permissions.length === 0) {
-    console.log('✅ 不需要特定权限，显示内容');
-    return children;
+      if (createOperatorResponse.data.success) {
+        console.log('✅ 运营人员用户创建成功');
+        // 重新尝试登录
+        const retryLoginResponse = await axios.post(`${BASE_URL}/api/auth/login`, {
+          username: 'test_operator_001',
+          password: 'test123456'
+        });
+        
+        if (retryLoginResponse.data.success) {
+          const operatorToken = retryLoginResponse.data.data.token;
+          const operatorUser = retryLoginResponse.data.data.user;
+          console.log('✅ 运营人员登录成功');
+          console.log('运营人员权限:', operatorUser.permissions);
+        } else {
+          console.log('❌ 运营人员登录仍然失败');
+        }
+      } else {
+        console.log('❌ 运营人员用户创建失败');
+      }
+    } else {
+      const operatorToken = operatorLoginResponse.data.data.token;
+      const operatorUser = operatorLoginResponse.data.data.user;
+      console.log('✅ 运营人员登录成功');
+      console.log('运营人员权限:', operatorUser.permissions);
+    }
+
+    // 3. 测试商户登录
+    console.log('\n3️⃣ 测试商户登录...');
+    const merchantLoginResponse = await axios.post(`${BASE_URL}/api/auth/login`, {
+      username: 'test_merchant_001',
+      password: 'test123456'
+    });
+
+    if (merchantLoginResponse.data.success) {
+      const merchantToken = merchantLoginResponse.data.data.token;
+      const merchantUser = merchantLoginResponse.data.data.user;
+      console.log('✅ 商户登录成功');
+      console.log('商户权限:', merchantUser.permissions);
+    } else {
+      console.log('⚠️ 商户登录失败');
+    }
+
+    // 4. 测试权限检查
+    console.log('\n4️⃣ 测试权限检查...');
+    
+    // 检查管理员权限
+    const adminHeaders = { 'Authorization': `Bearer ${adminToken}` };
+    const adminUsersResponse = await axios.get(`${BASE_URL}/api/users`, { headers: adminHeaders });
+    console.log('管理员访问用户列表:', adminUsersResponse.data.success ? '✅ 成功' : '❌ 失败');
+
+    // 检查运营人员权限
+    if (operatorLoginResponse.data.success) {
+      const operatorHeaders = { 'Authorization': `Bearer ${operatorLoginResponse.data.data.token}` };
+      const operatorUsersResponse = await axios.get(`${BASE_URL}/api/users`, { headers: operatorHeaders });
+      console.log('运营人员访问用户列表:', operatorUsersResponse.data.success ? '✅ 成功' : '❌ 失败');
+    }
+
+    // 检查商户权限
+    if (merchantLoginResponse.data.success) {
+      const merchantHeaders = { 'Authorization': `Bearer ${merchantLoginResponse.data.data.token}` };
+      const merchantUsersResponse = await axios.get(`${BASE_URL}/api/users`, { headers: merchantHeaders });
+      console.log('商户访问用户列表:', merchantUsersResponse.data.success ? '✅ 成功' : '❌ 失败');
+    }
+
+    console.log('\n🏁 前端权限控制测试完成');
+
+  } catch (error) {
+    console.error('❌ 测试失败:', error.message);
+    if (error.response) {
+      console.error('响应状态:', error.response.status);
+      console.error('响应数据:', error.response.data);
+    }
   }
-  
-  const hasRequiredPermission = permissions.some(permission => 
-    adminUser.permissions.includes(permission)
-  );
-  
-  if (hasRequiredPermission) {
-    console.log('✅ 权限检查通过，显示内容');
-    return children;
-  } else {
-    console.log('❌ 权限检查失败，不显示内容');
-    return null;
-  }
 }
 
-// 测试PermissionGuard
-console.log('\n🧪 测试PermissionGuard组件:');
-
-// 测试添加用户按钮权限
-const addUserButtonWithPermission = PermissionGuard(
-  [Permission.MANAGE_USERS],
-  '添加用户按钮'
-);
-
-// 测试删除用户按钮权限
-const deleteUserButtonWithPermission = PermissionGuard(
-  [Permission.MANAGE_USERS],
-  '删除用户按钮'
-);
-
-console.log('\n📝 测试结果总结:');
-console.log('admin用户角色:', adminUser.role);
-console.log('admin用户权限数量:', adminUser.permissions.length);
-console.log('是否包含MANAGE_USERS:', adminUser.permissions.includes('MANAGE_USERS'));
-console.log('权限检查应该:', adminUser.permissions.includes('MANAGE_USERS') ? '通过' : '失败');
-
-if (adminUser.permissions.includes('MANAGE_USERS')) {
-  console.log('🎉 admin用户应该能够在用户管理界面创建和删除用户');
-} else {
-  console.log('❌ admin用户缺少MANAGE_USERS权限，无法管理用户');
-}
+// 运行测试
+testFrontendPermissions();
