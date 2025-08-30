@@ -1,59 +1,55 @@
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-async function testPassword() {
-  console.log('🧪 测试密码验证...\n');
-  
-  const plainPassword = 'test_password_123';
-  const hashedPassword = '$2a$12$NgTlCtqDA4ZYh...'; // 从数据库获取的哈希值
-  
-  console.log('1️⃣ 测试密码哈希...');
-  const newHash = await bcrypt.hash(plainPassword, 10);
-  console.log('   新哈希值:', newHash);
-  
-  console.log('\n2️⃣ 测试密码验证...');
-  const isValid = await bcrypt.compare(plainPassword, newHash);
-  console.log('   密码验证结果:', isValid);
-  
-  console.log('\n3️⃣ 测试数据库中的哈希值...');
-  // 从数据库获取完整的哈希值
-  const mongoose = require('mongoose');
-  require('dotenv').config();
+// 连接数据库
+mongoose.connect('mongodb://localhost:27017/payment-platform', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(async () => {
+  console.log('✅ 数据库连接成功');
   
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/indian_payment_platform');
-    console.log('✅ 数据库连接成功');
+    // 获取用户模型
+    const User = require('./server/models/user');
     
-    const User = require('./server/models/User');
-    const user = await User.findOne({ username: 'test_merchant_001' });
+    // 查找admin用户
+    const adminUser = await User.findOne({ username: 'admin' });
     
-    if (user) {
-      console.log('   数据库中的密码哈希:', user.password);
-      console.log('   测试密码:', plainPassword);
+    if (adminUser) {
+      console.log('🔍 找到admin用户:', adminUser.username);
+      console.log('密码哈希:', adminUser.password);
+      console.log('密码是否以$2b$开头:', adminUser.password.startsWith('$2b$'));
       
-      const dbPasswordValid = await bcrypt.compare(plainPassword, user.password);
-      console.log('   数据库密码验证结果:', dbPasswordValid);
+      // 测试密码比较
+      const testPassword = 'admin123';
+      console.log('\n🧪 测试密码比较...');
+      console.log('测试密码:', testPassword);
       
-      // 重新生成密码哈希
-      const newPasswordHash = await bcrypt.hash(plainPassword, 10);
-      console.log('   新生成的密码哈希:', newPasswordHash);
+      // 直接使用bcrypt比较
+      const directCompare = await bcrypt.compare(testPassword, adminUser.password);
+      console.log('直接bcrypt比较结果:', directCompare);
       
-      // 更新用户密码
-      await User.updateOne(
-        { _id: user._id },
-        { password: newPasswordHash }
-      );
-      console.log('✅ 用户密码已更新');
+      // 使用用户模型的方法比较
+      const methodCompare = await adminUser.comparePassword(testPassword);
+      console.log('用户模型方法比较结果:', methodCompare);
+      
+      // 检查用户状态
+      console.log('\n📊 用户状态信息:');
+      console.log('状态:', adminUser.status);
+      console.log('是否锁定:', adminUser.isLocked);
+      console.log('是否激活:', adminUser.isActive);
       
     } else {
-      console.log('❌ 未找到用户 test_merchant_001');
+      console.log('❌ 未找到admin用户');
     }
     
   } catch (error) {
     console.error('❌ 测试失败:', error);
   } finally {
-    await mongoose.disconnect();
+    // 关闭数据库连接
+    await mongoose.connection.close();
     console.log('\n🔌 数据库连接已关闭');
   }
-}
-
-testPassword();
+}).catch(error => {
+  console.error('❌ 数据库连接失败:', error);
+});

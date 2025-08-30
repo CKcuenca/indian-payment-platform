@@ -18,47 +18,28 @@ mongoose.connect('mongodb://localhost:27017/payment-platform', {
     if (adminUser) {
       console.log('🔍 找到admin用户:', adminUser.username);
       
-      // 直接使用bcrypt加密密码，避免中间件重复加密
-      const newPassword = 'admin123';
-      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      // 使用正确的密码
+      const correctPassword = 'Yyw11301107*';
+      const hashedPassword = await bcrypt.hash(correctPassword, 12);
       
       // 直接更新数据库，绕过中间件
       await User.updateOne(
         { username: 'admin' },
-        { password: hashedPassword }
+        { 
+          password: hashedPassword,
+          $unset: { 
+            loginAttempts: 1, 
+            lockUntil: 1 
+          },
+          status: 'active'
+        }
       );
       
       console.log('✅ admin用户密码重置成功');
-      console.log('新密码:', newPassword);
+      console.log('新密码:', correctPassword);
+      console.log('账户已解锁');
     } else {
       console.log('❌ 未找到admin用户');
-      
-      // 创建新的admin用户
-      const hashedPassword = await bcrypt.hash('admin123', 12);
-      
-      const newAdmin = new User({
-        username: 'admin',
-        password: hashedPassword,
-        role: 'admin',
-        status: 'active',
-        fullName: '系统管理员',
-        email: 'admin@cashgit.com',
-        permissions: [
-          'VIEW_ALL_MERCHANTS',
-          'MANAGE_MERCHANTS',
-          'VIEW_PAYMENT_CONFIG',
-          'MANAGE_PAYMENT_CONFIG',
-          'VIEW_ALL_ORDERS',
-          'VIEW_ALL_TRANSACTIONS',
-          'MANAGE_USERS',
-          'SYSTEM_MONITORING'
-        ]
-      });
-      
-      await newAdmin.save();
-      console.log('✅ 创建新的admin用户成功');
-      console.log('用户名: admin');
-      console.log('密码: admin123');
     }
     
   } catch (error) {

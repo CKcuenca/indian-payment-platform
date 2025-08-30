@@ -48,11 +48,11 @@ router.post('/', authenticateToken, requireAdmin, [
   body('status').optional().isIn(['active', 'inactive', 'suspended', 'pending']).withMessage('Invalid status'),
   body('merchantId').optional().isString().withMessage('Merchant ID must be a string'),
   body('fullName').optional().isString().withMessage('Full name must be a string'),
-  body('email').optional().isEmail().withMessage('Email must be valid if provided'),
+  // 邮箱字段已移除
   validateRequest
 ], async (req, res) => {
   try {
-    const { username, password, role, status, merchantId, fullName, email } = req.body;
+    const { username, password, role, status, merchantId, fullName } = req.body;
     const User = require('../models/user');
 
     // 检查用户名是否已存在
@@ -61,17 +61,14 @@ router.post('/', authenticateToken, requireAdmin, [
       return res.status(400).json({ error: '用户名已存在' });
     }
 
-    // 加密密码
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // 创建用户
+    // 创建用户 - 让模型中间件处理密码加密
     const userData = {
       username,
-      password: hashedPassword,
+      password: password, // 不加密，让模型中间件处理
       role,
       status: status || 'active',
       fullName: fullName || username,
-      email: email || `${username}@cashgit.com`,
+      // 邮箱字段已移除
       permissions: getDefaultPermissions(role),
       createdAt: new Date(),
       updatedAt: new Date()
@@ -95,6 +92,12 @@ router.post('/', authenticateToken, requireAdmin, [
     });
   } catch (error) {
     console.error('Create user error:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      code: error.code
+    });
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -109,7 +112,7 @@ router.put('/:id', authenticateToken, requireAdmin, [
 ], async (req, res) => {
   try {
     const { id } = req.params;
-    const { username, role, status, merchantId, fullName, email } = req.body;
+    const { username, role, status, merchantId, fullName } = req.body;
     const User = require('../models/user');
 
     // 查找用户
@@ -132,7 +135,7 @@ router.put('/:id', authenticateToken, requireAdmin, [
     if (role !== undefined) updateData.role = role;
     if (status !== undefined) updateData.status = status;
     if (fullName !== undefined) updateData.fullName = fullName;
-    if (email !== undefined) updateData.email = email;
+    // 邮箱字段已移除
     if (role === 'merchant' && merchantId !== undefined) updateData.merchantId = merchantId;
     if (role !== 'merchant') updateData.merchantId = undefined; // 非商户角色移除商户ID
     

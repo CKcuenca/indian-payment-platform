@@ -356,7 +356,7 @@ export default function Users() {
                           <TableRow sx={{ backgroundColor: 'grey.100' }}>
                 <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>用户</TableCell>
                 <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>角色</TableCell>
-                <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>邮箱</TableCell>
+                {/* 邮箱字段已移除 */}
                 <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>商户ID</TableCell>
                 <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>状态</TableCell>
                 <TableCell sx={{ color: 'text.primary', fontWeight: 'bold', fontSize: '0.875rem' }}>最后登录</TableCell>
@@ -398,7 +398,7 @@ export default function Users() {
                     size="small"
                   />
                 </TableCell>
-                <TableCell>{user.email || `${user.username}@cashgit.com`}</TableCell>
+                <TableCell>{/* 邮箱字段已移除 */}</TableCell>
                 <TableCell>
                   {user.merchantId ? (
                     <Chip label={user.merchantId} size="small" variant="outlined" />

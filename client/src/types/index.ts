@@ -25,7 +25,7 @@ export interface User {
   id: string;
   username: string;
   fullName: string;
-  email: string;
+  // 邮箱字段已移除
   role: UserRole;
   permissions: Permission[];
   merchantId?: string; // 如果是商户角色，关联的商户ID

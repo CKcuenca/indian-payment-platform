@@ -12,14 +12,7 @@ const userSchema = new mongoose.Schema({
     maxlength: 30,
     match: /^[a-zA-Z0-9_]+$/
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    lowercase: true,
-    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  },
+  // 邮箱字段已移除
   phone: {
     type: String,
     trim: true,
@@ -119,6 +112,11 @@ userSchema.virtual('isActive').get(function() {
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
+  // 检查密码是否已经是加密的（以$2b$开头）
+  if (this.password.startsWith('$2b$')) {
+    return next();
+  }
+  
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
@@ -188,7 +186,7 @@ userSchema.statics.getDefaultPermissions = function(role) {
 
 // 索引
 userSchema.index({ username: 1 });
-userSchema.index({ email: 1 });
+// 邮箱索引已移除
 userSchema.index({ role: 1 });
 userSchema.index({ status: 1 });
 userSchema.index({ merchantId: 1 });
