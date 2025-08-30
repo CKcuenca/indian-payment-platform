@@ -117,7 +117,12 @@ export default function Users() {
 
   const handleDelete = async (id: string) => {
     const user = users.find(u => u.id === id);
-    if (user?.username === 'admin') {
+    if (!user) {
+      setError('用户不存在');
+      return;
+    }
+    
+    if (user.username === 'admin') {
       setError('不能删除超级管理员账户');
       return;
     }
@@ -146,7 +151,12 @@ export default function Users() {
 
   const handleToggleStatus = async (id: string) => {
     const user = users.find(u => u.id === id);
-    if (user?.username === 'admin') {
+    if (!user) {
+      setError('用户不存在');
+      return;
+    }
+    
+    if (user.username === 'admin') {
       setError('不能禁用超级管理员账户');
       return;
     }
