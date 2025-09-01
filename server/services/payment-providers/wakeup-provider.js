@@ -104,7 +104,7 @@ class WakeupProvider extends BaseProvider {
         throw new Error('DhPay上游支付通道未初始化');
       }
 
-      const dhpayResult = await this.dhpayProvider.createCollectionOrder(orderData);
+      const dhpayResult = await this.dhpayProvider.createPayment(orderData);
       
       if (dhpayResult.success) {
         return {
@@ -113,7 +113,7 @@ class WakeupProvider extends BaseProvider {
           paymentUrl: dhpayResult.paymentUrl,
           status: 'PENDING',
           message: 'DhPay订单创建成功',
-          dhpayOrderId: dhpayResult.payOrderId,
+          dhpayOrderId: dhpayResult.orderId,
           provider: 'dhpay'
         };
       } else {

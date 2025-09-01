@@ -86,9 +86,19 @@ async function testCreateDhPayOrder() {
 
     const response = await axios.post(`${TEST_CONFIG.baseUrl}/api/wakeup/create`, orderData);
     
-    if (response.data.success) {
+    if (response.data.code === 200) {
       console.log('✅ DhPay订单创建成功:', response.data.data);
-      return response.data.data.orderid;
+      
+      // 检查是否是DhPay订单（有payment_url而不是upi_transfer_info）
+      if (response.data.data.payment_url) {
+        console.log('🎯 确认使用了DhPay上游通道');
+        console.log('💳 支付链接:', response.data.data.payment_url);
+        console.log('🆔 DhPay订单ID:', response.data.data.dhpay_order_id);
+        return response.data.data.orderid;
+      } else {
+        console.log('⚠️ 返回了传统UPI转账信息，可能useDhPay参数未生效');
+        return response.data.data.orderid;
+      }
     } else {
       console.log('❌ 测试失败:', response.data);
       return null;

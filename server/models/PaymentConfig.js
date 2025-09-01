@@ -35,7 +35,9 @@ const paymentConfigSchema = new mongoose.Schema({
     },
     apiKey: {
       type: String,
-      required: true
+      required: function() {
+        return !['dhpay', 'unispay'].includes(this.provider.name);
+      }
     },
     secretKey: {
       type: String,
@@ -43,7 +45,7 @@ const paymentConfigSchema = new mongoose.Schema({
     },
     environment: {
       type: String,
-      enum: ['sandbox', 'production'],
+      enum: ['sandbox', 'production', 'test'],
       default: 'sandbox'
     }
   },

@@ -11,7 +11,7 @@ const Order = require('../models/order');
  */
 router.post('/create', mgAuthMiddleware, async (req, res) => {
   try {
-    const { orderid, amount, desc, notify_url, return_url, customer_phone } = req.verifiedParams;
+    const { orderid, amount, desc, notify_url, return_url, customer_phone, useDhPay } = req.verifiedParams;
     const merchant = req.merchant;
     
     // 验证订单ID格式
@@ -35,17 +35,28 @@ router.post('/create', mgAuthMiddleware, async (req, res) => {
       return res.json(errorResponse(400, '订单已存在'));
     }
     
-    // 获取唤醒支付配置
-    const wakeupConfig = await PaymentConfig.findOne({
-      'provider.name': 'wakeup'
-    });
-    
-    if (!wakeupConfig) {
-      return res.json(errorResponse(500, '唤醒支付配置未找到'));
+    // 获取配置：如果使用DhPay则查找DhPay配置，否则查找wakeup配置
+    let config;
+    if (useDhPay) {
+      config = await PaymentConfig.findOne({
+        'provider.name': 'dhpay'
+      });
+      
+      if (!config) {
+        return res.json(errorResponse(500, 'DhPay配置未找到'));
+      }
+    } else {
+      config = await PaymentConfig.findOne({
+        'provider.name': 'wakeup'
+      });
+      
+      if (!config) {
+        return res.json(errorResponse(500, '唤醒支付配置未找到'));
+      }
     }
     
     // 创建唤醒支付提供商实例
-    const wakeupProvider = new WakeupProvider(wakeupConfig);
+    const wakeupProvider = new WakeupProvider(config);
     
     // 创建唤醒支付订单
     const result = await wakeupProvider.createCollectionOrder({
@@ -55,7 +66,8 @@ router.post('/create', mgAuthMiddleware, async (req, res) => {
       customerPhone: customer_phone,
       description: desc,
       notifyUrl: notify_url,
-      returnUrl: return_url
+      returnUrl: return_url,
+      useDhPay: useDhPay
     });
     
     if (result.success) {
@@ -68,7 +80,7 @@ router.post('/create', mgAuthMiddleware, async (req, res) => {
         currency: 'INR',
         fee: 0, // 唤醒支付暂时不收取手续费
         provider: {
-          name: 'wakeup'
+          name: useDhPay ? 'dhpay' : 'wakeup'
         },
         customer: {
           phone: customer_phone
@@ -84,13 +96,24 @@ router.post('/create', mgAuthMiddleware, async (req, res) => {
       const order = new Order(orderData);
       await order.save();
       
-      return res.json(successResponse({
-        orderid: orderid,
-        status: 'PENDING',
-        message: result.message,
-        upi_transfer_info: result.upiTransferInfo,
-        verification_required: true
-      }));
+      // 根据是否使用DhPay返回不同的响应
+      if (useDhPay && result.paymentUrl) {
+        return res.json(successResponse({
+          orderid: orderid,
+          status: 'PENDING',
+          message: result.message,
+          payment_url: result.paymentUrl,
+          dhpay_order_id: result.dhpayOrderId
+        }));
+      } else {
+        return res.json(successResponse({
+          orderid: orderid,
+          status: 'PENDING',
+          message: result.message,
+          upi_transfer_info: result.upiTransferInfo,
+          verification_required: true
+        }));
+      }
     } else {
       return res.json(errorResponse(500, result.error || '创建唤醒支付订单失败'));
     }
