@@ -33,8 +33,14 @@ const merchantSchema = new mongoose.Schema({
   
   // 余额
   balance: {
-    type: Number,
-    default: 0
+    available: {
+      type: Number,
+      default: 0
+    },
+    frozen: {
+      type: Number,
+      default: 0
+    }
   },
   
   // 默认支付商
@@ -179,6 +185,56 @@ merchantSchema.pre('save', function(next) {
   this.updatedAt = new Date();
   next();
 });
+
+// 虚拟字段：总余额
+merchantSchema.virtual('totalBalance').get(function() {
+  return this.balance.available + this.balance.frozen;
+});
+
+// 虚拟字段：可用余额
+merchantSchema.virtual('availableBalance').get(function() {
+  return this.balance.available;
+});
+
+// 虚拟字段：冻结余额
+merchantSchema.virtual('frozenBalance').get(function() {
+  return this.balance.frozen;
+});
+
+// 方法：冻结余额
+merchantSchema.methods.freezeBalance = function(amount) {
+  if (this.balance.available >= amount) {
+    this.balance.available -= amount;
+    this.balance.frozen += amount;
+    return true;
+  }
+  return false;
+};
+
+// 方法：解冻余额
+merchantSchema.methods.unfreezeBalance = function(amount) {
+  if (this.balance.frozen >= amount) {
+    this.balance.frozen -= amount;
+    this.balance.available += amount;
+    return true;
+  }
+  return false;
+};
+
+// 方法：增加可用余额
+merchantSchema.methods.addAvailableBalance = function(amount) {
+  this.balance.available += amount;
+  return this.save();
+};
+
+// 方法：减少可用余额
+merchantSchema.methods.reduceAvailableBalance = function(amount) {
+  if (this.balance.available >= amount) {
+    this.balance.available -= amount;
+    return this.save();
+  }
+  return false;
+};
 
 // 生成商户ID的静态方法
 merchantSchema.statics.generateMerchantId = function() {

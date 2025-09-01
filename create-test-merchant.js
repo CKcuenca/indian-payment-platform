@@ -48,7 +48,10 @@ async function createTestMerchant() {
         defaultProvider: 'wakeup',
         providers: []
       },
-      balance: 0, // 使用Number类型
+      balance: {
+    available: 0,
+    frozen: 0
+  }, // 使用Number类型
       createdAt: new Date(),
       updatedAt: new Date()
     });

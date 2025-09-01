@@ -96,7 +96,7 @@ class PaymentStatusSyncService {
           // 排除已标记为同步失败的订单
           syncStatus: { $ne: 'SYNC_FAILED' }
         })
-        .populate('paymentConfig')
+        // .populate('paymentConfig') // 移除不存在的字段populate
         .sort({ _id: 1 })
         .limit(batchSize);
 
