@@ -52,53 +52,59 @@ const paymentConfigSchema = new mongoose.Schema({
   
   // 额度设置
   limits: {
-    // 日限额
-    dailyLimit: {
-      type: Number,
-      required: true,
-      default: 1000000, // 100万卢比
-      min: 0
+    // 代收限额
+    collection: {
+      dailyLimit: {
+        type: Number,
+        required: true,
+        default: 1000000, // 100万卢比
+        min: 0
+      },
+      monthlyLimit: {
+        type: Number,
+        required: true,
+        default: 10000000, // 1000万卢比
+        min: 0
+      },
+      singleTransactionLimit: {
+        type: Number,
+        required: true,
+        default: 100000, // 10万卢比
+        min: 0
+      },
+      minTransactionAmount: {
+        type: Number,
+        required: true,
+        default: 100, // 100卢比
+        min: 0
+      }
     },
-    // 月限额
-    monthlyLimit: {
-      type: Number,
-      required: true,
-      default: 10000000, // 1000万卢比
-      min: 0
-    },
-    // 单笔限额
-    singleTransactionLimit: {
-      type: Number,
-      required: true,
-      default: 100000, // 10万卢比
-      min: 0
-    },
-    // 最小交易金额
-    minTransactionAmount: {
-      type: Number,
-      required: true,
-      default: 100, // 100卢比
-      min: 0
-    },
-    // 最大交易金额
-    maxTransactionAmount: {
-      type: Number,
-      required: true,
-      default: 5000000, // 50万卢比
-      min: 0
-    },
-    // 大额交易阈值
-    largeAmountThreshold: {
-      type: Number,
-      default: 100000000, // 1000万卢比
-      min: 0
-    },
-    // 大额交易频率限制
-    maxLargeTransactionsPerDay: {
-      type: Number,
-      default: 3,
-      min: 1,
-      max: 10
+    // 代付限额
+    payout: {
+      dailyLimit: {
+        type: Number,
+        required: true,
+        default: 1000000, // 100万卢比
+        min: 0
+      },
+      monthlyLimit: {
+        type: Number,
+        required: true,
+        default: 10000000, // 1000万卢比
+        min: 0
+      },
+      singleTransactionLimit: {
+        type: Number,
+        required: true,
+        default: 100000, // 10万卢比
+        min: 0
+      },
+      minTransactionAmount: {
+        type: Number,
+        required: true,
+        default: 100, // 100卢比
+        min: 0
+      }
     }
   },
   
@@ -140,18 +146,33 @@ const paymentConfigSchema = new mongoose.Schema({
   
   // 费率设置
   fees: {
-    // 手续费率（百分比）
-    transactionFee: {
-      type: Number,
-      default: 0.5, // 0.5%
-      min: 0,
-      max: 10
+    // 代收费率
+    collection: {
+      transactionFee: {
+        type: Number,
+        default: 0.5, // 0.5%
+        min: 0,
+        max: 10
+      },
+      fixedFee: {
+        type: Number,
+        default: 0,
+        min: 0
+      }
     },
-    // 固定手续费（卢比）
-    fixedFee: {
-      type: Number,
-      default: 0,
-      min: 0
+    // 代付费率
+    payout: {
+      transactionFee: {
+        type: Number,
+        default: 0.3, // 0.3%
+        min: 0,
+        max: 10
+      },
+      fixedFee: {
+        type: Number,
+        default: 5,
+        min: 0
+      }
     }
   },
   
@@ -181,28 +202,28 @@ paymentConfigSchema.index({ createdAt: -1 });
 
 // 虚拟字段：剩余额度
 paymentConfigSchema.virtual('remainingDailyLimit').get(function() {
-  return Math.max(0, this.limits.dailyLimit - this.usage.dailyUsed);
+  return Math.max(0, this.limits.collection.dailyLimit - this.usage.dailyUsed);
 });
 
 paymentConfigSchema.virtual('remainingMonthlyLimit').get(function() {
-  return Math.max(0, this.limits.monthlyLimit - this.usage.monthlyUsed);
+  return Math.max(0, this.limits.collection.monthlyLimit - this.usage.monthlyUsed);
 });
 
 // 方法：检查额度是否足够
 paymentConfigSchema.methods.checkLimit = function(amount) {
-  if (amount > this.limits.singleTransactionLimit) {
+  if (amount > this.limits.collection.singleTransactionLimit) {
     return { valid: false, reason: 'SINGLE_TRANSACTION_LIMIT_EXCEEDED' };
   }
   
-  if (amount < this.limits.minTransactionAmount) {
+  if (amount < this.limits.collection.minTransactionAmount) {
     return { valid: false, reason: 'MIN_TRANSACTION_AMOUNT_NOT_MET' };
   }
   
-  if (this.usage.dailyUsed + amount > this.limits.dailyLimit) {
+  if (this.usage.dailyUsed + amount > this.limits.collection.dailyLimit) {
     return { valid: false, reason: 'DAILY_LIMIT_EXCEEDED' };
   }
   
-  if (this.usage.monthlyUsed + amount > this.limits.monthlyLimit) {
+  if (this.usage.monthlyUsed + amount > this.limits.collection.monthlyLimit) {
     return { valid: false, reason: 'MONTHLY_LIMIT_EXCEEDED' };
   }
   
