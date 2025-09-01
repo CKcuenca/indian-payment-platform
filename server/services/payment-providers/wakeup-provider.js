@@ -1,4 +1,5 @@
 const BaseProvider = require('./base-provider');
+const DhPayProvider = require('./dhpay-provider');
 
 /**
  * 唤醒支付提供商
@@ -10,6 +11,38 @@ class WakeupProvider extends BaseProvider {
     super(config);
     this.providerName = 'wakeup';
     this.requiresManualVerification = true; // 需要手动验证
+    
+    // 初始化DhPay作为上游支付通道
+    this.dhpayProvider = null;
+    this.initializeDhPay();
+  }
+
+  /**
+   * 初始化DhPay上游支付通道
+   */
+  initializeDhPay() {
+    try {
+      // 使用PaymentConfig中的DhPay配置
+      if (this.config && this.config.provider && this.config.provider.config && this.config.provider.config.dhpay) {
+        const dhpayConfig = this.config.provider.config.dhpay;
+        this.dhpayProvider = new DhPayProvider(dhpayConfig);
+        console.log('✅ DhPay上游支付通道初始化成功');
+      } else {
+        // 如果没有配置，使用默认配置
+        const dhpayConfig = {
+          baseUrl: process.env.DHPAY_BASE_URL || 'https://test-api.dhpay.com',
+          mchId: process.env.DHPAY_MCH_ID || '66',
+          secretKey: process.env.DHPAY_SECRET_KEY || 'CC3F988FCF248AA8C1007C5190D388AB',
+          environment: process.env.DHPAY_ENVIRONMENT || 'test'
+        };
+        
+        this.dhpayProvider = new DhPayProvider(dhpayConfig);
+        console.log('✅ DhPay上游支付通道初始化成功（使用默认配置）');
+      }
+    } catch (error) {
+      console.warn('⚠️ DhPay上游支付通道初始化失败:', error.message);
+      this.dhpayProvider = null;
+    }
   }
 
   /**
@@ -311,6 +344,83 @@ class WakeupProvider extends BaseProvider {
     // 这里应该调用银行API验证UTR号码和转账详情
     // 暂时返回模拟验证结果
     return utrNumber && utrNumber.length >= 10 && amount > 0;
+  }
+
+  /**
+   * 更新订单状态
+   * @param {string} orderId 订单ID
+   * @param {string} status 新状态
+   * @param {Object} metadata 元数据
+   * @returns {Promise<void>}
+   */
+  async updateOrderStatus(orderId, status, metadata = {}) {
+    try {
+      // 这里应该更新数据库中的订单状态
+      // 暂时只记录日志
+      console.log(`订单 ${orderId} 状态更新为: ${status}`, metadata);
+      
+      // TODO: 实现实际的订单状态更新逻辑
+      // const Order = require('../../models/order');
+      // await Order.findOneAndUpdate(
+      //   { orderId: orderId },
+      //   { 
+      //     status: status,
+      //     updatedAt: new Date(),
+      //     metadata: metadata
+      //   }
+      // );
+    } catch (error) {
+      console.error('更新订单状态失败:', error);
+    }
+  }
+
+  /**
+   * 处理DhPay回调通知
+   * @param {Object} callbackData 回调数据
+   * @returns {Promise<Object>} 处理结果
+   */
+  async handleDhPayCallback(callbackData) {
+    try {
+      const { orderId, amount, status, timestamp, sign } = callbackData;
+      
+      // 验证DhPay回调签名
+      if (this.dhpayProvider) {
+        const signatureValid = this.dhpayProvider.verifySignature(callbackData, sign);
+        if (!signatureValid) {
+          console.error('DhPay回调签名验证失败');
+          return { success: false, error: '签名验证失败' };
+        }
+      } else {
+        console.warn('DhPay提供者未初始化，跳过签名验证');
+      }
+      
+      // 处理订单状态
+      let orderStatus = 'PENDING';
+      if (status === 'SUCCESS') {
+        orderStatus = 'SUCCESS';
+      } else if (status === 'FAILED') {
+        orderStatus = 'FAILED';
+      }
+      
+      // 更新订单状态
+      await this.updateOrderStatus(orderId, orderStatus, {
+        verificationMethod: 'dhpay_callback',
+        callbackData: callbackData,
+        upstreamProvider: 'dhpay'
+      });
+      
+      return {
+        success: true,
+        message: 'DhPay回调处理成功',
+        orderStatus: orderStatus
+      };
+    } catch (error) {
+      console.error('处理DhPay回调失败:', error);
+      return {
+        success: false,
+        error: error.message || '回调处理失败'
+      };
+    }
   }
 }
 

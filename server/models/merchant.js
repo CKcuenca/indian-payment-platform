@@ -18,6 +18,12 @@ const merchantSchema = new mongoose.Schema({
     unique: false
   },
   
+  // API密钥
+  secretKey: {
+    type: String,
+    required: true
+  },
+  
   // 商户状态
   status: {
     type: String,

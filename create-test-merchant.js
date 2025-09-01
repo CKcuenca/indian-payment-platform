@@ -1,58 +1,75 @@
 const mongoose = require('mongoose');
 const Merchant = require('./server/models/merchant');
 
-// 连接MongoDB
-mongoose.connect('mongodb://localhost:27017/payment-platform', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+/**
+ * 创建本地测试商户账号
+ */
 
 async function createTestMerchant() {
   try {
-    // 检查是否已存在
-    const existingMerchant = await Merchant.findOne({ merchantId: 'TEST001' });
+    // 连接数据库 - 使用服务器相同的数据库
+    await mongoose.connect('mongodb://localhost:27017/payment-platform', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+
+    console.log('✅ 已连接到MongoDB (payment-platform)');
+
+    // 检查是否已存在测试商户
+    const existingMerchant = await Merchant.findOne({ merchantId: 'test_merchant_001' });
+    
     if (existingMerchant) {
-      console.log('✅ 测试商户已存在:', existingMerchant.merchantId);
+      console.log('⚠️ 测试商户已存在，跳过创建');
+      console.log('商户ID:', existingMerchant.merchantId);
+      console.log('商户名称:', existingMerchant.name);
       return existingMerchant;
     }
 
     // 创建测试商户
     const testMerchant = new Merchant({
-      merchantId: 'TEST001',
-      name: '测试游戏公司',
-      email: 'test@game.com', // 可选字段
+      merchantId: 'test_merchant_001',
+      name: '测试商户',
+      email: 'test@merchant.com',
+      phone: '919876543210',
+      apiKey: 'pk_test_merchant_001',
+      secretKey: 'test_secret_key_001',
       status: 'ACTIVE',
-      apiKey: 'test_api_key_' + Date.now(),
-      secretKey: 'test_secret_key_' + Date.now(),
       paymentConfig: {
-        defaultProvider: 'unispay',
-        providers: [
-          {
-            name: 'unispay',
-            enabled: true,
-            config: {}
-          },
-          {
-            name: 'passpay',
-            enabled: true,
-            config: {}
-          },
-          {
-            name: 'wakeup',
-            enabled: true,
-            config: {}
-          }
-        ]
-      }
+        fees: {
+          deposit: 0.01,
+          withdrawal: 0.01
+        },
+        limits: {
+          minDeposit: 100,
+          maxDeposit: 50000,
+          minWithdrawal: 100,
+          maxWithdrawal: 50000
+        },
+        defaultProvider: 'wakeup',
+        providers: []
+      },
+      balance: 0, // 使用Number类型
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
 
     await testMerchant.save();
-    console.log('✅ 测试商户创建成功:', testMerchant.merchantId);
+    console.log('✅ 测试商户创建成功');
+    console.log('商户ID:', testMerchant.merchantId);
+    console.log('商户名称:', testMerchant.name);
+    console.log('API密钥:', testMerchant.apiKey);
+    console.log('密钥:', testMerchant.secretKey);
+    console.log('状态:', testMerchant.status);
+
     return testMerchant;
 
   } catch (error) {
     console.error('❌ 创建测试商户失败:', error);
     throw error;
+  } finally {
+    // 关闭数据库连接
+    await mongoose.connection.close();
+    console.log('✅ 数据库连接已关闭');
   }
 }
 
@@ -60,11 +77,11 @@ async function createTestMerchant() {
 if (require.main === module) {
   createTestMerchant()
     .then(() => {
-      console.log('🎉 测试商户设置完成！');
+      console.log('🎯 测试商户创建完成！');
       process.exit(0);
     })
     .catch((error) => {
-      console.error('💥 设置失败:', error);
+      console.error('❌ 脚本执行失败:', error);
       process.exit(1);
     });
 }

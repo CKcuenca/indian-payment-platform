@@ -35,10 +35,17 @@ router.post('/create', mgAuthMiddleware, async (req, res) => {
       return res.json(errorResponse(400, '订单已存在'));
     }
     
-    // 获取唤醒支付配置
-    const wakeupConfig = await PaymentConfig.findOne({
-      'provider.name': 'wakeup'
+    // 获取唤醒支付配置 - 查找系统级配置或当前商户的配置
+    let wakeupConfig = await PaymentConfig.findOne({
+      'provider.name': 'wakeup',
+      merchantId: 'system'
     });
+    
+    if (!wakeupConfig) {
+      wakeupConfig = await PaymentConfig.findOne({
+        'provider.name': 'wakeup'
+      });
+    }
     
     if (!wakeupConfig) {
       return res.json(errorResponse(500, '唤醒支付配置未找到'));
@@ -78,7 +85,7 @@ router.post('/create', mgAuthMiddleware, async (req, res) => {
           failureUrl: return_url,
           notifyUrl: notify_url
         },
-        status: 'PENDING_VERIFICATION'
+        status: 'PENDING'
       };
       
       const order = new Order(orderData);
@@ -86,7 +93,7 @@ router.post('/create', mgAuthMiddleware, async (req, res) => {
       
       return res.json(successResponse({
         orderid: orderid,
-        status: 'PENDING_VERIFICATION',
+        status: 'PENDING',
         message: result.message,
         upi_transfer_info: result.upiTransferInfo,
         verification_required: true
@@ -120,10 +127,17 @@ router.post('/query', mgAuthMiddleware, async (req, res) => {
       return res.json(errorResponse(404, '订单不存在'));
     }
     
-    // 获取唤醒支付配置
-    const wakeupConfig = await PaymentConfig.findOne({
-      'provider.name': 'wakeup'
+    // 获取唤醒支付配置 - 查找系统级配置或当前商户的配置
+    let wakeupConfig = await PaymentConfig.findOne({
+      'provider.name': 'wakeup',
+      merchantId: 'system'
     });
+    
+    if (!wakeupConfig) {
+      wakeupConfig = await PaymentConfig.findOne({
+        'provider.name': 'wakeup'
+      });
+    }
     
     if (!wakeupConfig) {
       return res.json(errorResponse(500, '唤醒支付配置未找到'));
@@ -282,6 +296,78 @@ router.post('/check-status', async (req, res) => {
   } catch (error) {
     console.error('检查转账状态失败:', error);
     return res.status(500).json({ error: '系统错误' });
+  }
+});
+
+/**
+ * DhPay回调通知处理
+ * POST /api/wakeup/dhpay-notify
+ */
+router.post('/dhpay-notify', async (req, res) => {
+  try {
+    console.log('DhPay回调通知:', req.body);
+    
+    // 获取唤醒支付配置 - 查找系统级配置或当前商户的配置
+    let wakeupConfig = await PaymentConfig.findOne({
+      'provider.name': 'wakeup',
+      merchantId: 'system'
+    });
+    
+    if (!wakeupConfig) {
+      wakeupConfig = await PaymentConfig.findOne({
+        'provider.name': 'wakeup'
+      });
+    }
+    
+    if (!wakeupConfig) {
+      console.error('唤醒支付配置未找到');
+      return res.status(500).json({ success: false, error: '配置未找到' });
+    }
+    
+    // 创建唤醒支付提供商实例
+    const wakeupProvider = new WakeupProvider(wakeupConfig);
+    
+    // 处理DhPay回调
+    const result = await wakeupProvider.handleDhPayCallback(req.body);
+    
+    if (result.success) {
+      console.log('DhPay回调处理成功:', result.message);
+      res.json({ success: true, message: '回调处理成功' });
+    } else {
+      console.error('DhPay回调处理失败:', result.error);
+      res.status(400).json({ success: false, error: result.error });
+    }
+    
+  } catch (error) {
+    console.error('处理DhPay回调失败:', error);
+    res.status(500).json({ success: false, error: '系统错误' });
+  }
+});
+
+/**
+ * DhPay返回页面处理
+ * GET /api/wakeup/dhpay-return
+ */
+router.get('/dhpay-return', async (req, res) => {
+  try {
+    console.log('DhPay返回页面:', req.query);
+    
+    const { orderId, status, amount } = req.query;
+    
+    // 这里可以重定向到前端页面或返回结果
+    res.json({
+      success: true,
+      message: 'DhPay返回页面处理成功',
+      data: {
+        orderId,
+        status,
+        amount
+      }
+    });
+    
+  } catch (error) {
+    console.error('处理DhPay返回页面失败:', error);
+    res.status(500).json({ success: false, error: '系统错误' });
   }
 });
 
