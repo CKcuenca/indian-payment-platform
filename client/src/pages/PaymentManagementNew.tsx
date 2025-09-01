@@ -329,8 +329,8 @@ export default function PaymentManagementNew() {
           name: formData.providerName,
           type: formData.type,
           subType: formData.subType, // 添加子类型
-          accountId: formData.accountId,
-          apiKey: formData.apiKey,
+          accountId: formData.providerName === 'dhpay' ? '66' : formData.accountId, // DhPay使用固定商户ID
+          apiKey: formData.providerName === 'dhpay' ? '' : formData.apiKey, // DhPay不需要API密钥
           secretKey: formData.secretKey,
           environment: formData.environment,
           // UniSpay专用字段
@@ -448,9 +448,9 @@ export default function PaymentManagementNew() {
       '4party_platform1': 'info',
       '4party_platform2': 'info',
       '4party_platform3': 'info',
-      // 唤醒支付商
-      'unispay': 'error',
-      'dhpay': 'success'
+              // 唤醒支付商
+        'unispay': 'error',
+        'dhpay': 'success'
     };
     return colors[providerName.toLowerCase()] || 'default';
   };
@@ -735,8 +735,8 @@ export default function PaymentManagementNew() {
                           let shouldResetProvider = false;
                           if (newType === 'native') {
                             shouldResetProvider = !['airpay', 'cashfree', 'razorpay', 'paytm', 'passpay', '4party_platform1', '4party_platform2', '4party_platform3'].includes(currentProvider);
-                          } else if (newType === 'wakeup') {
-                            shouldResetProvider = !['unispay', 'dhpay'].includes(currentProvider);
+                                                      } else if (newType === 'wakeup') {
+                              shouldResetProvider = !['unispay', 'dhpay'].includes(currentProvider);
                           }
                           
                           const newState = {
@@ -849,10 +849,10 @@ export default function PaymentManagementNew() {
                         ] : [
                           <MenuItem key="no-subtype" value="" disabled>请先选择分支类型</MenuItem>
                         ]
-                      ) : formData.type === 'wakeup' ? [
-                        <MenuItem key="unispay" value="unispay">UniSpay (唤醒)</MenuItem>,
-                        <MenuItem key="dhpay" value="dhpay">DhPay (唤醒)</MenuItem>
-                      ] : [
+                                              ) : formData.type === 'wakeup' ? [
+                          <MenuItem key="unispay" value="unispay">UniSpay (唤醒)</MenuItem>,
+                          <MenuItem key="dhpay" value="dhpay">DhPay (唤醒)</MenuItem>
+                        ] : [
                         <MenuItem key="no-type" value="" disabled>请先选择支付商类型</MenuItem>
                       ]}
                     </Select>
@@ -896,15 +896,15 @@ export default function PaymentManagementNew() {
                   />
                 </Box>
                 
-                {/* API密钥 - 除了UniSpay外都需要 */}
-                {formData.providerName !== 'unispay' && (
+                {/* API密钥 - 除了UniSpay和DhPay外都需要 */}
+                {formData.providerName !== 'unispay' && formData.providerName !== 'dhpay' && (
                   <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                     <TextField
                       fullWidth
                       label="API密钥 (用于身份认证)"
                       value={formData.apiKey}
                       onChange={(e) => setFormData({...formData, apiKey: e.target.value})}
-                      helperText="用于API身份认证，UniSpay不需要"
+                      helperText="用于API身份认证，UniSpay和DhPay不需要"
                       required
                     />
                   </Box>
@@ -913,14 +913,27 @@ export default function PaymentManagementNew() {
                 <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                   <TextField
                     fullWidth
-                    label="密钥 (用于签名验证)"
+                    label={formData.providerName === 'dhpay' ? '商户密钥 (用于签名验证)' : '密钥 (用于签名验证)'}
                     type="password"
                     value={formData.secretKey}
                     onChange={(e) => setFormData({...formData, secretKey: e.target.value})}
-                    helperText="用于API签名验证，请保密"
+                    helperText={formData.providerName === 'dhpay' ? 'DhPay提供的商户密钥，用于API签名验证' : '用于API签名验证，请保密'}
                     required
                   />
                 </Box>
+                
+                {/* DhPay专用提示信息 */}
+                {formData.providerName === 'dhpay' && (
+                  <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                    <Alert severity="info" sx={{ mt: 1 }}>
+                      <Typography variant="body2">
+                        DhPay配置说明：<br/>
+                        • 商户ID已固定为系统分配值 (66)<br/>
+                        • 只需填写商户密钥即可
+                      </Typography>
+                    </Alert>
+                  </Box>
+                )}
                 
                 {/* UniSpay专用字段 - 仅在选择UniSpay时显示 */}
                 {formData.providerName === 'unispay' && (

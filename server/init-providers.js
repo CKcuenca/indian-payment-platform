@@ -26,6 +26,8 @@ paymentManager.registerProvider('unispay', new UnispayProvider({
   environment: process.env.UNISPAY_ENVIRONMENT || 'production'
 }));
 
+
+
 // 设置默认提供者为模拟提供者
 paymentManager.setDefaultProvider('mock');
 

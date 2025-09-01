@@ -22,6 +22,10 @@ app.set('trust proxy', ['127.0.0.1', '::1', '10.0.0.0/8', '172.16.0.0/12', '192.
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// 性能监控中间件
+const performanceMonitorMiddleware = require('./middleware/performance-monitor');
+app.use(performanceMonitorMiddleware);
+
 // 先注册数据库相关路由，再连接数据库
 console.log('🔧 预注册数据库相关路由...');
 
@@ -35,6 +39,7 @@ try {
   app.use('/api/memory-management', require('./routes/memory-management'));
   app.use('/api/test', require('./routes/test-simple'));
   app.use('/api/debug', require('./routes/debug'));
+  app.use('/api/performance', require('./routes/performance'));
   
   console.log('✅ Database-dependent routes pre-registered successfully');
 } catch (error) {

@@ -1,89 +1,68 @@
 const mongoose = require('mongoose');
 const PaymentConfig = require('./server/models/PaymentConfig');
 
-/**
- * 创建唤醒支付配置
- */
-
 async function createWakeupConfig() {
   try {
     // 连接数据库
-    await mongoose.connect('mongodb://localhost:27017/payment-platform', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
-
-    console.log('✅ 已连接到MongoDB (payment-platform)');
-
-    // 检查是否已存在唤醒支付配置
-    const existingConfig = await PaymentConfig.findOne({ 'provider.name': 'wakeup' });
-    
-    if (existingConfig) {
-      console.log('⚠️ 唤醒支付配置已存在，跳过创建');
-      console.log('配置ID:', existingConfig._id);
-      console.log('提供商:', existingConfig.provider.name);
-      return existingConfig;
-    }
+    await mongoose.connect('mongodb://localhost:27017/payment-platform');
+    console.log('✅ 连接到数据库');
 
     // 创建唤醒支付配置
     const wakeupConfig = new PaymentConfig({
-      merchantId: 'test_merchant_001',
-      accountName: 'wakeup_test_account',
+      accountName: 'DhPay唤醒支付配置',
       provider: {
-        name: 'wakeup',
+        name: 'dhpay',
         type: 'wakeup',
-        accountId: 'wakeup_account_001',
-        apiKey: 'wakeup_api_key_001',
-        secretKey: 'wakeup_secret_key_001',
-        environment: 'sandbox'
+        accountId: '66', // DhPay商户ID
+        apiKey: '', // DhPay不需要API密钥
+        secretKey: 'CC3F988FCF248AA8C1007C5190D388AB', // DhPay商户密钥
+        environment: 'test'
       },
+      description: 'DhPay上游支付通道配置 - 只需要商户密钥',
       limits: {
-        dailyLimit: 1000000,
-        monthlyLimit: 10000000,
-        singleTransactionLimit: 100000,
-        minTransactionAmount: 100,
-        maxTransactionAmount: 5000000,
-        largeAmountThreshold: 100000000,
-        maxLargeTransactionsPerDay: 3
+        collection: {
+          dailyLimit: 10000000,
+          monthlyLimit: 100000000,
+          singleTransactionLimit: 1000000,
+          minTransactionAmount: 100
+        },
+        payout: {
+          dailyLimit: 10000000,
+          monthlyLimit: 100000000,
+          singleTransactionLimit: 1000000,
+          minTransactionAmount: 100
+        }
       },
       fees: {
-        percentage: 0,
-        fixedAmount: 0
+        collection: {
+          transactionFee: 2.5,
+          fixedFee: 0
+        },
+        payout: {
+          transactionFee: 1.5,
+          fixedFee: 5
+        }
       },
+      priority: 1,
       status: 'ACTIVE',
-      createdAt: new Date(),
-      updatedAt: new Date()
+      merchantId: 'system'
     });
 
     await wakeupConfig.save();
-    console.log('✅ 唤醒支付配置创建成功');
-    console.log('配置ID:', wakeupConfig._id);
-    console.log('提供商:', wakeupConfig.provider.name);
-    console.log('状态:', wakeupConfig.status);
-
-    return wakeupConfig;
+    console.log('✅ DhPay唤醒支付配置创建成功');
+    console.log('配置详情:', {
+      accountName: wakeupConfig.accountName,
+      provider: wakeupConfig.provider.name,
+      type: wakeupConfig.provider.type,
+      merchantId: wakeupConfig.provider.accountId,
+      environment: wakeupConfig.provider.environment
+    });
 
   } catch (error) {
-    console.error('❌ 创建唤醒支付配置失败:', error);
-    throw error;
+    console.error('❌ 创建DhPay唤醒支付配置失败:', error);
   } finally {
-    // 关闭数据库连接
-    await mongoose.connection.close();
-    console.log('✅ 数据库连接已关闭');
+    mongoose.connection.close();
   }
 }
 
-// 运行脚本
-if (require.main === module) {
-  createWakeupConfig()
-    .then(() => {
-      console.log('🎯 唤醒支付配置创建完成！');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('❌ 脚本执行失败:', error);
-      process.exit(1);
-    });
-}
-
-module.exports = { createWakeupConfig };
+createWakeupConfig();

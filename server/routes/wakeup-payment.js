@@ -35,17 +35,10 @@ router.post('/create', mgAuthMiddleware, async (req, res) => {
       return res.json(errorResponse(400, '订单已存在'));
     }
     
-    // 获取唤醒支付配置 - 查找系统级配置或当前商户的配置
-    let wakeupConfig = await PaymentConfig.findOne({
-      'provider.name': 'wakeup',
-      merchantId: 'system'
+    // 获取唤醒支付配置
+    const wakeupConfig = await PaymentConfig.findOne({
+      'provider.name': 'wakeup'
     });
-    
-    if (!wakeupConfig) {
-      wakeupConfig = await PaymentConfig.findOne({
-        'provider.name': 'wakeup'
-      });
-    }
     
     if (!wakeupConfig) {
       return res.json(errorResponse(500, '唤醒支付配置未找到'));
@@ -127,17 +120,10 @@ router.post('/query', mgAuthMiddleware, async (req, res) => {
       return res.json(errorResponse(404, '订单不存在'));
     }
     
-    // 获取唤醒支付配置 - 查找系统级配置或当前商户的配置
-    let wakeupConfig = await PaymentConfig.findOne({
-      'provider.name': 'wakeup',
-      merchantId: 'system'
+    // 获取唤醒支付配置
+    const wakeupConfig = await PaymentConfig.findOne({
+      'provider.name': 'wakeup'
     });
-    
-    if (!wakeupConfig) {
-      wakeupConfig = await PaymentConfig.findOne({
-        'provider.name': 'wakeup'
-      });
-    }
     
     if (!wakeupConfig) {
       return res.json(errorResponse(500, '唤醒支付配置未找到'));
@@ -307,25 +293,18 @@ router.post('/dhpay-notify', async (req, res) => {
   try {
     console.log('DhPay回调通知:', req.body);
     
-    // 获取唤醒支付配置 - 查找系统级配置或当前商户的配置
-    let wakeupConfig = await PaymentConfig.findOne({
-      'provider.name': 'wakeup',
-      merchantId: 'system'
+    // 获取DhPay配置
+    const dhpayConfig = await PaymentConfig.findOne({
+      'provider.name': 'dhpay'
     });
     
-    if (!wakeupConfig) {
-      wakeupConfig = await PaymentConfig.findOne({
-        'provider.name': 'wakeup'
-      });
+    if (!dhpayConfig) {
+      console.error('DhPay配置未找到');
+      return res.status(500).json({ success: false, error: 'DhPay配置未找到' });
     }
     
-    if (!wakeupConfig) {
-      console.error('唤醒支付配置未找到');
-      return res.status(500).json({ success: false, error: '配置未找到' });
-    }
-    
-    // 创建唤醒支付提供商实例
-    const wakeupProvider = new WakeupProvider(wakeupConfig);
+    // 创建唤醒支付提供商实例（使用DhPay配置）
+    const wakeupProvider = new WakeupProvider(dhpayConfig);
     
     // 处理DhPay回调
     const result = await wakeupProvider.handleDhPayCallback(req.body);

@@ -1,0 +1,44 @@
+# DhPay支付通道环境变量配置示例
+# 复制此文件为 .env 并根据实际情况修改
+
+# ========================================
+# 生产环境配置
+# ========================================
+DHPAY_PRODUCTION_URL=https://api.dhpay.com
+DHPAY_PRODUCTION_MCH_ID=your_production_merchant_id
+DHPAY_PRODUCTION_SECRET_KEY=your_production_secret_key
+
+# ========================================
+# 测试环境配置
+# ========================================
+DHPAY_TEST_URL=https://test-api.dhpay.com
+DHPAY_TEST_MCH_ID=10000
+DHPAY_TEST_SECRET_KEY=test_secret_key
+
+# ========================================
+# 开发环境配置
+# ========================================
+DHPAY_DEV_URL=https://dev-api.dhpay.com
+DHPAY_DEV_MCH_ID=10000
+DHPAY_DEV_SECRET_KEY=dev_secret_key
+
+# ========================================
+# 其他配置
+# ========================================
+# 设置当前环境 (development|test|production)
+NODE_ENV=development
+
+# 超时配置（毫秒）
+DHPAY_TIMEOUT=30000
+
+# 重试次数
+DHPAY_RETRY_ATTEMPTS=3
+
+# 重试延迟（毫秒）
+DHPAY_RETRY_DELAY=1000
+
+# 日志级别 (debug|info|warn|error)
+DHPAY_LOG_LEVEL=info
+
+# 是否包含敏感数据到日志
+DHPAY_LOG_SENSITIVE=false

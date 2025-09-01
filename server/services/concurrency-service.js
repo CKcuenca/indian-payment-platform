@@ -3,12 +3,9 @@ const { getIndianTimeISO } = require('../utils/timeUtils');
 
 class ConcurrencyService {
   /**
-   * 使用数据库事务处理订单创建
+   * 使用顺序操作处理订单创建，避免事务问题
    */
   static async createOrderWithTransaction(orderData, merchantId) {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    
     try {
       // 1. 锁定商户记录进行限额检查
       const merchant = await mongoose.model('Merchant').findOneAndUpdate(
@@ -18,7 +15,6 @@ class ConcurrencyService {
         },
         { $inc: { 'balance.frozen': orderData.amount } },
         { 
-          session,
           new: true,
           runValidators: true 
         }
@@ -47,17 +43,22 @@ class ConcurrencyService {
             totalAmount: { $sum: '$amount' }
           }
         }
-      ], { session });
+      ]);
 
       const dailyTotal = (dailyUsage[0]?.totalAmount || 0) + orderData.amount;
       
       if (dailyTotal > merchant.paymentConfig.limits.maxDeposit) {
+        // 回滚冻结的余额
+        await mongoose.model('Merchant').findOneAndUpdate(
+          { merchantId },
+          { $inc: { 'balance.frozen': -orderData.amount } }
+        );
         throw new Error('Daily deposit limit exceeded');
       }
 
       // 3. 创建订单
       const order = new mongoose.model('Order')(orderData);
-      await order.save({ session });
+      await order.save();
 
       // 4. 创建交易记录
       const transaction = new mongoose.model('Transaction')({
@@ -74,9 +75,7 @@ class ConcurrencyService {
         updatedAt: getIndianTimeISO()
       });
       
-      await transaction.save({ session });
-
-      await session.commitTransaction();
+      await transaction.save();
       
       return {
         success: true,
@@ -85,10 +84,16 @@ class ConcurrencyService {
       };
       
     } catch (error) {
-      await session.abortTransaction();
+      // 如果出错，尝试回滚冻结的余额
+      try {
+        await mongoose.model('Merchant').findOneAndUpdate(
+          { merchantId },
+          { $inc: { 'balance.frozen': -orderData.amount } }
+        );
+      } catch (rollbackError) {
+        console.error('Failed to rollback frozen balance:', rollbackError);
+      }
       throw error;
-    } finally {
-      session.endSession();
     }
   }
 
@@ -96,9 +101,6 @@ class ConcurrencyService {
    * 处理订单状态更新
    */
   static async updateOrderStatus(orderId, newStatus, additionalData = {}) {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    
     try {
       // 1. 更新订单状态
       const order = await mongoose.model('Order').findOneAndUpdate(
@@ -108,7 +110,7 @@ class ConcurrencyService {
           updatedAt: getIndianTimeISO(),
           ...additionalData
         },
-        { session, new: true }
+        { new: true }
       );
 
       if (!order) {
@@ -116,52 +118,44 @@ class ConcurrencyService {
       }
 
       // 2. 更新交易记录
-      const transaction = await mongoose.model('Transaction').findOneAndUpdate(
+      await mongoose.model('Transaction').findOneAndUpdate(
         { orderId },
         { 
           status: newStatus,
           updatedAt: getIndianTimeISO(),
           ...additionalData
-        },
-        { session, new: true }
+        }
       );
 
-      // 3. 如果订单成功，更新商户余额
+      // 3. 如果订单成功，释放冻结余额并增加可用余额
       if (newStatus === 'SUCCESS') {
         await mongoose.model('Merchant').findOneAndUpdate(
           { merchantId: order.merchantId },
           { 
             $inc: { 
-              'balance.available': order.amount,
-              'balance.frozen': -order.amount
+              'balance.frozen': -order.amount,
+              'balance.available': order.amount
             }
-          },
-          { session }
-        );
-      } else if (newStatus === 'FAILED' || newStatus === 'CANCELLED') {
-        // 如果订单失败，释放冻结的余额
-        await mongoose.model('Merchant').findOneAndUpdate(
-          { merchantId: order.merchantId },
-          { 
-            $inc: { 'balance.frozen': -order.amount }
-          },
-          { session }
+          }
         );
       }
 
-      await session.commitTransaction();
-      
+      // 4. 如果订单失败或取消，释放冻结余额
+      if (['FAILED', 'CANCELLED'].includes(newStatus)) {
+        await mongoose.model('Merchant').findOneAndUpdate(
+          { merchantId: order.merchantId },
+          { $inc: { 'balance.frozen': -order.amount } }
+        );
+      }
+
       return {
         success: true,
-        order,
-        transaction
+        order
       };
       
     } catch (error) {
-      await session.abortTransaction();
+      console.error('Error updating order status:', error);
       throw error;
-    } finally {
-      session.endSession();
     }
   }
 
