@@ -449,7 +449,8 @@ export default function PaymentManagementNew() {
       '4party_platform2': 'info',
       '4party_platform3': 'info',
       // 唤醒支付商
-      'unispay': 'error'
+      'unispay': 'error',
+      'dhpay': 'success'
     };
     return colors[providerName.toLowerCase()] || 'default';
   };
@@ -735,7 +736,7 @@ export default function PaymentManagementNew() {
                           if (newType === 'native') {
                             shouldResetProvider = !['airpay', 'cashfree', 'razorpay', 'paytm', 'passpay', '4party_platform1', '4party_platform2', '4party_platform3'].includes(currentProvider);
                           } else if (newType === 'wakeup') {
-                            shouldResetProvider = !['unispay'].includes(currentProvider);
+                            shouldResetProvider = !['unispay', 'dhpay'].includes(currentProvider);
                           }
                           
                           const newState = {
@@ -849,7 +850,8 @@ export default function PaymentManagementNew() {
                           <MenuItem key="no-subtype" value="" disabled>请先选择分支类型</MenuItem>
                         ]
                       ) : formData.type === 'wakeup' ? [
-                        <MenuItem key="unispay" value="unispay">UniSpay (唤醒)</MenuItem>
+                        <MenuItem key="unispay" value="unispay">UniSpay (唤醒)</MenuItem>,
+                        <MenuItem key="dhpay" value="dhpay">DhPay (唤醒)</MenuItem>
                       ] : [
                         <MenuItem key="no-type" value="" disabled>请先选择支付商类型</MenuItem>
                       ]}
