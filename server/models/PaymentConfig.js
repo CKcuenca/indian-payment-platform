@@ -29,6 +29,11 @@ const paymentConfigSchema = new mongoose.Schema({
       enum: ['native', 'wakeup'],
       default: 'native'
     },
+    subType: {
+      type: String,
+      enum: ['third_party', 'fourth_party', 'wakeup'],
+      default: 'third_party'
+    },
     accountId: {
       type: String,
       required: true
@@ -37,6 +42,13 @@ const paymentConfigSchema = new mongoose.Schema({
       type: String,
       required: function() {
         return !['dhpay', 'unispay'].includes(this.provider.name);
+      },
+      // 对于dhpay和unispay，允许空字符串或undefined
+      validate: function(value) {
+        if (['dhpay', 'unispay'].includes(this.provider.name)) {
+          return true; // 对于这些提供商，任何值都有效
+        }
+        return value && value.trim().length > 0; // 其他提供商必须有值
       }
     },
     secretKey: {
@@ -47,6 +59,11 @@ const paymentConfigSchema = new mongoose.Schema({
       type: String,
       enum: ['sandbox', 'production', 'test'],
       default: 'sandbox'
+    },
+    mchNo: {
+      type: String,
+      required: false,
+      default: ''
     }
   },
   
