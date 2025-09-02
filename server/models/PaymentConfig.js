@@ -32,7 +32,13 @@ const paymentConfigSchema = new mongoose.Schema({
     subType: {
       type: String,
       enum: ['third_party', 'fourth_party', 'wakeup'],
-      default: 'third_party'
+      default: function() {
+        // 根据支付商类型智能设置默认值
+        if (['dhpay', 'unispay'].includes(this.provider.name)) {
+          return 'wakeup';
+        }
+        return 'third_party';
+      }
     },
     accountId: {
       type: String,
@@ -62,8 +68,11 @@ const paymentConfigSchema = new mongoose.Schema({
     },
     mchNo: {
       type: String,
-      required: false,
-      default: ''
+      required: function() {
+        // 只有UniSpay需要mchNo
+        return this.provider.name === 'unispay';
+      },
+      default: undefined
     }
   },
   

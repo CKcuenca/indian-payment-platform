@@ -35,6 +35,14 @@ import {
 } from '@mui/icons-material';
 
 import api from '../services/api';
+import { 
+  getPaymentProviderConfig, 
+  shouldShowField, 
+  isFieldRequired, 
+  getFieldLabel, 
+  getFieldHelper, 
+  getProviderNotes 
+} from '../config/paymentProviderConfigs';
 
 
 // 支付账户类型定义
@@ -266,11 +274,11 @@ export default function PaymentManagementNew() {
       payoutSingleTransactionLimit: 100000,
       payoutMinTransactionAmount: 100,
       // 代收费率
-      collectionTransactionFee: 5, // UniSpay代收5%
+      collectionTransactionFee: 0.5,
       collectionFixedFee: 0,
       // 代付费率
-      payoutTransactionFee: 3, // UniSpay代付3%
-      payoutFixedFee: 6, // UniSpay代付固定费用6卢比
+      payoutTransactionFee: 0.3,
+      payoutFixedFee: 5,
       priority: 1,
       status: 'ACTIVE'
     });
@@ -316,6 +324,18 @@ export default function PaymentManagementNew() {
       status: account.status
     });
     setDialogOpen(true);
+  };
+
+  // 处理支付商选择变化
+  const handleProviderChange = (providerName: string) => {
+    const config = getPaymentProviderConfig(providerName);
+    if (config) {
+      setFormData(prev => ({
+        ...prev,
+        providerName,
+        ...config.defaultValues
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -822,17 +842,7 @@ export default function PaymentManagementNew() {
                     <InputLabel>支付商</InputLabel>
                     <Select
                       value={formData.providerName}
-                      onChange={(e) => {
-                        const selectedProvider = e.target.value;
-                        console.log('选择支付商:', selectedProvider);
-                        console.log('选择前状态:', formData);
-                        
-                        setFormData(prev => {
-                          const newState = { ...prev, providerName: selectedProvider };
-                          console.log('选择后新状态:', newState);
-                          return newState;
-                        });
-                      }}
+                      onChange={(e) => handleProviderChange(e.target.value)}
                       disabled={!formData.type || !formData.subType}
                     >
                       {formData.type === 'native' ? (
@@ -886,26 +896,31 @@ export default function PaymentManagementNew() {
               </Box>
               
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-                <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
-                  <TextField
-                    fullWidth
-                    label="账户ID"
-                    value={formData.accountId}
-                    onChange={(e) => setFormData({...formData, accountId: e.target.value})}
-                    required
-                  />
-                </Box>
-                
-                {/* API密钥 - 除了UniSpay和DhPay外都需要 */}
-                {formData.providerName !== 'unispay' && formData.providerName !== 'dhpay' && (
+                {/* 账户ID - 根据支付商类型动态显示 */}
+                {shouldShowField(formData.providerName, 'accountId') && (
                   <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                     <TextField
                       fullWidth
-                      label="API密钥 (用于身份认证)"
+                      label={getFieldLabel(formData.providerName, 'accountId')}
+                      value={formData.accountId}
+                      onChange={(e) => setFormData({...formData, accountId: e.target.value})}
+                      helperText={getFieldHelper(formData.providerName, 'accountId')}
+                      required={isFieldRequired(formData.providerName, 'accountId')}
+                      disabled={formData.providerName === 'dhpay'} // DhPay使用固定值
+                    />
+                  </Box>
+                )}
+                
+                {/* API密钥 - 根据支付商类型动态显示 */}
+                {shouldShowField(formData.providerName, 'apiKey') && (
+                  <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                    <TextField
+                      fullWidth
+                      label={getFieldLabel(formData.providerName, 'apiKey')}
                       value={formData.apiKey}
                       onChange={(e) => setFormData({...formData, apiKey: e.target.value})}
-                      helperText="用于API身份认证，UniSpay和DhPay不需要"
-                      required
+                      helperText={getFieldHelper(formData.providerName, 'apiKey')}
+                      required={isFieldRequired(formData.providerName, 'apiKey')}
                     />
                   </Box>
                 )}
@@ -913,38 +928,41 @@ export default function PaymentManagementNew() {
                 <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                   <TextField
                     fullWidth
-                    label={formData.providerName === 'dhpay' ? '商户密钥 (用于签名验证)' : '密钥 (用于签名验证)'}
+                    label={getFieldLabel(formData.providerName, 'secretKey')}
                     type="password"
                     value={formData.secretKey}
                     onChange={(e) => setFormData({...formData, secretKey: e.target.value})}
-                    helperText={formData.providerName === 'dhpay' ? 'DhPay提供的商户密钥，用于API签名验证' : '用于API签名验证，请保密'}
-                    required
+                    helperText={getFieldHelper(formData.providerName, 'secretKey')}
+                    required={isFieldRequired(formData.providerName, 'secretKey')}
                   />
                 </Box>
                 
-                {/* DhPay专用提示信息 */}
-                {formData.providerName === 'dhpay' && (
+                {/* 支付商特殊说明 - 根据选择的支付商动态显示 */}
+                {formData.providerName && getProviderNotes(formData.providerName).length > 0 && (
                   <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                     <Alert severity="info" sx={{ mt: 1 }}>
                       <Typography variant="body2">
-                        DhPay配置说明：<br/>
-                        • 商户ID已固定为系统分配值 (66)<br/>
-                        • 只需填写商户密钥即可
+                        {getProviderNotes(formData.providerName).map((note, index) => (
+                          <React.Fragment key={index}>
+                            {note}
+                            {index < getProviderNotes(formData.providerName).length - 1 && <br/>}
+                          </React.Fragment>
+                        ))}
                       </Typography>
                     </Alert>
                   </Box>
                 )}
                 
-                {/* UniSpay专用字段 - 仅在选择UniSpay时显示 */}
-                {formData.providerName === 'unispay' && (
+                {/* mchNo字段 - 根据支付商类型动态显示 */}
+                {shouldShowField(formData.providerName, 'mchNo') && (
                   <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                     <TextField
                       fullWidth
-                      label="商户号 (mchNo)"
+                      label={getFieldLabel(formData.providerName, 'mchNo')}
                       value={formData.mchNo}
                       onChange={(e) => setFormData({...formData, mchNo: e.target.value})}
-                      helperText="UniSpay提供的商户号，用于API调用"
-                      required
+                      helperText={getFieldHelper(formData.providerName, 'mchNo')}
+                      required={isFieldRequired(formData.providerName, 'mchNo')}
                     />
                   </Box>
                 )}
