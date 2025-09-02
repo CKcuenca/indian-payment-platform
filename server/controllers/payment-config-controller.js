@@ -135,6 +135,8 @@ class PaymentConfigController {
       const updateData = req.body;
       
       // 在更新前进行自定义验证
+      console.log('🔍 接收到的更新数据:', JSON.stringify(updateData, null, 2));
+      
       if (updateData.provider) {
         const providerName = updateData.provider.name;
         const apiKey = updateData.provider.apiKey;
