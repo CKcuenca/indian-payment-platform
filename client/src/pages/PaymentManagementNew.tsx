@@ -396,6 +396,8 @@ export default function PaymentManagementNew() {
 
       if (editingAccount) {
         // 更新现有账户
+        console.log('🔍 提交前的表单数据:', formData);
+        console.log('🔍 提交前的accountData:', accountData);
         try {
           const updateResponse = await api.put(`/api/payment-config/${editingAccount._id}`, accountData);
           if (updateResponse.data.success) {
