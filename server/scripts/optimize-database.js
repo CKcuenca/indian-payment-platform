@@ -104,6 +104,13 @@ async function optimizeDatabase() {
       }
     }
 
+    // 9. 性能优化建议
+    console.log('\n性能优化建议:');
+    console.log('  - 定期运行此脚本以保持索引优化');
+    console.log('  - 监控慢查询日志');
+    console.log('  - 考虑添加复合索引以支持复杂查询');
+    console.log('  - 定期清理过期数据以节省存储空间');
+
     console.log('\n数据库优化完成！');
     
   } catch (error) {
