@@ -55,8 +55,19 @@ const paymentConfigSchema = new mongoose.Schema({
       // 对于dhpay和unispay，允许空字符串或undefined
       validate: {
         validator: function(value) {
-          const providerName = this.provider?.name;
+          // 在更新时，this可能不是完整的文档，需要从父级获取provider信息
+          let providerName = this.provider?.name;
+          if (!providerName && this.parent && this.parent.provider) {
+            providerName = this.parent.provider.name;
+          }
+          if (!providerName && this.parent && this.parent.parent && this.parent.parent.provider) {
+            providerName = this.parent.parent.provider.name;
+          }
+          
           console.log(`🔍 API Key验证 - provider: ${providerName}, value: "${value}"`);
+          console.log(`🔍 上下文信息 - this.provider:`, this.provider);
+          console.log(`🔍 上下文信息 - this.parent:`, this.parent);
+          
           if (providerName && ['dhpay', 'unispay'].includes(providerName)) {
             console.log(`✅ dhpay/unispay提供商，允许空值`);
             return true; // 对于这些提供商，任何值都有效
