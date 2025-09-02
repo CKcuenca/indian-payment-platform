@@ -53,12 +53,15 @@ const paymentConfigSchema = new mongoose.Schema({
         return providerName && !['dhpay', 'unispay'].includes(providerName);
       },
       // 对于dhpay和unispay，允许空字符串或undefined
-      validate: function(value) {
-        const providerName = this.provider?.name;
-        if (providerName && ['dhpay', 'unispay'].includes(providerName)) {
-          return true; // 对于这些提供商，任何值都有效
-        }
-        return value && value.trim().length > 0; // 其他提供商必须有值
+      validate: {
+        validator: function(value) {
+          const providerName = this.provider?.name;
+          if (providerName && ['dhpay', 'unispay'].includes(providerName)) {
+            return true; // 对于这些提供商，任何值都有效
+          }
+          return value && value.trim().length > 0; // 其他提供商必须有值
+        },
+        message: 'API Key is required for this provider'
       }
     },
     secretKey: {
@@ -76,6 +79,16 @@ const paymentConfigSchema = new mongoose.Schema({
         // 只有UniSpay需要mchNo，使用安全访问
         const providerName = this.provider?.name;
         return providerName === 'unispay';
+      },
+      validate: {
+        validator: function(value) {
+          const providerName = this.provider?.name;
+          if (providerName === 'unispay') {
+            return value && value.trim().length > 0; // UniSpay需要mchNo
+          }
+          return true; // 其他提供商不需要mchNo
+        },
+        message: 'Merchant Number is required for UniSpay'
       },
       default: undefined
     }
