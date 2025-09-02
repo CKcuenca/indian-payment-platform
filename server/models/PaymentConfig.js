@@ -33,8 +33,9 @@ const paymentConfigSchema = new mongoose.Schema({
       type: String,
       enum: ['third_party', 'fourth_party', 'wakeup'],
       default: function() {
-        // 根据支付商类型智能设置默认值
-        if (['dhpay', 'unispay'].includes(this.provider.name)) {
+        // 根据支付商类型智能设置默认值，使用安全访问
+        const providerName = this.provider?.name;
+        if (providerName && ['dhpay', 'unispay'].includes(providerName)) {
           return 'wakeup';
         }
         return 'third_party';
@@ -47,11 +48,14 @@ const paymentConfigSchema = new mongoose.Schema({
     apiKey: {
       type: String,
       required: function() {
-        return !['dhpay', 'unispay'].includes(this.provider.name);
+        // 使用this.provider?.name来安全访问，避免undefined错误
+        const providerName = this.provider?.name;
+        return providerName && !['dhpay', 'unispay'].includes(providerName);
       },
       // 对于dhpay和unispay，允许空字符串或undefined
       validate: function(value) {
-        if (['dhpay', 'unispay'].includes(this.provider.name)) {
+        const providerName = this.provider?.name;
+        if (providerName && ['dhpay', 'unispay'].includes(providerName)) {
           return true; // 对于这些提供商，任何值都有效
         }
         return value && value.trim().length > 0; // 其他提供商必须有值
@@ -69,8 +73,9 @@ const paymentConfigSchema = new mongoose.Schema({
     mchNo: {
       type: String,
       required: function() {
-        // 只有UniSpay需要mchNo
-        return this.provider.name === 'unispay';
+        // 只有UniSpay需要mchNo，使用安全访问
+        const providerName = this.provider?.name;
+        return providerName === 'unispay';
       },
       default: undefined
     }
