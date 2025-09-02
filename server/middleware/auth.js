@@ -15,7 +15,7 @@ const authMiddleware = async (req, res, next) => {
     const token = authHeader.substring(7);
     
     // 验证JWT token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
     
     // 查找商户
     const merchant = await Merchant.findOne({ 
