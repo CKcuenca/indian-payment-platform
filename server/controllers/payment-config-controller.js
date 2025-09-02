@@ -77,6 +77,37 @@ class PaymentConfigController {
         });
       }
       
+      // 在创建前进行自定义验证
+      if (configData.provider) {
+        const providerName = configData.provider.name;
+        const apiKey = configData.provider.apiKey;
+        
+        console.log(`🔍 创建验证 - provider: ${providerName}, apiKey: "${apiKey}"`);
+        
+        // 对于非dhpay/unispay的支付商，apiKey必须有值
+        if (providerName && !['dhpay', 'unispay'].includes(providerName)) {
+          if (!apiKey || apiKey.trim().length === 0) {
+            return res.status(400).json({
+              success: false,
+              message: '创建支付配置失败',
+              error: `API Key is required for ${providerName} provider`
+            });
+          }
+        }
+        
+        // 对于unispay，mchNo必须有值
+        if (providerName === 'unispay') {
+          const mchNo = configData.provider.mchNo;
+          if (!mchNo || mchNo.trim().length === 0) {
+            return res.status(400).json({
+              success: false,
+              message: '创建支付配置失败',
+              error: 'Merchant Number is required for UniSpay provider'
+            });
+          }
+        }
+      }
+      
       const config = new PaymentConfig(configData);
       await config.save();
       
@@ -102,6 +133,37 @@ class PaymentConfigController {
     try {
       const { id } = req.params;
       const updateData = req.body;
+      
+      // 在更新前进行自定义验证
+      if (updateData.provider) {
+        const providerName = updateData.provider.name;
+        const apiKey = updateData.provider.apiKey;
+        
+        console.log(`🔍 控制器验证 - provider: ${providerName}, apiKey: "${apiKey}"`);
+        
+        // 对于非dhpay/unispay的支付商，apiKey必须有值
+        if (providerName && !['dhpay', 'unispay'].includes(providerName)) {
+          if (!apiKey || apiKey.trim().length === 0) {
+            return res.status(400).json({
+              success: false,
+              message: '更新支付配置失败',
+              error: `API Key is required for ${providerName} provider`
+            });
+          }
+        }
+        
+        // 对于unispay，mchNo必须有值
+        if (providerName === 'unispay') {
+          const mchNo = updateData.provider.mchNo;
+          if (!mchNo || mchNo.trim().length === 0) {
+            return res.status(400).json({
+              success: false,
+              message: '更新支付配置失败',
+              error: 'Merchant Number is required for UniSpay provider'
+            });
+          }
+        }
+      }
       
       const config = await PaymentConfig.findByIdAndUpdate(
         id,

@@ -47,37 +47,7 @@ const paymentConfigSchema = new mongoose.Schema({
     },
     apiKey: {
       type: String,
-      required: function() {
-        // 使用this.provider?.name来安全访问，避免undefined错误
-        const providerName = this.provider?.name;
-        return providerName && !['dhpay', 'unispay'].includes(providerName);
-      },
-      // 对于dhpay和unispay，允许空字符串或undefined
-      validate: {
-        validator: function(value) {
-          // 在更新时，this可能不是完整的文档，需要从父级获取provider信息
-          let providerName = this.provider?.name;
-          if (!providerName && this.parent && this.parent.provider) {
-            providerName = this.parent.provider.name;
-          }
-          if (!providerName && this.parent && this.parent.parent && this.parent.parent.provider) {
-            providerName = this.parent.parent.provider.name;
-          }
-          
-          console.log(`🔍 API Key验证 - provider: ${providerName}, value: "${value}"`);
-          console.log(`🔍 上下文信息 - this.provider:`, this.provider);
-          console.log(`🔍 上下文信息 - this.parent:`, this.parent);
-          
-          if (providerName && ['dhpay', 'unispay'].includes(providerName)) {
-            console.log(`✅ dhpay/unispay提供商，允许空值`);
-            return true; // 对于这些提供商，任何值都有效
-          }
-          const isValid = value && value.trim().length > 0;
-          console.log(`❌ 其他提供商，验证结果: ${isValid}`);
-          return isValid; // 其他提供商必须有值
-        },
-        message: 'API Key is required for this provider'
-      }
+      required: false // 移除required验证，改为在控制器层验证
     },
     secretKey: {
       type: String,
