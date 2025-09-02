@@ -63,10 +63,26 @@ router.post('/create', mgAuthMiddleware, async (req, res) => {
     }
     
     // 根据后台配置选择支付商
-    const paymentConfig = await PaymentConfig.findOne({
+    let paymentConfig;
+    
+    // 首先查找商户特定的配置
+    paymentConfig = await PaymentConfig.findOne({
       'merchantId': merchant.merchantId,
       'status': 'ACTIVE'
     });
+    
+    // 如果没有商户特定配置，查找商户关联的配置
+    if (!paymentConfig && merchant.paymentConfigs && merchant.paymentConfigs.length > 0) {
+      paymentConfig = await PaymentConfig.findOne({
+        '_id': { $in: merchant.paymentConfigs },
+        'status': 'ACTIVE'
+      });
+    }
+    
+    // 如果还是没有，使用默认支付商
+    if (!paymentConfig && merchant.defaultProvider) {
+      paymentConfig = await PaymentConfig.findById(merchant.defaultProvider);
+    }
     
     if (!paymentConfig) {
       return res.json(errorResponse(500, '未找到有效的支付配置'));
