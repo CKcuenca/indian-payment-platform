@@ -56,10 +56,14 @@ const paymentConfigSchema = new mongoose.Schema({
       validate: {
         validator: function(value) {
           const providerName = this.provider?.name;
+          console.log(`🔍 API Key验证 - provider: ${providerName}, value: "${value}"`);
           if (providerName && ['dhpay', 'unispay'].includes(providerName)) {
+            console.log(`✅ dhpay/unispay提供商，允许空值`);
             return true; // 对于这些提供商，任何值都有效
           }
-          return value && value.trim().length > 0; // 其他提供商必须有值
+          const isValid = value && value.trim().length > 0;
+          console.log(`❌ 其他提供商，验证结果: ${isValid}`);
+          return isValid; // 其他提供商必须有值
         },
         message: 'API Key is required for this provider'
       }
