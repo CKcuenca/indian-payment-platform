@@ -398,6 +398,12 @@ export default function PaymentManagementNew() {
         // 更新现有账户
         console.log('🔍 提交前的表单数据:', formData);
         console.log('🔍 提交前的accountData:', accountData);
+        console.log('🔍 表单中的代付费率:', formData.payoutTransactionFee);
+        console.log('🔍 accountData中的代付费率:', accountData.fees?.payout?.transactionFee);
+        
+        // 将数据保存到全局变量，方便在控制台中查看
+        (window as any).lastFormData = formData;
+        (window as any).lastAccountData = accountData;
         try {
           const updateResponse = await api.put(`/api/payment-config/${editingAccount._id}`, accountData);
           if (updateResponse.data.success) {
@@ -1201,7 +1207,15 @@ export default function PaymentManagementNew() {
                     label="代付交易费率 (%)"
                     type="number"
                     value={formData.payoutTransactionFee}
-                    onChange={(e) => setFormData({...formData, payoutTransactionFee: parseFloat(e.target.value)})}
+                    onChange={(e) => {
+                      const newValue = parseFloat(e.target.value);
+                      console.log('🔍 代付费率输入变化:', {
+                        inputValue: e.target.value,
+                        parsedValue: newValue,
+                        currentFormData: formData.payoutTransactionFee
+                      });
+                      setFormData({...formData, payoutTransactionFee: newValue});
+                    }}
                     inputProps={{ step: 0.01, min: 0 }}
                     helperText="代付交易费率，如3%输入3"
                     required
