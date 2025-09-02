@@ -184,11 +184,20 @@ router.post('/query', mgAuthMiddleware, async (req, res) => {
 async function createUnispayPayout(orderId, amount, currency, bankCode, accountNumber, ifscCode, accountName, transferMode, remark, merchant) {
   try {
     const UnispayProvider = require('../services/payment-providers/unispay-provider');
-    const paymentConfig = await PaymentConfig.findOne({
-      'merchantId': merchant.merchantId,
+    // 查找unispay配置，优先查找商户关联的配置
+    let paymentConfig = await PaymentConfig.findOne({
+      '_id': { $in: merchant.paymentConfigs },
       'provider.name': 'unispay',
       'status': 'ACTIVE'
     });
+    
+    // 如果没有找到，查找系统级配置
+    if (!paymentConfig) {
+      paymentConfig = await PaymentConfig.findOne({
+        'provider.name': 'unispay',
+        'status': 'ACTIVE'
+      });
+    }
     
     if (!paymentConfig) {
       return { success: false, error: 'UNISPAY配置未找到' };
@@ -265,11 +274,20 @@ async function createUnispayPayout(orderId, amount, currency, bankCode, accountN
 async function createPasspayPayout(orderId, amount, currency, bankCode, accountNumber, ifscCode, accountName, transferMode, remark, merchant) {
   try {
     const PasspayProvider = require('../services/payment-providers/passpay-provider');
-    const paymentConfig = await PaymentConfig.findOne({
-      'merchantId': merchant.merchantId,
+    // 查找passpay配置，优先查找商户关联的配置
+    let paymentConfig = await PaymentConfig.findOne({
+      '_id': { $in: merchant.paymentConfigs },
       'provider.name': 'passpay',
       'status': 'ACTIVE'
     });
+    
+    // 如果没有找到，查找系统级配置
+    if (!paymentConfig) {
+      paymentConfig = await PaymentConfig.findOne({
+        'provider.name': 'passpay',
+        'status': 'ACTIVE'
+      });
+    }
     
     if (!paymentConfig) {
       return { success: false, error: 'PassPay配置未找到' };
