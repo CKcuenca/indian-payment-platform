@@ -165,12 +165,12 @@ export default function PaymentManagementNew() {
             },
             fees: {
               collection: {
-                transactionFee: item.fees?.transactionFee || 0.5,
-                fixedFee: item.fees?.fixedFee || 0
+                transactionFee: item.fees?.collection?.transactionFee || 0.5,
+                fixedFee: item.fees?.collection?.fixedFee || 0
               },
               payout: {
-                transactionFee: item.fees?.transactionFee || 0.3,
-                fixedFee: item.fees?.fixedFee || 0
+                transactionFee: item.fees?.payout?.transactionFee || 0.3,
+                fixedFee: item.fees?.payout?.fixedFee || 0
               }
             },
             priority: item.priority || 1,
