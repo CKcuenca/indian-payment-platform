@@ -1,0 +1,121 @@
+name: Deploy to Test Environment
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: |
+          client/package-lock.json
+          server/package-lock.json
+          
+    - name: Install server dependencies
+      run: |
+        cd server
+        npm ci
+        
+    - name: Install client dependencies
+      run: |
+        cd client
+        npm ci
+        
+    - name: Build frontend
+      run: |
+        cd client
+        npm run build
+        
+    - name: Deploy to Test Environment
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: ${{ secrets.EC2_PORT }}
+        script: |
+          cd /var/www/test.cashgit.com
+          
+          # 同步Git仓库到最新版本
+          git fetch origin
+          git reset --hard origin/main
+          git clean -fd
+          
+          # 备份当前版本
+          if [ -d "backup" ]; then
+            rm -rf backup
+          fi
+          mkdir -p backup
+          cp -r client/build backup/client_build_$(date +%Y%m%d_%H%M%S) 2>/dev/null || true
+          cp -r server backup/server_$(date +%Y%m%d_%H%M%S) 2>/dev/null || true
+          
+          # 停止测试环境服务
+          pm2 stop test-indian-payment-platform || true
+          
+          # 等待服务完全停止
+          sleep 3
+          
+          echo "Test environment Git sync completed and service stopped"
+          
+    - name: Upload built files to test
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: ${{ secrets.EC2_PORT }}
+        source: "client/build/*"
+        target: "/var/www/test.cashgit.com/client/build"
+        strip_components: 2
+        
+    - name: Upload server files to test
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: ${{ secrets.EC2_PORT }}
+        source: "server/*"
+        target: "/var/www/test.cashgit.com/server"
+        strip_components: 1
+        
+    - name: Restart test services
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: ${{ secrets.EC2_PORT }}
+        script: |
+          cd /var/www/test.cashgit.com/server
+          
+          # 安装新的依赖
+          npm ci --only=production
+          
+          # 启动测试环境服务
+          pm2 start ecosystem.test.config.js
+          
+          # 检查服务状态
+          pm2 status
+          
+          # 验证测试环境
+          echo "=== 测试环境部署验证 ==="
+          echo "Git提交: $(git log --oneline -1)"
+          echo "PM2进程: $(pm2 list | grep test-indian-payment-platform)"
+          echo "健康检查: $(curl -s http://localhost:3002/api/health | grep -o '\"environment\":\"[^\"]*\"' || echo 'Health check failed')"
+          echo "=========================="
+          
+          echo "Test environment deployment completed successfully!"
