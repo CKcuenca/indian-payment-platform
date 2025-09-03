@@ -1,8 +1,8 @@
-name: Deploy to AWS EC2
+name: Deploy to Production Environment
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ production ]
   workflow_dispatch:
 
 jobs:
