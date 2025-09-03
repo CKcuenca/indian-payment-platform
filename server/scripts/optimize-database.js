@@ -145,4 +145,4 @@ if (require.main === module) {
   optimizeDatabase();
 }
 
-module.exports = optimizeDatabase;
+module.exports = optimizeDatabase; que dingquefu wdengwoa本地hueyjian c
