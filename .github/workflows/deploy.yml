@@ -1,9 +1,16 @@
 name: Deploy to Production Environment
 
 on:
-  push:
-    branches: [ production ]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: '部署环境'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - test
 
 jobs:
   build-and-deploy:
