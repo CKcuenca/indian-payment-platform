@@ -62,7 +62,10 @@ export const PAYMENT_PROVIDER_CONFIGS: Record<string, PaymentProviderConfig> = {
     defaultValues: {
       type: 'native',
       subType: 'wakeup',
-      environment: 'production'
+      environment: 'production',
+      accountId: '',
+      mchNo: '',
+      apiKey: ''
     },
     fieldLabels: {
       accountId: '商户ID',
