@@ -216,6 +216,8 @@ export default function PaymentManagementNew() {
     environment: 'sandbox',
     // UniSpay专用字段
     mchNo: '',
+    // PassPay专用字段
+    payId: '',
     description: '',
     // 回调URL配置
     collectionNotifyUrl: '',
@@ -257,6 +259,8 @@ export default function PaymentManagementNew() {
       environment: 'sandbox',
       // UniSpay专用字段
       mchNo: '',
+      // PassPay专用字段
+      payId: '',
       description: '',
       // 回调URL配置
       collectionNotifyUrl: '',
@@ -354,7 +358,9 @@ export default function PaymentManagementNew() {
           secretKey: formData.secretKey,
           environment: formData.environment,
           // UniSpay专用字段
-          mchNo: formData.mchNo
+          mchNo: formData.mchNo,
+          // PassPay专用字段
+          payId: formData.payId
         },
         description: formData.description,
         limits: {
@@ -938,6 +944,20 @@ export default function PaymentManagementNew() {
                       onChange={(e) => setFormData({...formData, mchNo: e.target.value})}
                       helperText={getFieldHelper(formData.providerName, 'mchNo')}
                       required={isFieldRequired(formData.providerName, 'mchNo')}
+                    />
+                  </Box>
+                )}
+                
+                {/* PassPay专用字段 - payId */}
+                {shouldShowField(formData.providerName, 'payId') && (
+                  <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                    <TextField
+                      fullWidth
+                      label={getFieldLabel(formData.providerName, 'payId')}
+                      value={formData.payId}
+                      onChange={(e) => setFormData({...formData, payId: e.target.value})}
+                      helperText={getFieldHelper(formData.providerName, 'payId')}
+                      required={isFieldRequired(formData.providerName, 'payId')}
                     />
                   </Box>
                 )}
