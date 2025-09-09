@@ -88,7 +88,7 @@ export default function Merchants() {
     name: '',
     email: '',
     status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE' | 'SUSPENDED',
-    defaultProvider: 'AirPay',
+    defaultProvider: 'passpay',
     
     // 用户绑定字段
     userId: '',
@@ -177,7 +177,7 @@ export default function Merchants() {
           name: apiData.name,
           email: apiData.status,
           status: apiData.status,
-          defaultProvider: apiData.paymentConfig?.defaultProvider || 'airpay',
+          defaultProvider: apiData.paymentConfig?.defaultProvider || 'passpay',
           
           // 代收（充值）配置
           deposit: {
@@ -353,7 +353,7 @@ export default function Merchants() {
       name: '',
       email: '',
       status: 'ACTIVE',
-      defaultProvider: 'AirPay',
+      defaultProvider: 'passpay',
       
       // 用户绑定字段
       userId: '',
@@ -661,7 +661,7 @@ export default function Merchants() {
           email: formData.email,
           status: formData.status,
           balance: 0,
-          defaultProvider: formData.defaultProvider || 'AirPay',
+          defaultProvider: formData.defaultProvider || 'passpay',
           paymentConfigs: formData.selectedPaymentConfigs || [],
           
           // 用户绑定字段

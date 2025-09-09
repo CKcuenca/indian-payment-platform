@@ -136,8 +136,8 @@ export default function PaymentManagementNew() {
             accountName: item.accountName,
             provider: {
               name: item.provider.name,
-              type: item.provider.type || 'native',
-              subType: item.provider.subType || 'third_party',
+              type: item.provider.type || 'wakeup',
+              subType: item.provider.subType || 'wakeup',
               accountId: item.provider.accountId,
               apiKey: item.provider.apiKey || '',
               secretKey: item.provider.secretKey || '',
@@ -208,8 +208,8 @@ export default function PaymentManagementNew() {
   const [formData, setFormData] = useState({
     accountName: '',
     providerName: '',
-    type: 'native',
-    subType: 'third_party', // 新增：子类型 (third_party, fourth_party)
+    type: 'wakeup',
+    subType: 'wakeup', // 仅唤醒支付
     accountId: '',
     apiKey: '',
     secretKey: '',
@@ -249,8 +249,8 @@ export default function PaymentManagementNew() {
     setFormData({
       accountName: '',
       providerName: '',
-      type: 'native',
-      subType: 'third_party',
+      type: 'wakeup',
+      subType: 'wakeup',
       accountId: '',
       apiKey: '',
       secretKey: '',
@@ -466,19 +466,10 @@ export default function PaymentManagementNew() {
 
   const getProviderColor = (providerName: string) => {
     const colors: {[key: string]: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'default'} = {
-      // 3方支付商
-      'airpay': 'primary',
-      'cashfree': 'secondary',
-      'razorpay': 'success',
-      'paytm': 'warning',
-      // 4方平台
-      'passpay': 'info',
-      '4party_platform1': 'info',
-      '4party_platform2': 'info',
-      '4party_platform3': 'info',
-              // 唤醒支付商
-        'unispay': 'error',
-        'dhpay': 'success'
+      // 仅保留唤醒支付商与必要标识
+      'unispay': 'error',
+      'dhpay': 'success',
+      'passpay': 'info'
     };
     return colors[providerName.toLowerCase()] || 'default';
   };
@@ -761,16 +752,14 @@ export default function PaymentManagementNew() {
                           
                           // 检查当前选中的支付商是否在新类型中可用
                           let shouldResetProvider = false;
-                          if (newType === 'native') {
-                            shouldResetProvider = !['airpay', 'cashfree', 'razorpay', 'paytm', 'passpay', '4party_platform1', '4party_platform2', '4party_platform3'].includes(currentProvider);
-                                                      } else if (newType === 'wakeup') {
-                              shouldResetProvider = !['unispay', 'dhpay'].includes(currentProvider);
+                          if (newType === 'wakeup') {
+                            shouldResetProvider = !['unispay', 'dhpay', 'passpay'].includes(currentProvider);
                           }
                           
                           const newState = {
                             ...prev, 
                             type: newType, 
-                            subType: newType === 'wakeup' ? 'wakeup' : 'third_party', // 重置子类型
+                            subType: 'wakeup', // 仅唤醒
                             providerName: shouldResetProvider ? '' : currentProvider
                           };
                           
@@ -779,12 +768,6 @@ export default function PaymentManagementNew() {
                         });
                       }}
                     >
-                      <MenuItem value="native">
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <AccountBalanceWallet color="secondary" />
-                          原生支付商
-                        </Box>
-                      </MenuItem>
                       <MenuItem value="wakeup">
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Smartphone color="primary" />
@@ -796,7 +779,7 @@ export default function PaymentManagementNew() {
                 </Box>
                 
                 {/* 原生支付商的子类型选择 */}
-                {formData.type === 'native' && (
+                {false && formData.type === 'native' && (
                   <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                     <FormControl fullWidth required>
                       <InputLabel>分支类型</InputLabel>
@@ -853,30 +836,15 @@ export default function PaymentManagementNew() {
                       onChange={(e) => handleProviderChange(e.target.value)}
                       disabled={!formData.type || !formData.subType}
                     >
-                      {formData.type === 'native' ? (
-                        formData.subType === 'third_party' ? [
-                          <MenuItem key="airpay" value="airpay">AirPay (3方)</MenuItem>,
-                          <MenuItem key="cashfree" value="cashfree">CashFree (3方)</MenuItem>,
-                          <MenuItem key="razorpay" value="razorpay">Razorpay (3方)</MenuItem>,
-                          <MenuItem key="paytm" value="paytm">Paytm (3方)</MenuItem>
-                        ] : formData.subType === 'fourth_party' ? [
-                          <MenuItem key="passpay" value="passpay">PassPay (4方平台)</MenuItem>,
-                          <MenuItem key="4party_platform1" value="4party_platform1">4方平台1 (统一API)</MenuItem>,
-                          <MenuItem key="4party_platform2" value="4party_platform2">4方平台2 (统一API)</MenuItem>,
-                          <MenuItem key="4party_platform3" value="4party_platform3">4方平台3 (统一API)</MenuItem>
-                        ] : [
-                          <MenuItem key="no-subtype" value="" disabled>请先选择分支类型</MenuItem>
-                        ]
-                                              ) : formData.type === 'wakeup' ? [
-                          <MenuItem key="unispay" value="unispay">UniSpay (唤醒)</MenuItem>,
-                          <MenuItem key="dhpay" value="dhpay">DhPay (唤醒)</MenuItem>
-                        ] : [
-                        <MenuItem key="no-type" value="" disabled>请先选择支付商类型</MenuItem>
+                      {[
+                        <MenuItem key="unispay" value="unispay">UniSpay (唤醒)</MenuItem>,
+                        <MenuItem key="dhpay" value="dhpay">DhPay (唤醒)</MenuItem>,
+                        <MenuItem key="passpay" value="passpay">PassPay (唤醒)</MenuItem>
                       ]}
                     </Select>
                     {/* 调试信息 */}
                     <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-                      当前类型: {formData.type} | 子类型: {formData.subType} | 支付商: {formData.providerName || '未选择'}
+                      当前类型: {formData.type} | 支付商: {formData.providerName || '未选择'}
                     </Typography>
                   </FormControl>
                 </Box>
