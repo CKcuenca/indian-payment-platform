@@ -3,6 +3,8 @@ const router = express.Router();
 const { apiKeyAuth } = require('../middleware/auth');
 const PassPayProvider = require('../services/payment-providers/passpay-provider');
 const PaymentConfig = require('../models/PaymentConfig');
+const Order = require('../models/order');
+const Transaction = require('../models/transaction');
 
 /**
  * @route GET /api/passpay/status
@@ -518,8 +520,60 @@ router.post('/callback', async (req, res) => {
       });
     }
 
-    // 处理回调数据
-    console.log('PassPay回调数据:', callbackData);
+    // 处理回调数据并更新订单状态
+    const { out_trade_no, trade_no, status, utr, amount } = callbackData;
+    if (!out_trade_no) {
+      return res.status(400).json({ success: false, error: '缺少out_trade_no' });
+    }
+
+    const order = await Order.findOne({ orderId: out_trade_no });
+    if (!order) {
+      return res.status(404).json({ success: false, error: '订单不存在' });
+    }
+
+    // 映射状态（与 provider 内保持一致）
+    const statusMap = { '0': 'PENDING', '1': 'PROCESSING', '2': 'SUCCESS', '3': 'FAILED', '4': 'CANCELLED', '5': 'EXPIRED' };
+    const newStatus = statusMap?.[String(status)] || 'PROCESSING';
+
+    // 更新订单字段
+    order.status = newStatus;
+    if (trade_no) {
+      order.provider = order.provider || {};
+      order.provider.transactionId = trade_no;
+      order.provider.providerOrderId = trade_no;
+    }
+    if (utr) {
+      order.provider = order.provider || {};
+      order.provider.utrNumber = utr;
+    }
+    if (newStatus === 'SUCCESS') {
+      order.paidAt = order.paidAt || new Date();
+    }
+    order.statusUpdatedAt = new Date();
+    await order.save();
+
+    // 成功时记录交易
+    if (newStatus === 'SUCCESS') {
+      try {
+        const txn = new Transaction({
+          transactionId: Transaction.generateTransactionId(),
+          orderId: order.orderId,
+          merchantId: order.merchantId,
+          type: order.type,
+          amount: typeof amount === 'number' ? Math.round(amount * 100) : order.amount,
+          currency: order.currency,
+          balanceChange: order.type === 'DEPOSIT' ? Math.round(order.amount) : -Math.round(order.amount),
+          balanceSnapshot: { before: 0, after: 0 },
+          status: 'SUCCESS',
+          provider: { name: 'passpay', transactionId: trade_no, utrNumber: utr },
+          description: 'PassPay回调入账',
+          completedAt: new Date()
+        });
+        await txn.save();
+      } catch (e) {
+        console.error('记录交易失败:', e);
+      }
+    }
 
     // 返回成功响应
     res.json({
