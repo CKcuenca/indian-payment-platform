@@ -131,11 +131,11 @@ export const PAYMENT_PROVIDER_CONFIGS: Record<string, PaymentProviderConfig> = {
     },
     fieldLabels: {
       secretKey: '商户密钥',
-      accountId: '商户ID'
+      accountId: '商户号 (merchantNo)'
     },
     fieldHelpers: {
       secretKey: 'PassPay提供的商户密钥，用于签名验证',
-      accountId: 'PassPay提供的商户ID'
+      accountId: 'PassPay提供的商户号 (merchantNo)'
     },
     specialNotes: [
       'PassPay配置说明：',
