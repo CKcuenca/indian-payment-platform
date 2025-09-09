@@ -84,13 +84,24 @@ class PaymentConfigController {
         
         console.log(`🔍 创建验证 - provider: ${providerName}, apiKey: "${apiKey}"`);
         
-        // 对于非dhpay/unispay的支付商，apiKey必须有值
-        if (providerName && !['dhpay', 'unispay'].includes(providerName)) {
+        // 对于除 dhpay/unispay/passpay 外的支付商，apiKey 必填
+        if (providerName && !['dhpay', 'unispay', 'passpay'].includes(providerName)) {
           if (!apiKey || apiKey.trim().length === 0) {
             return res.status(400).json({
               success: false,
               message: '创建支付配置失败',
               error: `API Key is required for ${providerName} provider`
+            });
+          }
+        }
+        // 对于 passpay，要求 payId 必填
+        if (providerName === 'passpay') {
+          const payId = configData.provider.payId;
+          if (!payId || payId.trim().length === 0) {
+            return res.status(400).json({
+              success: false,
+              message: '创建支付配置失败',
+              error: 'payId is required for PassPay provider'
             });
           }
         }
@@ -143,13 +154,24 @@ class PaymentConfigController {
         
         console.log(`🔍 控制器验证 - provider: ${providerName}, apiKey: "${apiKey}"`);
         
-        // 对于非dhpay/unispay的支付商，apiKey必须有值
-        if (providerName && !['dhpay', 'unispay'].includes(providerName)) {
+        // 对于除 dhpay/unispay/passpay 外的支付商，apiKey 必填
+        if (providerName && !['dhpay', 'unispay', 'passpay'].includes(providerName)) {
           if (!apiKey || apiKey.trim().length === 0) {
             return res.status(400).json({
               success: false,
               message: '更新支付配置失败',
               error: `API Key is required for ${providerName} provider`
+            });
+          }
+        }
+        // 对于 passpay，要求 payId 必填
+        if (providerName === 'passpay') {
+          const payId = updateData.provider.payId;
+          if (!payId || payId.trim().length === 0) {
+            return res.status(400).json({
+              success: false,
+              message: '更新支付配置失败',
+              error: 'payId is required for PassPay provider'
             });
           }
         }
