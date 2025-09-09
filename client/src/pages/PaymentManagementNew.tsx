@@ -302,6 +302,8 @@ export default function PaymentManagementNew() {
       environment: account.provider.environment,
       // UniSpay专用字段
       mchNo: account.provider.mchNo || '',
+      // PassPay专用字段
+      payId: account.provider.payId || '',
       description: account.description || '',
       // 代收限额
       collectionDailyLimit: account.limits.collection?.dailyLimit || 1000000,
