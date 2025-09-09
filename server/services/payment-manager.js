@@ -129,4 +129,10 @@ class PaymentManager {
         await provider.initialize();
         console.log(`Provider ${name} initialized successfully`);
       } catch (error) {
-        console.error(`
+        console.error(`Failed to initialize provider ${name}:`, error.message);
+      }
+    }
+  }
+}
+
+module.exports = PaymentManager;
