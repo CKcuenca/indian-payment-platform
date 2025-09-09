@@ -110,6 +110,33 @@ export const PAYMENT_PROVIDER_CONFIGS: Record<string, PaymentProviderConfig> = {
       '• 聚合多个支付商',
       '• 简化集成流程'
     ]
+  },
+
+  // PassPay（唤醒支付）配置
+  passpay: {
+    name: 'passpay',
+    displayName: 'PassPay',
+    type: 'wakeup',
+    subType: 'wakeup',
+    requiredFields: ['accountName', 'secretKey', 'environment'],
+    optionalFields: ['description'],
+    hiddenFields: ['apiKey', 'mchNo', 'accountId'],
+    defaultValues: {
+      type: 'wakeup',
+      subType: 'wakeup',
+      environment: 'production'
+    },
+    fieldLabels: {
+      secretKey: '商户密钥'
+    },
+    fieldHelpers: {
+      secretKey: 'PassPay提供的商户密钥，用于签名验证'
+    },
+    specialNotes: [
+      'PassPay配置说明：',
+      '• 属于唤醒支付类型',
+      '• 只需配置商户密钥与环境'
+    ]
   }
 };
 
