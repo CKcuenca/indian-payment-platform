@@ -82,38 +82,6 @@ export const PAYMENT_PROVIDER_CONFIGS: Record<string, PaymentProviderConfig> = {
     ]
   },
 
-  // 传统第三方支付商配置
-  airpay: {
-    name: 'airpay',
-    displayName: 'AirPay',
-    type: 'native',
-    subType: 'third_party',
-    requiredFields: ['accountName', 'accountId', 'apiKey', 'secretKey', 'environment'],
-    optionalFields: ['description'],
-    hiddenFields: ['mchNo'],
-    defaultValues: {
-      type: 'native',
-      subType: 'third_party',
-      environment: 'sandbox'
-    },
-    fieldLabels: {
-      accountId: '商户ID',
-      apiKey: 'API密钥',
-      secretKey: '密钥'
-    },
-    fieldHelpers: {
-      accountId: 'AirPay提供的商户ID',
-      apiKey: '用于API调用认证',
-      secretKey: '用于API签名验证，请保密'
-    },
-    specialNotes: [
-      'AirPay配置说明：',
-      '• 传统第三方支付商',
-      '• 需要API密钥和密钥',
-      '• 支持代收代付服务'
-    ]
-  },
-
   // 唤醒支付商配置
   wakeup: {
     name: 'wakeup',

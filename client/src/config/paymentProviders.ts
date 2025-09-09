@@ -3,64 +3,6 @@ import { PaymentProviderType, PaymentProviderCategory, PaymentProvider } from '.
 // 原生支付商配置
 export const NATIVE_PROVIDERS: PaymentProvider[] = [
   {
-    id: 'airpay',
-    name: 'airpay',
-    displayName: 'AirPay',
-    type: PaymentProviderType.NATIVE,
-    category: 'native',
-    isActive: true,
-    features: ['UPI支付', '银行卡支付', '钱包支付'],
-    supportedCurrencies: ['INR'],
-    environment: 'production',
-    config: {
-      apiKey: '',
-      secretKey: '',
-      accountId: '',
-      webhookUrl: ''
-    },
-    limits: {
-      minAmount: 100,
-      maxAmount: 1000000,
-      dailyLimit: 10000000,
-      monthlyLimit: 100000000
-    },
-    fees: {
-      transactionFee: 0.5,
-      fixedFee: 0
-    },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'cashfree',
-    name: 'cashfree',
-    displayName: 'CashFree',
-    type: PaymentProviderType.NATIVE,
-    category: 'native',
-    isActive: true,
-    features: ['UPI支付', '银行卡支付', '网银支付'],
-    supportedCurrencies: ['INR'],
-    environment: 'production',
-    config: {
-      apiKey: '',
-      secretKey: '',
-      accountId: '',
-      webhookUrl: ''
-    },
-    limits: {
-      minAmount: 100,
-      maxAmount: 1000000,
-      dailyLimit: 10000000,
-      monthlyLimit: 100000000
-    },
-    fees: {
-      transactionFee: 0.5,
-      fixedFee: 0
-    },
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
     id: 'razorpay',
     name: 'razorpay',
     displayName: 'Razorpay',

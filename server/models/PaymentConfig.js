@@ -22,7 +22,7 @@ const paymentConfigSchema = new mongoose.Schema({
     name: {
       type: String,
       required: true,
-      enum: ['airpay', 'cashfree', 'razorpay', 'paytm', 'mock', 'passpay', 'wakeup', 'unispay', 'dhpay']
+      enum: ['razorpay', 'paytm', 'mock', 'passpay', 'wakeup', 'unispay', 'dhpay']
     },
     type: {
       type: String,

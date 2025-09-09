@@ -1,4 +1,3 @@
-const AirPayProvider = require('./payment-providers/airpay-provider');
 const MockProvider = require('./payment-providers/mock-provider');
 const WakeupProvider = require('./payment-providers/wakeup-provider');
 const UnispayProvider = require('./payment-providers/unispay-provider');
@@ -130,10 +129,4 @@ class PaymentManager {
         await provider.initialize();
         console.log(`Provider ${name} initialized successfully`);
       } catch (error) {
-        console.error(`Failed to initialize provider ${name}:`, error.message);
-      }
-    }
-  }
-}
-
-module.exports = PaymentManager;
+        console.error(`
