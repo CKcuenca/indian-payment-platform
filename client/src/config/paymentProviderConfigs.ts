@@ -55,9 +55,9 @@ export const PAYMENT_PROVIDER_CONFIGS: Record<string, PaymentProviderConfig> = {
     displayName: 'UniSpay',
     type: 'native',
     subType: 'wakeup',
-    requiredFields: ['accountName', 'accountId', 'secretKey', 'environment', 'mchNo'],
+    requiredFields: ['accountName', 'secretKey', 'environment', 'mchNo'],
     optionalFields: ['description', 'apiKey'],
-    hiddenFields: ['apiKey'],
+    hiddenFields: ['apiKey', 'accountId'],
     defaultValues: {
       type: 'native',
       subType: 'wakeup',

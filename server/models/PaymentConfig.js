@@ -43,7 +43,10 @@ const paymentConfigSchema = new mongoose.Schema({
     },
     accountId: {
       type: String,
-      required: true
+      required: function() {
+        const providerName = this.provider?.name;
+        return providerName !== 'unispay';
+      }
     },
     apiKey: {
       type: String,
