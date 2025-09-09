@@ -59,6 +59,8 @@ interface PaymentAccount {
     environment: string;
     // UniSpay专用字段
     mchNo?: string;
+    // PassPay专用字段
+    payId?: string;
   };
   // 回调URL配置
   collectionNotifyUrl?: string;
