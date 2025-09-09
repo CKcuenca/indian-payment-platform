@@ -314,9 +314,7 @@ class PassPayProvider {
         pay_id: this.payId,
         out_trade_no: payoutData.orderId,
         amount: payoutData.amount.toFixed(2),
-        account_number: payoutData.accountNumber,
-        ifsc_code: payoutData.ifscCode,
-        account_holder: payoutData.accountHolder,
+        upi_id: payoutData.upiId,
         notify_url: payoutData.notifyUrl
       };
 

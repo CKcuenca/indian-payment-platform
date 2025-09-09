@@ -120,7 +120,7 @@ export const PAYMENT_PROVIDER_CONFIGS: Record<string, PaymentProviderConfig> = {
     displayName: 'PassPay',
     type: 'wakeup',
     subType: 'wakeup',
-    requiredFields: ['accountName', 'accountId', 'secretKey', 'environment'],
+    requiredFields: ['accountName', 'accountId', 'payId', 'secretKey', 'environment'],
     optionalFields: ['description'],
     hiddenFields: ['apiKey', 'mchNo'],
     defaultValues: {
@@ -131,11 +131,13 @@ export const PAYMENT_PROVIDER_CONFIGS: Record<string, PaymentProviderConfig> = {
     },
     fieldLabels: {
       secretKey: '商户密钥',
-      accountId: '商户号 (merchantNo)'
+      accountId: '商户号 (merchantNo)',
+      payId: '支付通道ID (payId)'
     },
     fieldHelpers: {
       secretKey: 'PassPay提供的商户密钥，用于签名验证',
-      accountId: 'PassPay提供的商户号 (merchantNo)'
+      accountId: 'PassPay提供的商户号 (merchantNo)',
+      payId: 'PassPay 提供的支付通道ID，用于区分通道'
     },
     specialNotes: [
       'PassPay配置说明：',

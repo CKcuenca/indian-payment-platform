@@ -277,12 +277,12 @@ router.post('/utr/query', apiKeyAuth, async (req, res) => {
  */
 router.post('/upi/query', apiKeyAuth, async (req, res) => {
   try {
-    const { upiId } = req.body;
+    const { orderId, tradeNo } = req.body;
 
-    if (!upiId) {
+    if (!orderId || !tradeNo) {
       return res.status(400).json({
         success: false,
-        error: '缺少必要参数：upiId'
+        error: '缺少必要参数：orderId, tradeNo'
       });
     }
 
@@ -302,7 +302,7 @@ router.post('/upi/query', apiKeyAuth, async (req, res) => {
     const passpay = new PassPayProvider(passpayConfig);
     
     // 查询UPI
-    const result = await passpay.queryUPI(upiId);
+    const result = await passpay.queryUPI(orderId, tradeNo);
 
     if (result.success) {
       res.json({

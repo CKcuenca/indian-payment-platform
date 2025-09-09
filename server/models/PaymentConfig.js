@@ -48,6 +48,13 @@ const paymentConfigSchema = new mongoose.Schema({
         return providerName !== 'unispay';
       }
     },
+    payId: {
+      type: String,
+      required: function() {
+        const providerName = this.provider?.name;
+        return providerName === 'passpay';
+      }
+    },
     apiKey: {
       type: String,
       required: false // 移除required验证，改为在控制器层验证
