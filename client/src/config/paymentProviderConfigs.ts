@@ -57,7 +57,7 @@ export const PAYMENT_PROVIDER_CONFIGS: Record<string, PaymentProviderConfig> = {
     subType: 'wakeup',
     requiredFields: ['accountName', 'accountId', 'secretKey', 'environment', 'mchNo'],
     optionalFields: ['description', 'apiKey'],
-    hiddenFields: [],
+    hiddenFields: ['apiKey'],
     defaultValues: {
       type: 'native',
       subType: 'wakeup',
