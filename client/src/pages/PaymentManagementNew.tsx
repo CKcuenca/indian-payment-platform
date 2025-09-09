@@ -913,7 +913,7 @@ export default function PaymentManagementNew() {
                 </Box>
                 
                 {/* 支付商特殊说明 - 根据选择的支付商动态显示 */}
-                {formData.providerName && getProviderNotes(formData.providerName).length > 0 && (
+                {false && formData.providerName && getProviderNotes(formData.providerName).length > 0 && (
                   <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                     <Alert severity="info" sx={{ mt: 1 }}>
                       <Typography variant="body2">
