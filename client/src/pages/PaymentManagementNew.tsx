@@ -349,8 +349,8 @@ export default function PaymentManagementNew() {
           name: formData.providerName,
           type: formData.type,
           subType: formData.subType, // 添加子类型
-          accountId: formData.providerName === 'dhpay' ? '66' : formData.accountId, // DhPay使用固定商户ID
-          apiKey: formData.providerName === 'dhpay' ? '' : formData.apiKey, // DhPay不需要API密钥
+          accountId: formData.accountId,
+          apiKey: formData.apiKey,
           secretKey: formData.secretKey,
           environment: formData.environment,
           // UniSpay专用字段
@@ -882,7 +882,6 @@ export default function PaymentManagementNew() {
                       onChange={(e) => setFormData({...formData, accountId: e.target.value})}
                       helperText={getFieldHelper(formData.providerName, 'accountId')}
                       required={isFieldRequired(formData.providerName, 'accountId')}
-                      disabled={formData.providerName === 'dhpay'} // DhPay使用固定值
                     />
                   </Box>
                 )}

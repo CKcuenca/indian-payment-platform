@@ -24,11 +24,11 @@ export const PAYMENT_PROVIDER_CONFIGS: Record<string, PaymentProviderConfig> = {
     displayName: 'DhPay',
     type: 'wakeup',
     subType: 'wakeup',
-    requiredFields: ['accountName', 'secretKey', 'environment'],
+    requiredFields: ['accountName', 'accountId', 'secretKey', 'environment'],
     optionalFields: ['description'],
-    hiddenFields: ['apiKey', 'mchNo', 'accountId'],
+    hiddenFields: ['apiKey', 'mchNo'],
     defaultValues: {
-      accountId: '66',
+      accountId: '',
       apiKey: '',
       type: 'wakeup',
       subType: 'wakeup',
@@ -40,12 +40,11 @@ export const PAYMENT_PROVIDER_CONFIGS: Record<string, PaymentProviderConfig> = {
     },
     fieldHelpers: {
       secretKey: 'DhPay提供的商户密钥，用于API签名验证',
-      accountId: '固定值66，由系统自动分配'
+      accountId: '由DhPay提供的商户ID'
     },
     specialNotes: [
       'DhPay配置说明：',
-      '• 商户ID已固定为系统分配值 (66)',
-      '• 只需填写商户密钥即可',
+      '• 需要填写商户ID与商户密钥',
       '• 支持唤醒支付模式'
     ]
   },
@@ -121,24 +120,27 @@ export const PAYMENT_PROVIDER_CONFIGS: Record<string, PaymentProviderConfig> = {
     displayName: 'PassPay',
     type: 'wakeup',
     subType: 'wakeup',
-    requiredFields: ['accountName', 'secretKey', 'environment'],
+    requiredFields: ['accountName', 'accountId', 'secretKey', 'environment'],
     optionalFields: ['description'],
-    hiddenFields: ['apiKey', 'mchNo', 'accountId'],
+    hiddenFields: ['apiKey', 'mchNo'],
     defaultValues: {
       type: 'wakeup',
       subType: 'wakeup',
-      environment: 'production'
+      environment: 'production',
+      accountId: ''
     },
     fieldLabels: {
-      secretKey: '商户密钥'
+      secretKey: '商户密钥',
+      accountId: '商户ID'
     },
     fieldHelpers: {
-      secretKey: 'PassPay提供的商户密钥，用于签名验证'
+      secretKey: 'PassPay提供的商户密钥，用于签名验证',
+      accountId: 'PassPay提供的商户ID'
     },
     specialNotes: [
       'PassPay配置说明：',
       '• 属于唤醒支付类型',
-      '• 只需配置商户密钥与环境'
+      '• 需要配置商户ID与商户密钥'
     ]
   }
 };
