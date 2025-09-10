@@ -48,40 +48,51 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { isAuthenticated, currentUser } = useAuth();
   
-  // 添加调试信息
-  console.log('=== ProtectedRoute 权限检查调试 ===');
-  console.log('路径:', window.location.pathname);
-  console.log('认证状态:', isAuthenticated);
-  console.log('当前用户:', currentUser);
-  console.log('用户角色:', currentUser?.role);
-  console.log('用户权限:', currentUser?.permissions);
-  console.log('需要权限:', permissions);
-  console.log('需要任意权限:', anyPermission);
+  // 开发环境调试信息
+  if (process.env.NODE_ENV === 'development') {
+    console.log('=== ProtectedRoute 权限检查调试 ===');
+    console.log('路径:', window.location.pathname);
+    console.log('认证状态:', isAuthenticated);
+    console.log('用户角色:', currentUser?.role);
+    console.log('需要权限:', permissions);
+  }
   
   if (!isAuthenticated || !currentUser) {
-    console.log('❌ 用户未认证，重定向到登录页面');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('❌ 用户未认证，重定向到登录页面');
+    }
     return <Navigate to="/login" replace />;
   }
 
   if (permissions.length > 0) {
     const hasAllPermissions = permissions.every(p => currentUser.permissions.includes(p));
-    console.log('检查所有权限:', permissions, '结果:', hasAllPermissions);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('检查所有权限:', permissions, '结果:', hasAllPermissions);
+    }
     if (!hasAllPermissions) {
-      console.log('❌ 用户缺少必要权限，重定向到仪表盘');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('❌ 用户缺少必要权限，重定向到仪表盘');
+      }
       return <Navigate to="/" replace />;
     }
   }
 
   if (anyPermission.length > 0) {
     const hasAnyPermission = anyPermission.some(p => currentUser.permissions.includes(p));
-    console.log('检查任意权限:', anyPermission, '结果:', hasAnyPermission);
+    if (process.env.NODE_ENV === 'development') {
+      console.log('检查任意权限:', anyPermission, '结果:', hasAnyPermission);
+    }
     if (!hasAnyPermission) {
-      console.log('❌ 用户缺少任意权限，重定向到仪表盘');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('❌ 用户缺少任意权限，重定向到仪表盘');
+      }
       return <Navigate to="/" replace />;
     }
   }
 
-  console.log('✅ 权限检查通过，渲染组件');
+  if (process.env.NODE_ENV === 'development') {
+    console.log('✅ 权限检查通过，渲染组件');
+  }
   return <>{children}</>;
 };
 

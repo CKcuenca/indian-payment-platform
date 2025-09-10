@@ -25,10 +25,21 @@ class AuthService {
     // 从本地存储恢复用户状态
     this.token = localStorage.getItem('auth_token');
     const userData = localStorage.getItem('user_data');
-    if (userData) {
+    const tokenExpiry = localStorage.getItem('token_expiry');
+    
+    // 检查token是否过期
+    if (tokenExpiry && Date.now() > parseInt(tokenExpiry)) {
+      this.clearAuth();
+      return;
+    }
+    
+    if (userData && this.token) {
       try {
         this.currentUser = JSON.parse(userData);
         this.initializePermissionManager();
+        
+        // 设置API请求头
+        api.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
       } catch (error) {
         console.error('Failed to parse user data:', error);
         this.clearAuth();
@@ -60,9 +71,11 @@ class AuthService {
         this.token = token;
         this.currentUser.permissions = permissions;
         
-        // 保存到本地存储
+        // 保存到本地存储（设置token 24小时后过期）
+        const expiryTime = Date.now() + (24 * 60 * 60 * 1000);
         localStorage.setItem('auth_token', token);
         localStorage.setItem('user_data', JSON.stringify(user));
+        localStorage.setItem('token_expiry', expiryTime.toString());
         
         // 初始化权限管理器
         this.initializePermissionManager();
@@ -103,6 +116,43 @@ class AuthService {
     this.token = null;
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_data');
+    localStorage.removeItem('token_expiry');
+  }
+
+  // 检查token是否即将过期
+  isTokenExpiringSoon(): boolean {
+    const tokenExpiry = localStorage.getItem('token_expiry');
+    if (!tokenExpiry) return false;
+    
+    // 如果30分钟内过期，返回true
+    const expiry = parseInt(tokenExpiry);
+    const thirtyMinutes = 30 * 60 * 1000;
+    return (expiry - Date.now()) < thirtyMinutes;
+  }
+
+  // 刷新token（如果支持）
+  async refreshToken(): Promise<boolean> {
+    try {
+      if (!this.token) return false;
+      
+      const response = await api.post('/api/auth/refresh', { token: this.token });
+      if (response.data.success) {
+        const { token: newToken } = response.data.data;
+        this.token = newToken;
+        
+        // 更新本地存储
+        const expiryTime = Date.now() + (24 * 60 * 60 * 1000);
+        localStorage.setItem('auth_token', newToken);
+        localStorage.setItem('token_expiry', expiryTime.toString());
+        
+        // 更新API请求头
+        api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+        return true;
+      }
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+    }
+    return false;
   }
 
   // 获取当前用户

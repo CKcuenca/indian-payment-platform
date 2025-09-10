@@ -18,6 +18,7 @@ const CashGitPaymentTest: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [secretKey, setSecretKey] = useState('test_secret_key_123456');
 
   // 支付订单参数
   const [paymentParams, setPaymentParams] = useState<Partial<CashGitPaymentRequest>>({
@@ -66,28 +67,28 @@ const CashGitPaymentTest: React.FC = () => {
 
   const handleCreatePayment = () => {
     handleApiCall(
-      () => cashgitApiService.createPayment(paymentParams as CashGitPaymentRequest),
+      () => cashgitApiService.createPayment(paymentParams as Omit<CashGitPaymentRequest, 'sign'>, secretKey),
       '创建支付订单'
     );
   };
 
   const handleQueryOrder = () => {
     handleApiCall(
-      () => cashgitApiService.queryOrder(queryParams as CashGitQueryRequest),
+      () => cashgitApiService.queryOrder(queryParams as Omit<CashGitQueryRequest, 'sign'>, secretKey),
       '查询订单'
     );
   };
 
   const handleRefund = () => {
     handleApiCall(
-      () => cashgitApiService.requestRefund(refundParams as CashGitRefundRequest),
+      () => cashgitApiService.requestRefund(refundParams as Omit<CashGitRefundRequest, 'sign'>, secretKey),
       '申请退款'
     );
   };
 
   const handleCloseOrder = () => {
     handleApiCall(
-      () => cashgitApiService.closeOrder(closeParams as CashGitCloseRequest),
+      () => cashgitApiService.closeOrder(closeParams as Omit<CashGitCloseRequest, 'sign'>, secretKey),
       '关闭订单'
     );
   };
@@ -101,6 +102,22 @@ const CashGitPaymentTest: React.FC = () => {
       <Alert severity="info" sx={{ mb: 3 }}>
         此页面用于测试CashGit支付API的各项功能。请确保后端服务器正在运行。
       </Alert>
+
+      {/* 全局配置 */}
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          全局配置
+        </Typography>
+        <TextField
+          fullWidth
+          label="商户密钥 (secretKey)"
+          type="password"
+          value={secretKey}
+          onChange={(e) => setSecretKey(e.target.value)}
+          helperText="用于生成签名的商户密钥"
+          sx={{ maxWidth: 400 }}
+        />
+      </Paper>
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
         {/* 创建支付订单 */}
