@@ -29,6 +29,9 @@ router.post('/pay', mgAuthMiddleware, async (req, res) => {
       return res.json(errorResponse(400, '金额格式不正确'));
     }
     
+    // 转换为paisa单位存储到数据库
+    const amountInPaisa = Math.round(numAmount * 100);
+    
     // 检查订单是否已存在
     const existingOrder = await Order.findOne({ 
       orderId: orderid, 
@@ -71,7 +74,7 @@ router.post('/pay', mgAuthMiddleware, async (req, res) => {
         name: 'passpay',
         transactionId: passpayResult.data.tradeNo
       },
-      amount: numAmount,
+      amount: amountInPaisa,
       description: desc || 'CashGit支付订单',
       status: 'PENDING',
       paymentMethod: 'passpay_payment',
@@ -142,7 +145,7 @@ router.post('/query', mgAuthMiddleware, async (req, res) => {
       // 如果PassPay查询失败，返回本地状态
       const responseData = {
         orderid: order.orderId,
-        amount: order.amount.toString(),
+        amount: (order.amount / 100).toFixed(2),
         status: order.status,
         paytime: order.paidAt ? order.paidAt.getTime() : null,
         desc: order.description
@@ -166,7 +169,7 @@ router.post('/query', mgAuthMiddleware, async (req, res) => {
     // 返回PassPay的最新状态
     const responseData = {
       orderid: order.orderId,
-      amount: order.amount.toString(),
+      amount: (order.amount / 100).toFixed(2),
       status: passpayResult.data.status,
       paytime: order.paidAt ? order.paidAt.getTime() : null,
       desc: order.description,
@@ -243,7 +246,8 @@ router.post('/refund', mgAuthMiddleware, async (req, res) => {
     }
     
     const refundAmount = parseFloat(amount);
-    if (isNaN(refundAmount) || refundAmount <= 0 || refundAmount > order.amount) {
+    const refundAmountInPaisa = Math.round(refundAmount * 100);
+    if (isNaN(refundAmount) || refundAmount <= 0 || refundAmountInPaisa > order.amount) {
       return res.json(errorResponse(400, '退款金额不正确'));
     }
     
@@ -252,11 +256,8 @@ router.post('/refund', mgAuthMiddleware, async (req, res) => {
       transactionId: `refund_${Date.now()}`,
       orderId: order.orderId,
       merchantId: merchant.merchantId,
-      type: 'DEPOSIT', // 支付订单类型为充值
-      provider: {
-        name: 'cashgit' // 设置支付提供者名称
-      },      type: 'refund',
-      amount: refundAmount,
+      type: 'REFUND',
+      amount: refundAmountInPaisa,
       status: 'PENDING',
       description: `退款订单: ${orderid}`,
       createdAt: new Date()
@@ -312,6 +313,7 @@ router.post('/utr/submit', mgAuthMiddleware, async (req, res) => {
     
     // 验证金额
     const utrAmount = parseFloat(amount);
+    const utrAmountInPaisa = Math.round(utrAmount * 100);
     if (isNaN(utrAmount) || utrAmount <= 0) {
       return res.json(errorResponse(400, 'UTR金额格式不正确'));
     }
@@ -343,7 +345,7 @@ router.post('/utr/submit', mgAuthMiddleware, async (req, res) => {
     order.status = 'PROCESSING';
     order.updatedAt = new Date();
     order.provider.utrNumber = utr_number;
-    order.provider.utrAmount = utrAmount;
+    order.provider.utrAmount = utrAmountInPaisa;
     
     // 添加状态历史记录
     order.statusHistory.push({
@@ -365,7 +367,7 @@ router.post('/utr/submit', mgAuthMiddleware, async (req, res) => {
         name: 'passpay',
         utrNumber: utr_number
       },
-      amount: utrAmount,
+      amount: utrAmountInPaisa,
       status: 'PENDING',
       description: `UTR补单: ${utr_number}`,
       createdAt: new Date()
@@ -438,7 +440,7 @@ router.post('/utr/query', mgAuthMiddleware, async (req, res) => {
       return res.json(successResponse({
         orderid,
         utr_number: utrTransaction.provider.utrNumber,
-        amount: utrTransaction.amount,
+        amount: (utrTransaction.amount / 100).toFixed(2),
         status: utrTransaction.status,
         created_at: utrTransaction.createdAt
       }, 'UTR查询成功（本地状态）'));
@@ -537,6 +539,7 @@ router.post('/payout/create', mgAuthMiddleware, async (req, res) => {
     
     // 验证金额
     const payoutAmount = parseFloat(amount);
+    const payoutAmountInPaisa = Math.round(payoutAmount * 100);
     if (isNaN(payoutAmount) || payoutAmount <= 0) {
       return res.json(errorResponse(400, '代付金额格式不正确'));
     }
@@ -586,7 +589,7 @@ router.post('/payout/create', mgAuthMiddleware, async (req, res) => {
         name: 'passpay',
         transactionId: passpayResult.data.tradeNo
       },
-      amount: payoutAmount,
+      amount: payoutAmountInPaisa,
       description: '代付订单',
       status: 'PENDING',
       paymentMethod: 'passpay_payout',
@@ -658,7 +661,7 @@ router.post('/payout/query', mgAuthMiddleware, async (req, res) => {
       // 如果PassPay查询失败，返回本地状态
       return res.json(successResponse({
         orderid,
-        amount: order.amount.toString(),
+        amount: (order.amount / 100).toFixed(2),
         status: order.status,
         account_number: order.bankAccount?.accountNumber,
         ifsc_code: order.bankAccount?.ifscCode,
@@ -678,7 +681,7 @@ router.post('/payout/query', mgAuthMiddleware, async (req, res) => {
     // 返回PassPay的最新状态
     res.json(successResponse({
       orderid,
-      amount: order.amount.toString(),
+      amount: (order.amount / 100).toFixed(2),
       status: passpayResult.data.status,
       account_number: order.bankAccount?.accountNumber,
       ifsc_code: order.bankAccount?.ifscCode,
@@ -742,11 +745,11 @@ router.post('/balance/query', mgAuthMiddleware, async (req, res) => {
       const availableBalance = deposits - withdrawals - refunds;
       
       return res.json(successResponse({
-        balance: availableBalance.toFixed(2),
+        balance: (availableBalance / 100).toFixed(2),
         currency: 'INR',
-        total_deposits: deposits.toFixed(2),
-        total_withdrawals: withdrawals.toFixed(2),
-        total_refunds: refunds.toFixed(2),
+        total_deposits: (deposits / 100).toFixed(2),
+        total_withdrawals: (withdrawals / 100).toFixed(2),
+        total_refunds: (refunds / 100).toFixed(2),
         last_update: new Date().toISOString(),
         note: '本地计算余额（PassPay查询失败）'
       }, '余额查询成功（本地计算）'));

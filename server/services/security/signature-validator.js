@@ -114,6 +114,138 @@ class SignatureValidator {
   }
 
   /**
+   * 验证DhPay签名
+   * @param {Object} params - 请求参数
+   * @param {string} secretKey - 密钥
+   * @param {string} receivedSignature - 接收到的签名
+   * @returns {Object} 验证结果
+   */
+  async validateDhPaySignature(params, secretKey, receivedSignature) {
+    try {
+      // 生成DhPay签名
+      const expectedSignature = this.generateDhPaySignature(params, secretKey);
+      
+      // 签名对比 (DhPay使用大写)
+      if (expectedSignature.toUpperCase() !== receivedSignature.toUpperCase()) {
+        return {
+          valid: false,
+          error: 'DhPay签名验证失败',
+          code: 'DHPAY_SIGNATURE_MISMATCH',
+          details: {
+            expected: expectedSignature,
+            received: receivedSignature
+          }
+        };
+      }
+
+      return {
+        valid: true,
+        message: 'DhPay签名验证成功'
+      };
+    } catch (error) {
+      return {
+        valid: false,
+        error: `DhPay签名验证异常: ${error.message}`,
+        code: 'DHPAY_SIGNATURE_ERROR'
+      };
+    }
+  }
+
+  /**
+   * 生成DhPay签名
+   * @param {Object} params - 参数对象
+   * @param {string} secretKey - 密钥
+   * @returns {string} 生成的签名
+   */
+  generateDhPaySignature(params, secretKey) {
+    // 过滤空值参数
+    const filteredParams = {};
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== null && value !== undefined && value !== '' && key !== 'sign') {
+        filteredParams[key] = value;
+      }
+    }
+
+    // 按参数名ASCII码从小到大排序
+    const sortedKeys = Object.keys(filteredParams).sort();
+    
+    // 使用URL键值对格式拼接
+    const stringA = sortedKeys.map(key => `${key}=${filteredParams[key]}`).join('&');
+    
+    // 拼接密钥
+    const stringSignTemp = stringA + '&secretKey=' + secretKey;
+    
+    // MD5加密并转大写
+    return crypto.createHash('md5').update(stringSignTemp).digest('hex').toUpperCase();
+  }
+
+  /**
+   * 验证UnisPay签名
+   * @param {Object} params - 请求参数
+   * @param {string} secretKey - 密钥
+   * @param {string} receivedSignature - 接收到的签名
+   * @returns {Object} 验证结果
+   */
+  async validateUnispaySignature(params, secretKey, receivedSignature) {
+    try {
+      // 生成UnisPay签名
+      const expectedSignature = this.generateUnispaySignature(params, secretKey);
+      
+      // 签名对比 (UnisPay使用小写)
+      if (expectedSignature.toLowerCase() !== receivedSignature.toLowerCase()) {
+        return {
+          valid: false,
+          error: 'UnisPay签名验证失败',
+          code: 'UNISPAY_SIGNATURE_MISMATCH',
+          details: {
+            expected: expectedSignature,
+            received: receivedSignature
+          }
+        };
+      }
+
+      return {
+        valid: true,
+        message: 'UnisPay签名验证成功'
+      };
+    } catch (error) {
+      return {
+        valid: false,
+        error: `UnisPay签名验证异常: ${error.message}`,
+        code: 'UNISPAY_SIGNATURE_ERROR'
+      };
+    }
+  }
+
+  /**
+   * 生成UnisPay签名
+   * @param {Object} params - 参数对象
+   * @param {string} secretKey - 密钥
+   * @returns {string} 生成的签名
+   */
+  generateUnispaySignature(params, secretKey) {
+    // 移除sign字段
+    const { sign, ...signParams } = params;
+    
+    // 按字母顺序排序
+    const sortedKeys = Object.keys(signParams).sort();
+    
+    // 构建签名字符串
+    let signStr = '';
+    sortedKeys.forEach(key => {
+      if (signParams[key] !== undefined && signParams[key] !== null && signParams[key] !== '') {
+        signStr += `${key}=${signParams[key]}&`;
+      }
+    });
+    
+    // 移除最后的&，然后添加密钥
+    signStr = signStr.slice(0, -1) + `&key=${secretKey}`;
+    
+    // 生成SHA-256签名（16进制小写）
+    return crypto.createHash('sha256').update(signStr).digest('hex');
+  }
+
+  /**
    * 生成更安全的HMAC-SHA256签名
    * @param {Object} params - 参数对象
    * @param {string} secretKey - 密钥

@@ -86,8 +86,8 @@ class DhPayProvider {
     // 3. 使用URL键值对格式拼接
     const stringA = sortedKeys.map(key => `${key}=${filteredParams[key]}`).join('&');
     
-    // 4. 拼接密钥
-    const stringSignTemp = stringA + this.secretKey;
+    // 4. 拼接密钥 - 修复：按照DhPay文档要求拼接&secretKey=
+    const stringSignTemp = stringA + '&secretKey=' + this.secretKey;
     
     // 5. MD5加密并转大写
     const sign = crypto.createHash('md5').update(stringSignTemp).digest('hex').toUpperCase();

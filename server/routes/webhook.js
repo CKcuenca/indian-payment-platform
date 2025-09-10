@@ -96,7 +96,7 @@ router.post('/passpay/collection', async (req, res) => {
       updatedAt: new Date(),
       'paymentDetails.tradeNo': trade_no,
       'paymentDetails.utr': utr,
-      'paymentDetails.realAmount': parseFloat(real_amount || amount)
+      'paymentDetails.realAmount': Math.round(parseFloat(real_amount || amount) * 100)
     };
 
     if (orderStatus === 'SUCCESS') {
@@ -109,8 +109,8 @@ router.post('/passpay/collection', async (req, res) => {
     const transactionData = {
       orderId: order._id,
       transactionId: trade_no,
-      amount: parseFloat(amount),
-      realAmount: parseFloat(real_amount || amount),
+      amount: Math.round(parseFloat(amount) * 100),
+      realAmount: Math.round(parseFloat(real_amount || amount) * 100),
       status: orderStatus,
       provider: 'passpay',
       utr: utr,
@@ -139,8 +139,8 @@ router.post('/passpay/collection', async (req, res) => {
       tradeNo: trade_no
     });
 
-    // 返回成功响应
-    res.json({ success: true, message: '回调处理成功' });
+    // 返回成功响应 - 修复：PassPay要求返回纯字符串"success"
+    res.send('success');
 
   } catch (error) {
     console.error('PassPay代收回调处理失败:', error);
@@ -227,7 +227,7 @@ router.post('/passpay/payout', async (req, res) => {
     const transactionData = {
       orderId: order._id,
       transactionId: trade_no,
-      amount: parseFloat(amount),
+      amount: Math.round(parseFloat(amount) * 100),
       status: orderStatus,
       provider: 'passpay',
       utr: utr,
@@ -248,8 +248,8 @@ router.post('/passpay/payout', async (req, res) => {
       tradeNo: trade_no
     });
 
-    // 返回成功响应
-    res.json({ success: true, message: '回调处理成功' });
+    // 返回成功响应 - 修复：PassPay要求返回纯字符串"success"
+    res.send('success');
 
   } catch (error) {
     console.error('PassPay代付回调处理失败:', error);
@@ -293,9 +293,10 @@ function generatePassPaySignature(params, secretKey) {
  */
 function mapPassPayStatus(status) {
   const statusMap = {
-    3: 'PENDING',      // 交易中
-    5: 'SUCCESS',      // 交易成功
-    6: 'FAILED'        // 交易失败
+    '1': 'PENDING',      // 订单创建成功
+    '3': 'PROCESSING',   // 交易中
+    '5': 'SUCCESS',      // 交易成功
+    '6': 'FAILED'        // 交易失败
   };
   return statusMap[status] || 'UNKNOWN';
 }
@@ -305,9 +306,10 @@ function mapPassPayStatus(status) {
  */
 function mapPassPayPayoutStatus(status) {
   const statusMap = {
-    3: 'PENDING',      // 交易中
-    5: 'SUCCESS',      // 代付交易成功
-    6: 'FAILED'        // 代付交易失败
+    '1': 'PENDING',      // 订单创建成功
+    '3': 'PROCESSING',   // 交易中
+    '5': 'SUCCESS',      // 代付交易成功
+    '6': 'FAILED'        // 代付交易失败
   };
   return statusMap[status] || 'UNKNOWN';
 }
@@ -419,7 +421,7 @@ router.post('/unispay/collection', async (req, res) => {
     await forwardNotificationToMerchant(order, {
       status: orderStatus,
       orderNo: orderNo,
-      amount: amount,
+      amount: parseFloat(amount),  // 保持rupees格式给下游商户
       currency: currency,
       successTime: successTime,
       message: msg
@@ -457,7 +459,7 @@ async function forwardNotificationToMerchant(order, statusUpdate) {
       orderId: order.orderId,
       merchantId: order.merchantId,
       status: statusUpdate.status,
-      amount: order.amount,
+      amount: (order.amount / 100).toFixed(2),  // 转换为rupees格式
       currency: order.currency,
       fee: order.fee,
       netAmount: order.netAmount,
@@ -531,11 +533,11 @@ function generateNotificationSignature(data, secretKey) {
  */
 function mapUnispayStatus(state) {
   const statusMap = {
-    1: 'PENDING',      // 待处理
-    2: 'PROCESSING',   // 处理中
-    3: 'SUCCESS',      // 成功
-    4: 'FAILED',       // 失败
-    5: 'CANCELLED'     // 已取消
+    '0': 'PENDING',      // 待支付
+    '1': 'SUCCESS',      // 支付成功
+    '2': 'FAILED',       // 支付失败
+    '3': 'CANCELLED',    // 已取消
+    '4': 'REFUNDED'      // 已退款
   };
   return statusMap[state] || 'UNKNOWN';
 }

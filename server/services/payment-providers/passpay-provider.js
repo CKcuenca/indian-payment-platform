@@ -90,7 +90,7 @@ class PassPayProvider {
         mchid: this.mchid,
         pay_id: this.payId,
         out_trade_no: orderData.orderId,
-        amount: orderData.amount.toFixed(2), // 保留两位小数
+        amount: (orderData.amount / 100).toFixed(2), // 修复：转换为卢比并保留两位小数字符串格式
         notify_url: orderData.notifyUrl
       };
 
@@ -114,7 +114,14 @@ class PassPayProvider {
           }
         };
       } else {
-        throw new Error(response.data.message || '创建代收订单失败');
+        // 完善错误处理：根据PassPay文档支持业务级错误处理
+        let errorMessage = response.data.message || '创建代收订单失败';
+        if (errorMessage.includes('Channel closed')) {
+          errorMessage = '支付通道已关闭，请联系运营支持';
+        } else if (errorMessage.includes('Insufficient')) {
+          errorMessage = '余额不足，请充值后重试';
+        }
+        throw new Error(errorMessage);
       }
     } catch (error) {
       console.error('PassPay创建代收订单失败:', error);
@@ -313,7 +320,7 @@ class PassPayProvider {
         mchid: this.mchid,
         pay_id: this.payId,
         out_trade_no: payoutData.orderId,
-        amount: payoutData.amount.toFixed(2),
+        amount: (payoutData.amount / 100).toFixed(2), // 修复：转换为卢比并保留两位小数字符串格式
         upi_id: payoutData.upiId,
         notify_url: payoutData.notifyUrl
       };
@@ -422,7 +429,14 @@ class PassPayProvider {
           }
         };
       } else {
-        throw new Error(response.data.message || '余额查询失败');
+        // 完善错误处理：根据PassPay文档支持业务级错误处理
+        let errorMessage = response.data.message || '余额查询失败';
+        if (response.data.rCode === 401) {
+          errorMessage = '签名验证失败，请检查配置';
+        } else if (response.data.rCode === 403) {
+          errorMessage = '无权查询余额，请检查商户权限';
+        }
+        throw new Error(errorMessage);
       }
     } catch (error) {
       console.error('PassPay余额查询失败:', error);
@@ -460,13 +474,12 @@ class PassPayProvider {
    * 映射PassPay状态到系统状态
    */
   mapStatus(status) {
+    // 修复：根据PassPay文档要求的状态码映射
     const statusMap = {
-      '0': 'PENDING',      // 待处理
-      '1': 'PROCESSING',   // 处理中
-      '2': 'SUCCESS',      // 成功
-      '3': 'FAILED',       // 失败
-      '4': 'CANCELLED',    // 取消
-      '5': 'EXPIRED'       // 过期
+      '1': 'PENDING',      // 订单创建成功
+      '3': 'PROCESSING',   // 交易中
+      '5': 'SUCCESS',      // 交易成功
+      '6': 'FAILED'        // 交易失败
     };
     return statusMap[status] || 'UNKNOWN';
   }
