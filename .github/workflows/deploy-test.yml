@@ -34,10 +34,11 @@ jobs:
         cd client
         npm ci
         
-    - name: Build frontend
+    - name: Build frontend for test environment
       run: |
         cd client
-        npm run build
+        # 使用测试环境专用构建脚本
+        npm run build:test
         
     - name: Deploy to Test Environment
       uses: appleboy/ssh-action@v1.0.3
@@ -119,5 +120,7 @@ jobs:
           echo "=========================="
           
           echo "Test environment deployment completed successfully!"
+
+
 
 

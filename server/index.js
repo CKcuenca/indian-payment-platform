@@ -14,7 +14,35 @@ const PORT = process.env.PORT || 3001;
 
 // 安全中间件
 app.use(helmet());
-app.use(cors());
+
+// CORS配置 - 明确指定允许的域名
+const corsOptions = {
+  origin: function (origin, callback) {
+    // 允许的域名列表
+    const allowedOrigins = [
+      'http://localhost:3000',        // 本地开发
+      'https://cashgit.com',          // 生产环境
+      'https://test.cashgit.com',     // 测试环境
+      'https://www.cashgit.com',      // 生产环境www
+      'https://www.test.cashgit.com'  // 测试环境www
+    ];
+    
+    // 允许没有origin的请求（如移动应用、Postman等）
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('❌ CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // 允许发送凭证
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key']
+};
+
+app.use(cors(corsOptions));
 
 // 信任代理设置 - 只信任本地和私有网络
 app.set('trust proxy', ['127.0.0.1', '::1', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16']);
