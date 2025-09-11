@@ -37,7 +37,12 @@ import {
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   AccountBalance as AccountBalanceIcon,
-
+  Security as SecurityIcon,
+  Add as AddIPIcon,
+  Delete as DeleteIPIcon,
+  CheckCircle as CheckCircleIcon,
+  Block as BlockIcon,
+  NetworkCheck as NetworkCheckIcon,
   History as HistoryIcon,
 } from '@mui/icons-material';
 import { Merchant, UserRole } from '../types';
@@ -81,7 +86,52 @@ export default function Merchants() {
   const [users, setUsers] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   
+  // IP白名单管理相关状态
+  const [newIP, setNewIP] = useState({ ip: '', mask: 32, description: '' });
+  const [testIP, setTestIP] = useState('');
+  const [testResult, setTestResult] = useState<any>(null);
+  const [testLoading, setTestLoading] = useState(false);
 
+  // 加载IP白名单数据
+  const loadIPWhitelist = async (merchantId: string) => {
+    try {
+      const response = await api.get('/api/ip-whitelist', {
+        params: { merchantId }
+      });
+      if (response.data.success) {
+        const ipData = response.data.data;
+        setFormData(prev => ({
+          ...prev,
+          ipWhitelist: {
+            enabled: ipData.enabled,
+            strictMode: ipData.strictMode,
+            allowedIPs: ipData.allowedIPs || [],
+            accessRules: ipData.accessRules
+          }
+        }));
+      }
+    } catch (error) {
+      console.error('加载IP白名单失败:', error);
+    }
+  };
+
+  // 更新IP白名单配置
+  const updateIPWhitelist = async (merchantId: string) => {
+    try {
+      // 更新基础配置
+      await api.put('/api/ip-whitelist/config', {
+        enabled: formData.ipWhitelist.enabled,
+        strictMode: formData.ipWhitelist.strictMode,
+        accessRules: formData.ipWhitelist.accessRules
+      });
+
+      // 这里可以添加同步IP列表的逻辑
+      // 由于IP列表通过前端管理，可以考虑批量更新
+      console.log('IP白名单配置已更新');
+    } catch (error) {
+      console.error('更新IP白名单失败:', error);
+    }
+  };
 
   const [formData, setFormData] = useState({
     merchantId: '',
@@ -126,6 +176,18 @@ export default function Merchants() {
     },
     
     selectedPaymentConfigs: [] as string[], // 用于存储支付配置的ID
+    
+    // IP白名单配置
+    ipWhitelist: {
+      enabled: false,
+      strictMode: false,
+      allowedIPs: [] as any[],
+      accessRules: {
+        blockUnknownIPs: true,
+        maxFailedAttempts: 5,
+        lockoutDuration: 300
+      }
+    }
   });
 
   useEffect(() => {
@@ -440,7 +502,22 @@ export default function Merchants() {
       },
       
       selectedPaymentConfigs: merchant.paymentConfigs || [],
+      
+      // IP白名单配置
+      ipWhitelist: {
+        enabled: merchant.security?.ipWhitelist?.enabled || false,
+        strictMode: merchant.security?.ipWhitelist?.strictMode || false,
+        allowedIPs: merchant.security?.ipWhitelist?.allowedIPs || [],
+        accessRules: merchant.security?.ipWhitelist?.accessRules || {
+          blockUnknownIPs: true,
+          maxFailedAttempts: 5,
+          lockoutDuration: 300
+        }
+      }
     });
+    
+    // 加载IP白名单数据
+    loadIPWhitelist(merchant.merchantId);
     setDialogOpen(true);
   };
 
@@ -638,12 +715,20 @@ export default function Merchants() {
             },
           },
           
+          // IP白名单配置
+          security: {
+            ipWhitelist: formData.ipWhitelist
+          },
+          
           updatedAt: new Date().toISOString(),
         };
 
-                    const response = await api.put(`/api/admin/merchants/${editingMerchant.merchantId}`, updateData);
+        const response = await api.put(`/api/admin/merchants/${editingMerchant.merchantId}`, updateData);
         
         if (response.data.success) {
+          // 同步更新IP白名单配置
+          await updateIPWhitelist(editingMerchant.merchantId);
+          
           setMerchants(merchants.map(merchant => 
             merchant.merchantId === editingMerchant.merchantId 
               ? { ...merchant, ...updateData }
@@ -1820,6 +1905,242 @@ export default function Merchants() {
                 helperText="例如：100000 表示 ₹100,000"
                 required
               />
+
+              {/* IP白名单管理 */}
+              {editingMerchant && (
+                <>
+                  <Box sx={{ gridColumn: '1 / -1' }}>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <SecurityIcon color="primary" />
+                      IP白名单管理
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ gridColumn: '1 / -1' }}>
+                    <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                      <FormControl>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={formData.ipWhitelist.enabled}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              ipWhitelist: {
+                                ...prev.ipWhitelist,
+                                enabled: e.target.checked
+                              }
+                            }))}
+                          />
+                          启用IP白名单
+                        </label>
+                      </FormControl>
+                      <FormControl>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={formData.ipWhitelist.strictMode}
+                            onChange={(e) => setFormData(prev => ({
+                              ...prev,
+                              ipWhitelist: {
+                                ...prev.ipWhitelist,
+                                strictMode: e.target.checked
+                              }
+                            }))}
+                            disabled={!formData.ipWhitelist.enabled}
+                          />
+                          严格模式
+                        </label>
+                      </FormControl>
+                    </Box>
+                    
+                    {/* 添加IP表单 */}
+                    <Box sx={{ 
+                      display: 'flex', 
+                      gap: 2, 
+                      mb: 2, 
+                      p: 2, 
+                      bgcolor: 'grey.50', 
+                      borderRadius: 1 
+                    }}>
+                      <TextField
+                        size="small"
+                        label="IP地址"
+                        value={newIP.ip}
+                        onChange={(e) => setNewIP({ ...newIP, ip: e.target.value })}
+                        placeholder="192.168.1.1"
+                        sx={{ flex: 1 }}
+                      />
+                      <FormControl size="small" sx={{ minWidth: 120 }}>
+                        <InputLabel>掩码</InputLabel>
+                        <Select
+                          value={newIP.mask}
+                          label="掩码"
+                          onChange={(e) => setNewIP({ ...newIP, mask: Number(e.target.value) })}
+                        >
+                          <MenuItem value={32}>32 (单个IP)</MenuItem>
+                          <MenuItem value={24}>24 (256个IP)</MenuItem>
+                          <MenuItem value={16}>16 (65536个IP)</MenuItem>
+                          <MenuItem value={8}>8 (16777216个IP)</MenuItem>
+                        </Select>
+                      </FormControl>
+                      <TextField
+                        size="small"
+                        label="描述"
+                        value={newIP.description}
+                        onChange={(e) => setNewIP({ ...newIP, description: e.target.value })}
+                        placeholder="办公室网络"
+                        sx={{ flex: 1 }}
+                      />
+                      <Button
+                        variant="contained"
+                        size="small"
+                        startIcon={<AddIPIcon />}
+                        onClick={() => {
+                          if (!newIP.ip) return;
+                          const newIPEntry = {
+                            id: Date.now().toString(),
+                            ip: newIP.ip,
+                            mask: newIP.mask,
+                            description: newIP.description,
+                            status: 'ACTIVE',
+                            addedAt: new Date().toISOString(),
+                            usageCount: 0
+                          };
+                          setFormData(prev => ({
+                            ...prev,
+                            ipWhitelist: {
+                              ...prev.ipWhitelist,
+                              allowedIPs: [...prev.ipWhitelist.allowedIPs, newIPEntry]
+                            }
+                          }));
+                          setNewIP({ ip: '', mask: 32, description: '' });
+                        }}
+                        disabled={!newIP.ip}
+                      >
+                        添加
+                      </Button>
+                    </Box>
+
+                    {/* IP列表 */}
+                    {formData.ipWhitelist.allowedIPs.length > 0 && (
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="subtitle2" gutterBottom>
+                          已配置的IP ({formData.ipWhitelist.allowedIPs.length})
+                        </Typography>
+                        <Box sx={{ maxHeight: 200, overflow: 'auto', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+                          {formData.ipWhitelist.allowedIPs.map((ip: any) => (
+                            <Box
+                              key={ip.id}
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                p: 1,
+                                borderBottom: 1,
+                                borderColor: 'divider',
+                                '&:last-child': { borderBottom: 0 }
+                              }}
+                            >
+                              <Box>
+                                <Typography variant="body2" fontFamily="monospace">
+                                  {ip.mask === 32 ? ip.ip : `${ip.ip}/${ip.mask}`}
+                                </Typography>
+                                {ip.description && (
+                                  <Typography variant="caption" color="text.secondary">
+                                    {ip.description}
+                                  </Typography>
+                                )}
+                              </Box>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Chip
+                                  label={ip.status}
+                                  color={ip.status === 'ACTIVE' ? 'success' : 'error'}
+                                  size="small"
+                                />
+                                <IconButton
+                                  size="small"
+                                  onClick={() => {
+                                    setFormData(prev => ({
+                                      ...prev,
+                                      ipWhitelist: {
+                                        ...prev.ipWhitelist,
+                                        allowedIPs: prev.ipWhitelist.allowedIPs.filter((item: any) => item.id !== ip.id)
+                                      }
+                                    }));
+                                  }}
+                                  color="error"
+                                >
+                                  <DeleteIPIcon fontSize="small" />
+                                </IconButton>
+                              </Box>
+                            </Box>
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
+
+                    {/* IP测试 */}
+                    <Box sx={{ 
+                      display: 'flex', 
+                      gap: 2, 
+                      alignItems: 'flex-start',
+                      p: 2, 
+                      bgcolor: 'blue.50', 
+                      borderRadius: 1 
+                    }}>
+                      <TextField
+                        size="small"
+                        label="测试IP"
+                        value={testIP}
+                        onChange={(e) => setTestIP(e.target.value)}
+                        placeholder="192.168.1.100"
+                        sx={{ flex: 1 }}
+                      />
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={testLoading ? <CircularProgress size={16} /> : <NetworkCheckIcon />}
+                        onClick={() => {
+                          if (!testIP || !formData.ipWhitelist.enabled) return;
+                          
+                          setTestLoading(true);
+                          // 模拟测试逻辑
+                          setTimeout(() => {
+                            const isAllowed = formData.ipWhitelist.allowedIPs.some((ip: any) => {
+                              if (ip.status !== 'ACTIVE') return false;
+                              if (ip.mask === 32) return ip.ip === testIP;
+                              // 简化的CIDR检查
+                              return testIP.startsWith(ip.ip.split('.').slice(0, ip.mask / 8).join('.'));
+                            });
+                            
+                            setTestResult({
+                              allowed: isAllowed,
+                              reason: isAllowed ? 'IP在白名单中' : 'IP不在白名单中'
+                            });
+                            setTestLoading(false);
+                          }, 1000);
+                        }}
+                        disabled={!testIP || !formData.ipWhitelist.enabled || testLoading}
+                      >
+                        测试
+                      </Button>
+                    </Box>
+
+                    {testResult && (
+                      <Alert 
+                        severity={testResult.allowed ? 'success' : 'error'} 
+                        sx={{ mt: 2 }}
+                        icon={testResult.allowed ? <CheckCircleIcon /> : <BlockIcon />}
+                      >
+                        <Typography variant="body2">
+                          {testResult.allowed ? 'IP访问允许' : 'IP访问被拒绝'}: {testResult.reason}
+                        </Typography>
+                      </Alert>
+                    )}
+                  </Box>
+                </>
+              )}
             </Box>
           </DialogContent>
         </form>

@@ -196,6 +196,67 @@ const merchantSchema = new mongoose.Schema({
       deprecatedAt: Date,
       reason: String
     }],
+    // IP白名单配置
+    ipWhitelist: {
+      enabled: {
+        type: Boolean,
+        default: false
+      },
+      strictMode: {
+        type: Boolean,
+        default: false // 严格模式：必须IP验证通过
+      },
+      allowedIPs: [{
+        ip: {
+          type: String,
+          required: true
+        },
+        mask: {
+          type: Number,
+          default: 32 // CIDR掩码，默认32（单个IP）
+        },
+        description: {
+          type: String,
+          default: ''
+        },
+        addedAt: {
+          type: Date,
+          default: Date.now
+        },
+        addedBy: {
+          type: String,
+          required: false
+        },
+        status: {
+          type: String,
+          enum: ['ACTIVE', 'INACTIVE'],
+          default: 'ACTIVE'
+        },
+        lastUsed: {
+          type: Date,
+          required: false
+        },
+        usageCount: {
+          type: Number,
+          default: 0
+        }
+      }],
+      // IP访问规则
+      accessRules: {
+        blockUnknownIPs: {
+          type: Boolean,
+          default: true // 是否阻止未知IP
+        },
+        maxFailedAttempts: {
+          type: Number,
+          default: 5 // 最大失败尝试次数
+        },
+        lockoutDuration: {
+          type: Number,
+          default: 300 // 锁定时间（秒）
+        }
+      }
+    },
     usage: {
       dailyCount: {
         type: Number,
@@ -281,6 +342,132 @@ merchantSchema.methods.reduceAvailableBalance = function(amount) {
     return this.save();
   }
   return false;
+};
+
+// IP白名单相关方法
+merchantSchema.methods.addAllowedIP = function(ip, mask = 32, description = '', addedBy = 'system') {
+  if (!this.security.ipWhitelist) {
+    this.security.ipWhitelist = {
+      enabled: false,
+      strictMode: false,
+      allowedIPs: [],
+      accessRules: {
+        blockUnknownIPs: true,
+        maxFailedAttempts: 5,
+        lockoutDuration: 300
+      }
+    };
+  }
+  
+  // 检查IP是否已存在
+  const existingIP = this.security.ipWhitelist.allowedIPs.find(
+    item => item.ip === ip && item.mask === mask
+  );
+  
+  if (existingIP) {
+    return { success: false, message: 'IP already exists in whitelist' };
+  }
+  
+  this.security.ipWhitelist.allowedIPs.push({
+    ip,
+    mask,
+    description,
+    addedBy,
+    status: 'ACTIVE'
+  });
+  
+  return { success: true, message: 'IP added to whitelist successfully' };
+};
+
+merchantSchema.methods.removeAllowedIP = function(ipId) {
+  if (!this.security.ipWhitelist || !this.security.ipWhitelist.allowedIPs) {
+    return { success: false, message: 'IP whitelist not configured' };
+  }
+  
+  const index = this.security.ipWhitelist.allowedIPs.findIndex(
+    item => item._id.toString() === ipId
+  );
+  
+  if (index === -1) {
+    return { success: false, message: 'IP not found in whitelist' };
+  }
+  
+  this.security.ipWhitelist.allowedIPs.splice(index, 1);
+  return { success: true, message: 'IP removed from whitelist successfully' };
+};
+
+merchantSchema.methods.updateIPStatus = function(ipId, status) {
+  if (!this.security.ipWhitelist || !this.security.ipWhitelist.allowedIPs) {
+    return { success: false, message: 'IP whitelist not configured' };
+  }
+  
+  const ipEntry = this.security.ipWhitelist.allowedIPs.find(
+    item => item._id.toString() === ipId
+  );
+  
+  if (!ipEntry) {
+    return { success: false, message: 'IP not found in whitelist' };
+  }
+  
+  ipEntry.status = status;
+  return { success: true, message: 'IP status updated successfully' };
+};
+
+merchantSchema.methods.isIPAllowed = function(clientIP) {
+  if (!this.security.ipWhitelist || !this.security.ipWhitelist.enabled) {
+    return { allowed: true, reason: 'IP whitelist not enabled' };
+  }
+  
+  if (!this.security.ipWhitelist.allowedIPs || this.security.ipWhitelist.allowedIPs.length === 0) {
+    return { 
+      allowed: !this.security.ipWhitelist.strictMode, 
+      reason: this.security.ipWhitelist.strictMode ? 'No IPs in whitelist (strict mode)' : 'No IPs configured but not in strict mode'
+    };
+  }
+  
+  // 检查IP是否在白名单中
+  for (const ipEntry of this.security.ipWhitelist.allowedIPs) {
+    if (ipEntry.status !== 'ACTIVE') continue;
+    
+    if (this.isIPInRange(clientIP, ipEntry.ip, ipEntry.mask)) {
+      // 更新使用统计
+      ipEntry.lastUsed = new Date();
+      ipEntry.usageCount = (ipEntry.usageCount || 0) + 1;
+      
+      return { 
+        allowed: true, 
+        reason: 'IP found in whitelist',
+        matchedEntry: ipEntry
+      };
+    }
+  }
+  
+  return { 
+    allowed: false, 
+    reason: 'IP not found in whitelist' 
+  };
+};
+
+merchantSchema.methods.isIPInRange = function(clientIP, allowedIP, mask) {
+  if (mask === 32) {
+    return clientIP === allowedIP;
+  }
+  
+  // CIDR计算逻辑
+  try {
+    const clientIPNum = this.ipToNumber(clientIP);
+    const allowedIPNum = this.ipToNumber(allowedIP);
+    const maskNum = (0xFFFFFFFF << (32 - mask)) >>> 0;
+    
+    return (clientIPNum & maskNum) === (allowedIPNum & maskNum);
+  } catch (error) {
+    console.error('IP range calculation error:', error);
+    return false;
+  }
+};
+
+merchantSchema.methods.ipToNumber = function(ip) {
+  return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet), 0) >>> 0;
 };
 
 // 生成商户ID的静态方法

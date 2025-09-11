@@ -2,6 +2,23 @@ const SignatureUtil = require('../utils/signature');
 const Merchant = require('../models/merchant');
 
 /**
+ * 获取客户端真实IP地址
+ */
+function getClientIP(req) {
+  const forwardedIpsStr = req.headers['x-forwarded-for'];
+  if (forwardedIpsStr) {
+    const forwardedIps = forwardedIpsStr.split(',');
+    return forwardedIps[0].trim();
+  }
+  return req.headers['x-real-ip'] || 
+         req.connection?.remoteAddress || 
+         req.socket?.remoteAddress ||
+         (req.connection?.socket ? req.connection.socket.remoteAddress : null) ||
+         req.ip ||
+         '127.0.0.1';
+}
+
+/**
  * MG支付标准认证中间件
  * 验证商户身份和请求签名
  */
@@ -35,6 +52,37 @@ const mgAuthMiddleware = async (req, res, next) => {
         message: '商户不存在或未激活',
         data: null
       });
+    }
+    
+    // IP白名单验证
+    const clientIP = getClientIP(req);
+    const ipValidation = merchant.isIPAllowed(clientIP);
+    
+    if (!ipValidation.allowed) {
+      console.log(`❌ IP白名单验证失败: ${clientIP} - ${ipValidation.reason}`);
+      
+      // 记录安全事件
+      const SecurityAudit = require('../services/security/security-audit');
+      const securityAudit = new SecurityAudit();
+      await securityAudit.logSecurityEvent('IP_ACCESS_DENIED', {
+        merchantId: appid,
+        clientIP,
+        reason: ipValidation.reason,
+        userAgent: req.headers['user-agent'],
+        path: req.path,
+        method: req.method
+      }, 'WARN');
+      
+      return res.status(403).json({
+        code: 403,
+        message: 'IP地址不在白名单中',
+        data: null
+      });
+    }
+    
+    // IP访问成功，保存商户（更新使用统计）
+    if (ipValidation.matchedEntry) {
+      await merchant.save();
     }
     
     // 验证签名
