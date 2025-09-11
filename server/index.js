@@ -4,7 +4,9 @@ const helmet = require('helmet');
 const mongoose = require('mongoose');
 const path = require('path');
 const { globalErrorHandler } = require('./middleware/error-handler');
-require('dotenv').config({ path: path.join(__dirname, '../env.production') });
+// 根据环境加载不同的配置文件
+const envFile = process.env.NODE_ENV === 'test' ? '../env.test' : '../env.production';
+require('dotenv').config({ path: path.join(__dirname, envFile) });
 
 // 设置全局时区为印度标准时间 (IST)
 process.env.TZ = 'Asia/Kolkata';
