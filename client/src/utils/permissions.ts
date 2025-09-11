@@ -10,7 +10,7 @@ export const ROLE_PERMISSIONS: RolePermissions = {
     Permission.VIEW_ALL_ORDERS,
     Permission.VIEW_ALL_TRANSACTIONS,
     Permission.MANAGE_USERS,
-
+    Permission.SYSTEM_MONITORING
   ],
   [UserRole.OPERATOR]: [
     Permission.VIEW_ALL_MERCHANTS,
