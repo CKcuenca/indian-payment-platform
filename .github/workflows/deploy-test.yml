@@ -47,6 +47,8 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         port: ${{ secrets.EC2_PORT }}
+        timeout: 120s
+        command_timeout: 60s
         script: |
           cd /var/www/test.cashgit.com
           
@@ -100,13 +102,14 @@ jobs:
         username: ${{ secrets.EC2_USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
         port: ${{ secrets.EC2_PORT }}
+        timeout: 300s
+        command_timeout: 180s
         script: |
-          # 完全清理现有进程
+          # 简化进程清理
           echo "清理现有进程..."
-          pm2 stop test-indian-payment-platform 2>/dev/null || true
-          pm2 delete test-indian-payment-platform 2>/dev/null || true
-          pkill -f "node.*server" 2>/dev/null || true
-          sleep 5
+          pm2 stop test-indian-payment-platform || true
+          pm2 delete test-indian-payment-platform || true
+          sleep 2
           
           cd /var/www/test.cashgit.com
           
@@ -137,29 +140,18 @@ jobs:
               --out logs/out.log
           fi
           
-          # 等待服务启动
-          sleep 15
+          # 简化启动验证
+          echo "等待服务启动..."
+          sleep 10
           
-          # 验证测试环境
+          # 快速验证
           echo "=== 测试环境部署验证 ==="
-          echo "Git提交: $(git log --oneline -1)"
-          echo "PM2进程: $(pm2 list | grep test-indian-payment-platform)"
-          echo "端口监听: $(netstat -tlnp | grep :3002)"
+          pm2 list | grep test-indian-payment-platform || echo "进程未找到"
+          netstat -tlnp | grep :3002 || echo "端口未监听"
           
-          # 多次健康检查
-          for i in {1..5}; do
-            echo "健康检查尝试 $i/5..."
-            if curl -s --connect-timeout 5 http://localhost:3002/api/health; then
-              echo "✅ 健康检查成功!"
-              break
-            else
-              echo "❌ 健康检查失败，等待3秒..."
-              sleep 3
-            fi
-          done
-          
-          echo "PM2日志 (最后10行):"
-          pm2 logs test-indian-payment-platform --lines 10 || echo "无法获取日志"
+          # 单次健康检查
+          echo "健康检查..."
+          curl -s --connect-timeout 3 http://localhost:3002/api/health || echo "❌ 健康检查失败"
           
           echo "=========================="
           echo "Test environment deployment completed!"
