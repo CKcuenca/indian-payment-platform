@@ -544,18 +544,10 @@ export default function MerchantKeyManagement() {
                         <Button
                           variant="contained"
                           startIcon={<CodeIcon />}
-                          onClick={() => window.open('/api-docs.html', '_blank')}
-                          sx={{ minWidth: 140 }}
-                        >
-                          完整API文档
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          startIcon={<CodeIcon />}
                           onClick={() => window.open('/wakeup-payment-api.html', '_blank')}
                           sx={{ minWidth: 140 }}
                         >
-                          唤醒支付文档
+                          API接口文档
                         </Button>
                         <Button
                           variant="outlined"
@@ -568,7 +560,7 @@ export default function MerchantKeyManagement() {
                         <Button
                           variant="outlined"
                           startIcon={<SecurityIcon />}
-                          onClick={() => window.open('/api-docs.html#authentication', '_blank')}
+                          onClick={() => window.open('/wakeup-payment-api.html#signature', '_blank')}
                           sx={{ minWidth: 140 }}
                         >
                           签名验证工具
@@ -614,7 +606,7 @@ export default function MerchantKeyManagement() {
                         <Button
                           size="small"
                           variant="outlined"
-                          onClick={() => window.open('/api-docs.html#payment', '_blank')}
+                          onClick={() => window.open('/wakeup-payment-api.html#deposit', '_blank')}
                         >
                           详细文档
                         </Button>
@@ -659,7 +651,7 @@ export default function MerchantKeyManagement() {
                         <Button
                           size="small"
                           variant="outlined"
-                          onClick={() => window.open('/api-docs.html#balance', '_blank')}
+                          onClick={() => window.open('/wakeup-payment-api.html#query', '_blank')}
                         >
                           详细文档
                         </Button>
@@ -704,7 +696,7 @@ export default function MerchantKeyManagement() {
                         <Button
                           size="small"
                           variant="outlined"
-                          onClick={() => window.open('/api-docs.html#signature', '_blank')}
+                          onClick={() => window.open('/wakeup-payment-api.html#signature', '_blank')}
                         >
                           详细文档
                         </Button>
