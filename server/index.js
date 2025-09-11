@@ -192,6 +192,7 @@ app.get('/api/demo/orders', (req, res) => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/payment', require('./routes/payment'));
+app.use('/api/merchant', require('./routes/merchant-keys')); // 商户密钥管理
 app.use('/api/merchant', require('./routes/merchant')); // 无限流
 app.use('/api/merchant-profile', require('./routes/merchant-profile')); // 商户个人资料
 app.use('/api/providers', require('./routes/providers'));

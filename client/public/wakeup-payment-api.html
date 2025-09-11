@@ -556,11 +556,11 @@
  */
 public static void main(String[] args) {
     Map&lt;String, Object&gt; map = new TreeMap&lt;&gt;();
-    map.put("mchNo", "M171925157713");
-    map.put("mchOrderId", "1234567as94");
+    map.put("appid", "M171925157713");
+    map.put("orderid", "1234567as94");
     map.put("timestamp", "1725300081000");
     map.put("payType", 102);
-    map.put("notifyUrl", "http://localhost:8080/test");
+    map.put("notify_url", "http://localhost:8080/test");
     map.put("amount", "1000");
     
     String sign = checkSha256Hex(map, "123456789", "key");
@@ -680,7 +680,7 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                         
                         <div class="endpoint">
                             <div class="method method-post">POST</div>
-                            <span class="endpoint-url">/api/order/create</span>
+                            <span class="endpoint-url">/api/wakeup/create</span>
                         </div>
                         
                         <h3>接口说明</h3>
@@ -700,14 +700,14 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>mchNo</td>
+                                        <td>appid</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户号</td>
                                         <td>M171925157713</td>
                                     </tr>
                                     <tr>
-                                        <td>mchOrderId</td>
+                                        <td>orderid</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户订单号</td>
@@ -926,7 +926,7 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                         
                         <div class="endpoint">
                             <div class="method method-post">POST</div>
-                            <span class="endpoint-url">/api/order/query</span>
+                            <span class="endpoint-url">/api/wakeup/query</span>
                         </div>
                         
                         <h3>接口说明</h3>
@@ -946,14 +946,14 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>mchNo</td>
+                                        <td>appid</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户号</td>
                                         <td>M171925157713</td>
                                     </tr>
                                     <tr>
-                                        <td>mchOrderId</td>
+                                        <td>orderid</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户订单号</td>
@@ -980,8 +980,8 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                         <h3>请求示例</h3>
                         <div class="code-block">
 <pre>{
-    "mchNo": "M171925157713",
-    "mchOrderId": "ORDER_20241201_001",
+    "appid": "M171925157713",
+    "orderid": "ORDER_20241201_001",
     "timestamp": "1725300081000",
     "sign": "fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde"
 }</pre>
@@ -1101,7 +1101,7 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>mchOrderId</td>
+                                        <td>orderid</td>
                                         <td>String</td>
                                         <td>商户订单号</td>
                                         <td>ORDER_20241201_001</td>
@@ -1155,7 +1155,7 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                         <h3>通知示例</h3>
                         <div class="code-block">
 <pre>{
-    "mchOrderId": "ORDER_20241201_001",
+    "orderid": "ORDER_20241201_001",
     "platformOrderId": "CG202412010001",
     "status": "SUCCESS",
     "amount": "1000",
@@ -1263,14 +1263,14 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>mchNo</td>
+                                        <td>appid</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户号</td>
                                         <td>M171925157713</td>
                                     </tr>
                                     <tr>
-                                        <td>mchOrderId</td>
+                                        <td>orderid</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户订单号</td>
@@ -1353,8 +1353,8 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                         <h3>请求示例</h3>
                         <div class="code-block">
 <pre>{
-    "mchNo": "M171925157713",
-    "mchOrderId": "WITHDRAW_20241201_001",
+    "appid": "M171925157713",
+    "orderid": "WITHDRAW_20241201_001",
     "amount": "5000",
     "currency": "INR",
     "bankCode": "SBIN",
@@ -1487,14 +1487,14 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>mchNo</td>
+                                        <td>appid</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户号</td>
                                         <td>M171925157713</td>
                                     </tr>
                                     <tr>
-                                        <td>mchOrderId</td>
+                                        <td>orderid</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户订单号</td>
@@ -1521,8 +1521,8 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                         <h3>请求示例</h3>
                         <div class="code-block">
 <pre>{
-    "mchNo": "M171925157713",
-    "mchOrderId": "WITHDRAW_20241201_001",
+    "appid": "M171925157713",
+    "orderid": "WITHDRAW_20241201_001",
     "timestamp": "1725300081000",
     "sign": "fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde"
 }</pre>
@@ -1721,14 +1721,14 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>mchNo</td>
+                                        <td>appid</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户号</td>
                                         <td>M171925157713</td>
                                     </tr>
                                     <tr>
-                                        <td>mchOrderId</td>
+                                        <td>orderid</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户订单号</td>
@@ -1755,8 +1755,8 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                         <h3>请求示例</h3>
                         <div class="code-block">
 <pre>{
-    "mchNo": "M171925157713",
-    "mchOrderId": "ORDER_20241201_001",
+    "appid": "M171925157713",
+    "orderid": "ORDER_20241201_001",
     "timestamp": "1725300081000",
     "sign": "fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde"
 }</pre>
@@ -1933,7 +1933,7 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>mchNo</td>
+                                        <td>appid</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>商户号</td>
@@ -1960,7 +1960,7 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
                         <h3>请求示例</h3>
                         <div class="code-block">
 <pre>{
-    "mchNo": "M171925157713",
+    "appid": "M171925157713",
     "timestamp": "1725300081000",
     "sign": "fd732521e341b1c9f66b91593db983bd800e0e4e14b2c0ce2d921d48fcce2bde"
 }</pre>
@@ -2036,7 +2036,7 @@ public static TreeMap&lt;String, Object&gt; mapToTreeMap(Map&lt;String, Object&g
     "code": "0000",
     "message": "成功",
     "data": {
-        "mchNo": "M171925157713",
+        "appid": "M171925157713",
         "balance": "100000",
         "currency": "INR",
         "frozenAmount": "5000",

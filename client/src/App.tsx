@@ -10,6 +10,7 @@ import Transactions from './pages/Transactions';
 import Merchants from './pages/Merchants';
 import PaymentManagementNew from './pages/PaymentManagementNew';
 import Users from './pages/Users';
+import MerchantKeyManagement from './pages/MerchantKeyManagement';
 
 import CashGitPaymentTest from './pages/CashGitPaymentTest';
 
@@ -220,6 +221,17 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <div>个人资料页面（待实现）</div>
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/merchant-keys"
+            element={
+              <ProtectedRoute anyPermission={[Permission.VIEW_OWN_MERCHANT_DATA, Permission.MANAGE_MERCHANTS]}>
+                <Layout>
+                  <MerchantKeyManagement />
                 </Layout>
               </ProtectedRoute>
             }

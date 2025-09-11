@@ -101,25 +101,68 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: ${{ secrets.EC2_PORT }}
         script: |
-          cd /var/www/test.cashgit.com/server
+          # 完全清理现有进程
+          echo "清理现有进程..."
+          pm2 stop test-indian-payment-platform 2>/dev/null || true
+          pm2 delete test-indian-payment-platform 2>/dev/null || true
+          pkill -f "node.*server" 2>/dev/null || true
+          sleep 5
           
-          # 安装新的依赖
+          cd /var/www/test.cashgit.com
+          
+          # 创建必要目录
+          mkdir -p logs server/logs
+          
+          # 安装服务端依赖
+          cd server
           npm ci --only=production
+          cd ..
           
-          # 启动测试环境服务
-          pm2 start ecosystem.test.config.js
+          # 设置环境变量并启动服务
+          export NODE_ENV=test
+          export PORT=3002
           
-          # 检查服务状态
-          pm2 status
+          if [ -f "ecosystem.test.config.js" ]; then
+            echo "使用测试环境配置启动..."
+            pm2 start ecosystem.test.config.js
+          else
+            echo "使用默认配置启动..."
+            pm2 start server/index.js \
+              --name "test-indian-payment-platform" \
+              --time \
+              --env NODE_ENV=test \
+              --env PORT=3002 \
+              --log logs/combined.log \
+              --error logs/err.log \
+              --out logs/out.log
+          fi
+          
+          # 等待服务启动
+          sleep 15
           
           # 验证测试环境
           echo "=== 测试环境部署验证 ==="
           echo "Git提交: $(git log --oneline -1)"
           echo "PM2进程: $(pm2 list | grep test-indian-payment-platform)"
-          echo "健康检查: $(curl -s http://localhost:3002/api/health | grep -o '\"environment\":\"[^\"]*\"' || echo 'Health check failed')"
-          echo "=========================="
+          echo "端口监听: $(netstat -tlnp | grep :3002)"
           
-          echo "Test environment deployment completed successfully!"
+          # 多次健康检查
+          for i in {1..5}; do
+            echo "健康检查尝试 $i/5..."
+            if curl -s --connect-timeout 5 http://localhost:3002/api/health; then
+              echo "✅ 健康检查成功!"
+              break
+            else
+              echo "❌ 健康检查失败，等待3秒..."
+              sleep 3
+            fi
+          done
+          
+          echo "PM2日志 (最后10行):"
+          pm2 logs test-indian-payment-platform --lines 10 || echo "无法获取日志"
+          
+          echo "=========================="
+          echo "Test environment deployment completed!"
 
 
 

@@ -18,7 +18,13 @@ const merchantSchema = new mongoose.Schema({
     unique: false
   },
   
-  // API密钥
+  // API密钥对
+  apiKey: {
+    type: String,
+    required: true,
+    unique: true,
+    index: true
+  },
   secretKey: {
     type: String,
     required: true
@@ -168,6 +174,47 @@ const merchantSchema = new mongoose.Schema({
   paymentConfigs: [{
     type: String
   }],
+  
+  // 安全管理
+  security: {
+    keyStatus: {
+      type: String,
+      enum: ['ACTIVE', 'DISABLED', 'EXPIRED'],
+      default: 'ACTIVE'
+    },
+    lastKeyUpdate: {
+      type: Date,
+      default: Date.now
+    },
+    keyUpdateBy: {
+      type: String,
+      required: false
+    },
+    keyHistory: [{
+      apiKey: String,
+      secretKey: String,
+      deprecatedAt: Date,
+      reason: String
+    }],
+    usage: {
+      dailyCount: {
+        type: Number,
+        default: 0
+      },
+      monthlyCount: {
+        type: Number,
+        default: 0
+      },
+      lastUsed: {
+        type: Date,
+        default: Date.now
+      },
+      lastResetDate: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  },
   
   // 创建和更新时间
   createdAt: {

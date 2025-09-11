@@ -27,7 +27,8 @@ import {
   Api,
   Person,
   TrendingUp,
-  CreditCard
+  CreditCard,
+  Key
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../services/authService';
@@ -59,6 +60,12 @@ const menuItems = [
     icon: <Business />,
     path: '/merchants',
     permissions: [Permission.VIEW_ALL_MERCHANTS, Permission.VIEW_OWN_MERCHANT_DATA]
+  },
+  {
+    text: '密钥管理',
+    icon: <Key />,
+    path: '/merchant-keys',
+    permissions: [Permission.VIEW_OWN_MERCHANT_DATA, Permission.MANAGE_MERCHANTS]
   },
   {
     text: '支付管理',
