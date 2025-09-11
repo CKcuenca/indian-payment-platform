@@ -326,7 +326,7 @@ export default function MerchantKeyManagement() {
           <TabPanel value={currentTab} index={0}>
             <Grid container spacing={3}>
               {/* 基本信息卡片 */}
-              <Grid item component="div" xs={12} md={8}>
+              <Grid item xs={12} md={8}>
                 <Card sx={{ height: '100%' }}>
                   <CardContent>
                     <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', mb: 2 }}>
@@ -458,7 +458,7 @@ export default function MerchantKeyManagement() {
               </Grid>
 
               {/* 安全信息卡片 */}
-              <Grid item component="div" xs={12} md={4}>
+              <Grid item xs={12} md={4}>
                 <Card sx={{ height: '100%' }}>
                   <CardContent>
                     <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', mb: 2 }}>
@@ -521,7 +521,7 @@ export default function MerchantKeyManagement() {
           <TabPanel value={currentTab} index={1}>
             {examples ? (
               <Grid container spacing={3}>
-                <Grid item component="div" xs={12}>
+                <Grid item xs={12}>
                   <Alert severity="info" sx={{ mb: 3 }}>
                     <Typography variant="body2">
                       以下示例展示了如何使用您的API密钥调用支付接口。请确保在生产环境中妥善保管您的密钥。
@@ -530,7 +530,7 @@ export default function MerchantKeyManagement() {
                 </Grid>
 
                 {/* 快速访问文档区域 */}
-                <Grid item component="div" xs={12}>
+                <Grid item xs={12}>
                   <Card sx={{ mb: 3, bgcolor: alpha(theme.palette.primary.main, 0.02) }}>
                     <CardContent>
                       <Typography variant="h6" gutterBottom color="primary.main" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -571,7 +571,7 @@ export default function MerchantKeyManagement() {
                 </Grid>
 
                 {/* 代收订单示例 */}
-                <Grid item component="div" xs={12} lg={6}>
+                <Grid item xs={12} lg={6}>
                   <Card>
                     <CardContent>
                       <Typography variant="h6" gutterBottom color="primary.main">
@@ -616,7 +616,7 @@ export default function MerchantKeyManagement() {
                 </Grid>
 
                 {/* 余额查询示例 */}
-                <Grid item component="div" xs={12} lg={6}>
+                <Grid item xs={12} lg={6}>
                   <Card>
                     <CardContent>
                       <Typography variant="h6" gutterBottom color="primary.main">
@@ -661,7 +661,7 @@ export default function MerchantKeyManagement() {
                 </Grid>
 
                 {/* 签名算法示例 */}
-                <Grid item component="div" xs={12}>
+                <Grid item xs={12}>
                   <Card>
                     <CardContent>
                       <Typography variant="h6" gutterBottom color="primary.main">
@@ -720,7 +720,7 @@ export default function MerchantKeyManagement() {
                 </Typography>
                 {keyInfo.usage ? (
                   <Grid container spacing={3}>
-                    <Grid item component="div" xs={12} sm={6} md={3}>
+                    <Grid item xs={12} sm={6} md={3}>
                       <Paper sx={{ p: 2, textAlign: 'center' }}>
                         <Typography variant="h4" color="primary.main">
                           {keyInfo.usage.dailyCount.toLocaleString()}
@@ -730,7 +730,7 @@ export default function MerchantKeyManagement() {
                         </Typography>
                       </Paper>
                     </Grid>
-                    <Grid item component="div" xs={12} sm={6} md={3}>
+                    <Grid item xs={12} sm={6} md={3}>
                       <Paper sx={{ p: 2, textAlign: 'center' }}>
                         <Typography variant="h4" color="secondary.main">
                           {keyInfo.usage.monthlyCount.toLocaleString()}
@@ -740,7 +740,7 @@ export default function MerchantKeyManagement() {
                         </Typography>
                       </Paper>
                     </Grid>
-                    <Grid item component="div" xs={12} sm={6} md={3}>
+                    <Grid item xs={12} sm={6} md={3}>
                       <Paper sx={{ p: 2, textAlign: 'center' }}>
                         <Typography variant="h4" color="success.main">
                           {keyInfo.keyHistory}
@@ -750,7 +750,7 @@ export default function MerchantKeyManagement() {
                         </Typography>
                       </Paper>
                     </Grid>
-                    <Grid item component="div" xs={12} sm={6} md={3}>
+                    <Grid item xs={12} sm={6} md={3}>
                       <Paper sx={{ p: 2, textAlign: 'center' }}>
                         <Typography variant="body1" color="text.primary">
                           {formatDate(keyInfo.usage.lastUsed)}
