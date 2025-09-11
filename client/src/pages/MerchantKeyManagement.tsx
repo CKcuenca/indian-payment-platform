@@ -21,11 +21,11 @@ import {
   Card,
   CardContent,
   CardActions,
-  Grid,
   Tooltip,
   Snackbar,
   Tabs,
   Tab,
+  Stack,
   useTheme,
   alpha,
 } from '@mui/material';
@@ -44,9 +44,6 @@ import {
   Warning as WarningIcon,
 } from '@mui/icons-material';
 
-import { PermissionGuard } from '../components/PermissionGuard';
-import { Permission } from '../types';
-import { authService } from '../services/authService';
 import api from '../services/api';
 
 interface KeyInfo {
@@ -324,9 +321,9 @@ export default function MerchantKeyManagement() {
 
           {/* Tab内容 */}
           <TabPanel value={currentTab} index={0}>
-            <Grid container spacing={3}>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ width: '100%' }}>
               {/* 基本信息卡片 */}
-              <Grid item xs={12} md={8}>
+              <Box sx={{ flex: 2 }}>
                 <Card sx={{ height: '100%' }}>
                   <CardContent>
                     <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', mb: 2 }}>
@@ -455,10 +452,10 @@ export default function MerchantKeyManagement() {
                     </Box>
                   </CardActions>
                 </Card>
-              </Grid>
+              </Box>
 
               {/* 安全信息卡片 */}
-              <Grid item xs={12} md={4}>
+              <Box sx={{ flex: 1 }}>
                 <Card sx={{ height: '100%' }}>
                   <CardContent>
                     <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', mb: 2 }}>
@@ -514,23 +511,21 @@ export default function MerchantKeyManagement() {
                     )}
                   </CardContent>
                 </Card>
-              </Grid>
-            </Grid>
+              </Box>
+            </Stack>
           </TabPanel>
 
           <TabPanel value={currentTab} index={1}>
             {examples ? (
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                  <Alert severity="info" sx={{ mb: 3 }}>
-                    <Typography variant="body2">
-                      以下示例展示了如何使用您的API密钥调用支付接口。请确保在生产环境中妥善保管您的密钥。
-                    </Typography>
-                  </Alert>
-                </Grid>
+              <Stack spacing={3}>
+                <Alert severity="info">
+                  <Typography variant="body2">
+                    以下示例展示了如何使用您的API密钥调用支付接口。请确保在生产环境中妥善保管您的密钥。
+                  </Typography>
+                </Alert>
 
                 {/* 快速访问文档区域 */}
-                <Grid item xs={12}>
+                <Box>
                   <Card sx={{ mb: 3, bgcolor: alpha(theme.palette.primary.main, 0.02) }}>
                     <CardContent>
                       <Typography variant="h6" gutterBottom color="primary.main" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -568,10 +563,12 @@ export default function MerchantKeyManagement() {
                       </Box>
                     </CardContent>
                   </Card>
-                </Grid>
+                </Box>
 
-                {/* 代收订单示例 */}
-                <Grid item xs={12} lg={6}>
+                {/* 示例区域 */}
+                <Stack direction={{ xs: 'column', lg: 'row' }} spacing={3}>
+                  {/* 代收订单示例 */}
+                  <Box sx={{ flex: 1 }}>
                   <Card>
                     <CardContent>
                       <Typography variant="h6" gutterBottom color="primary.main">
@@ -613,10 +610,10 @@ export default function MerchantKeyManagement() {
                       </Box>
                     </CardContent>
                   </Card>
-                </Grid>
+                  </Box>
 
-                {/* 余额查询示例 */}
-                <Grid item xs={12} lg={6}>
+                  {/* 余额查询示例 */}
+                  <Box sx={{ flex: 1 }}>
                   <Card>
                     <CardContent>
                       <Typography variant="h6" gutterBottom color="primary.main">
@@ -658,10 +655,11 @@ export default function MerchantKeyManagement() {
                       </Box>
                     </CardContent>
                   </Card>
-                </Grid>
+                  </Box>
+                </Stack>
 
                 {/* 签名算法示例 */}
-                <Grid item xs={12}>
+                <Box>
                   <Card>
                     <CardContent>
                       <Typography variant="h6" gutterBottom color="primary.main">
@@ -703,8 +701,8 @@ export default function MerchantKeyManagement() {
                       </Box>
                     </CardContent>
                   </Card>
-                </Grid>
-              </Grid>
+                </Box>
+              </Stack>
             ) : (
               <Alert severity="info">
                 正在加载使用示例...
@@ -719,48 +717,40 @@ export default function MerchantKeyManagement() {
                   📈 API使用统计
                 </Typography>
                 {keyInfo.usage ? (
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <Paper sx={{ p: 2, textAlign: 'center' }}>
-                        <Typography variant="h4" color="primary.main">
-                          {keyInfo.usage.dailyCount.toLocaleString()}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          今日调用次数
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <Paper sx={{ p: 2, textAlign: 'center' }}>
-                        <Typography variant="h4" color="secondary.main">
-                          {keyInfo.usage.monthlyCount.toLocaleString()}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          本月调用次数
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <Paper sx={{ p: 2, textAlign: 'center' }}>
-                        <Typography variant="h4" color="success.main">
-                          {keyInfo.keyHistory}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          历史密钥版本
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                      <Paper sx={{ p: 2, textAlign: 'center' }}>
-                        <Typography variant="body1" color="text.primary">
-                          {formatDate(keyInfo.usage.lastUsed)}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          最后使用时间
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                  </Grid>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ flexWrap: 'wrap' }}>
+                    <Paper sx={{ p: 2, textAlign: 'center', flex: 1, minWidth: 200 }}>
+                      <Typography variant="h4" color="primary.main">
+                        {keyInfo.usage.dailyCount.toLocaleString()}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        今日调用次数
+                      </Typography>
+                    </Paper>
+                    <Paper sx={{ p: 2, textAlign: 'center', flex: 1, minWidth: 200 }}>
+                      <Typography variant="h4" color="secondary.main">
+                        {keyInfo.usage.monthlyCount.toLocaleString()}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        本月调用次数
+                      </Typography>
+                    </Paper>
+                    <Paper sx={{ p: 2, textAlign: 'center', flex: 1, minWidth: 200 }}>
+                      <Typography variant="h4" color="success.main">
+                        {keyInfo.keyHistory}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        历史密钥版本
+                      </Typography>
+                    </Paper>
+                    <Paper sx={{ p: 2, textAlign: 'center', flex: 1, minWidth: 200 }}>
+                      <Typography variant="body1" color="text.primary">
+                        {formatDate(keyInfo.usage.lastUsed)}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        最后使用时间
+                      </Typography>
+                    </Paper>
+                  </Stack>
                 ) : (
                   <Alert severity="info">
                     暂无使用统计数据

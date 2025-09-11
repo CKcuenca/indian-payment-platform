@@ -174,6 +174,24 @@ export interface Merchant {
   
   // 支付配置关联
   paymentConfigs?: string[]; // 关联的支付配置ID列表
+  
+  // IP白名单配置
+  ipWhitelist?: {
+    enabled: boolean;
+    strictMode: boolean;
+    allowedIPs: Array<{
+      ip: string;
+      mask?: number;
+      description?: string;
+      status?: 'ACTIVE' | 'INACTIVE';
+    }>;
+    accessRules: {
+      blockUnknownIPs: boolean;
+      maxFailedAttempts: number;
+      lockoutDuration: number;
+    };
+  };
+  
   createdAt: string;
   updatedAt: string;
 }

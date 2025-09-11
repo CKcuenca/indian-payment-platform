@@ -453,6 +453,18 @@ export default function Merchants() {
       },
       
       selectedPaymentConfigs: [],
+      
+      // IP白名单配置
+      ipWhitelist: {
+        enabled: false,
+        strictMode: false,
+        allowedIPs: [],
+        accessRules: {
+          blockUnknownIPs: true,
+          maxFailedAttempts: 5,
+          lockoutDuration: 300
+        }
+      },
     });
     setDialogOpen(true);
   };
@@ -505,10 +517,10 @@ export default function Merchants() {
       
       // IP白名单配置
       ipWhitelist: {
-        enabled: merchant.security?.ipWhitelist?.enabled || false,
-        strictMode: merchant.security?.ipWhitelist?.strictMode || false,
-        allowedIPs: merchant.security?.ipWhitelist?.allowedIPs || [],
-        accessRules: merchant.security?.ipWhitelist?.accessRules || {
+        enabled: merchant.ipWhitelist?.enabled || false,
+        strictMode: merchant.ipWhitelist?.strictMode || false,
+        allowedIPs: merchant.ipWhitelist?.allowedIPs || [],
+        accessRules: merchant.ipWhitelist?.accessRules || {
           blockUnknownIPs: true,
           maxFailedAttempts: 5,
           lockoutDuration: 300
