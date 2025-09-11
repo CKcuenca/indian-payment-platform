@@ -194,26 +194,6 @@ export default function Layout({ children }: LayoutProps) {
             CashGit - Indian Payment Platform
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {/* 对接文档链接 - 所有用户都可以看到 */}
-            <Button
-              color="inherit"
-              variant="outlined"
-              size="small"
-              sx={{ mr: 2, borderColor: 'rgba(255,255,255,0.3)', color: 'white' }}
-              onClick={() => window.open('/api-docs.html', '_blank')}
-            >
-              对接文档
-            </Button>
-            {/* 唤醒支付对接文档链接 */}
-            <Button
-              color="inherit"
-              variant="outlined"
-              size="small"
-              sx={{ mr: 2, borderColor: 'rgba(255,255,255,0.3)', color: 'white' }}
-              onClick={() => window.open('/wakeup-payment-api.html', '_blank')}
-            >
-              唤醒对接文档
-            </Button>
             <Typography variant="body2" sx={{ mr: 2 }}>
               {currentUser?.fullName || currentUser?.username}
             </Typography>
