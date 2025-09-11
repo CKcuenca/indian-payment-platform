@@ -303,10 +303,98 @@
                 font-size: 2em; 
             }
         }
+        
+        /* 密码保护页面样式 */
+        .password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .password-box {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .password-box h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 1.5em;
+        }
+        
+        .password-box input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        
+        .password-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .password-box button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .password-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .password-error {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- 密码保护页面 -->
+    <div id="passwordOverlay" class="password-overlay">
+        <div class="password-box">
+            <h2>🔐 访问验证</h2>
+            <p style="color: #7f8c8d; margin-bottom: 25px;">请输入文档访问密码</p>
+            <input 
+                type="password" 
+                id="passwordInput" 
+                placeholder="请输入密码"
+                maxlength="20"
+            >
+            <button onclick="checkPassword()">访问文档</button>
+            <div id="passwordError" class="password-error"></div>
+        </div>
+    </div>
+    
+    <div id="mainContent" class="container hidden">
         <!-- 侧边栏 -->
         <div class="sidebar">
             <div class="sidebar-header">
@@ -429,7 +517,7 @@ amount=100.00&appid=MERCHANT_MEWZV8HV&desc=游戏充值&notify_url=https://your-
 
 // Step 3: MD5加密（32位小写）
 sign = md5("amount=100.00&appid=MERCHANT_MEWZV8HV&desc=游戏充值&notify_url=https://your-game.com/notify&orderid=ORDER_20241201_001sk_test123456")
-     = "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+     = "755b88f30aa739c214a8512c42d1e535"
 </pre>
                         </div>
                         
@@ -552,7 +640,7 @@ function generateSign(params, secretKey) {
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>MD5签名</td>
-                                        <td>a1b2c3d4e5f6...</td>
+                                        <td>755b88f30aa739c214a8512c42d1e535</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -569,7 +657,7 @@ function generateSign(params, secretKey) {
   "return_url": "https://your-game.com/success",
   "customer_phone": "9876543210",
   "useDhPay": false,
-  "sign": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+  "sign": "755b88f30aa739c214a8512c42d1e535"
 }</pre>
                         </div>
                         
@@ -581,7 +669,7 @@ function generateSign(params, secretKey) {
   "data": {
     "orderid": "ORDER_20241201_001",
     "status": "PENDING",
-    "upiTransferInfo": {
+    "upi_transfer_info": {
       "beneficiaryName": "Rajesh Kumar",
       "beneficiaryUPI": "rajesh@paytm",
       "beneficiaryAccount": "1234567890",
@@ -592,7 +680,7 @@ function generateSign(params, secretKey) {
       "transferNote": "Order: ORDER_20241201_001 - 游戏充值订单",
       "expectedCompletionTime": "5-10 minutes"
     },
-    "verificationRequired": true,
+    "verification_required": true,
     "message": "请通过UPI转账到指定账户，转账完成后系统将自动验证"
   }
 }</pre>
@@ -606,7 +694,7 @@ function generateSign(params, secretKey) {
   "data": {
     "orderid": "ORDER_20241201_001",
     "status": "PENDING",
-    "paymentUrl": "https://dhpay.com/pay?token=abc123...",
+    "payment_url": "https://dhpay.com/pay?token=abc123...",
     "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANS...",
     "message": "请使用支付链接或扫描二维码完成支付"
   }
@@ -658,7 +746,7 @@ function generateSign(params, secretKey) {
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>MD5签名</td>
-                                        <td>a1b2c3d4e5f6...</td>
+                                        <td>755b88f30aa739c214a8512c42d1e535</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -774,7 +862,7 @@ function generateSign(params, secretKey) {
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
                                         <td>MD5签名</td>
-                                        <td>a1b2c3d4e5f6...</td>
+                                        <td>755b88f30aa739c214a8512c42d1e535</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1097,6 +1185,57 @@ public class WakeupPaymentExample {
     </div>
     
     <script>
+        // 密码验证功能
+        function checkPassword() {
+            const passwordInput = document.getElementById('passwordInput');
+            const passwordError = document.getElementById('passwordError');
+            const passwordOverlay = document.getElementById('passwordOverlay');
+            const mainContent = document.getElementById('mainContent');
+            
+            const enteredPassword = passwordInput.value;
+            const correctPassword = '88888888';
+            
+            if (enteredPassword === correctPassword) {
+                // 密码正确，显示主内容
+                passwordOverlay.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+                
+                // 保存访问状态到sessionStorage（仅在当前会话有效）
+                sessionStorage.setItem('wakeup_doc_access', 'true');
+                
+                // 清除错误信息
+                passwordError.textContent = '';
+            } else {
+                // 密码错误
+                passwordError.textContent = '密码错误，请重新输入';
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        }
+        
+        // 回车键提交密码
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('passwordInput');
+            
+            // 检查是否已经验证过密码
+            const hasAccess = sessionStorage.getItem('wakeup_doc_access');
+            if (hasAccess === 'true') {
+                document.getElementById('passwordOverlay').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+            } else {
+                // 聚焦到密码输入框
+                setTimeout(() => {
+                    passwordInput.focus();
+                }, 100);
+            }
+            
+            passwordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkPassword();
+                }
+            });
+        });
+        
         function showSection(sectionId) {
             // 隐藏所有内容区域
             const sections = document.querySelectorAll('.content-section');
