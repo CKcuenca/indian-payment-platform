@@ -326,7 +326,7 @@ export default function MerchantKeyManagement() {
           <TabPanel value={currentTab} index={0}>
             <Grid container spacing={3}>
               {/* 基本信息卡片 */}
-              <Grid item component="div" xs={12} md={8} component="div">
+              <Grid item component="div" xs={12} md={8}>
                 <Card sx={{ height: '100%' }}>
                   <CardContent>
                     <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', mb: 2 }}>
