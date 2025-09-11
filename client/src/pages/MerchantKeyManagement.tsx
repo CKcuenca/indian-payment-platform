@@ -428,7 +428,7 @@ export default function MerchantKeyManagement() {
                   </CardContent>
 
                   <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                       <Button
                         variant="contained"
                         startIcon={<RefreshIcon />}
@@ -443,6 +443,14 @@ export default function MerchantKeyManagement() {
                         onClick={handleDownloadConfig}
                       >
                         下载配置文件
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        startIcon={<CodeIcon />}
+                        onClick={() => setCurrentTab(1)}
+                        color="primary"
+                      >
+                        查看使用示例
                       </Button>
                     </Box>
                   </CardActions>
@@ -521,6 +529,55 @@ export default function MerchantKeyManagement() {
                   </Alert>
                 </Grid>
 
+                {/* 快速访问文档区域 */}
+                <Grid item xs={12}>
+                  <Card sx={{ mb: 3, bgcolor: alpha(theme.palette.primary.main, 0.02) }}>
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom color="primary.main" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CodeIcon />
+                        开发资源快速访问
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        获取完整的API文档、SDK下载和在线测试工具
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                        <Button
+                          variant="contained"
+                          startIcon={<CodeIcon />}
+                          onClick={() => window.open('/api-docs.html', '_blank')}
+                          sx={{ minWidth: 140 }}
+                        >
+                          完整API文档
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          startIcon={<CodeIcon />}
+                          onClick={() => window.open('/wakeup-payment-api.html', '_blank')}
+                          sx={{ minWidth: 140 }}
+                        >
+                          唤醒支付文档
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          startIcon={<DownloadIcon />}
+                          onClick={handleDownloadConfig}
+                          sx={{ minWidth: 140 }}
+                        >
+                          下载SDK配置
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          startIcon={<SecurityIcon />}
+                          onClick={() => window.open('/api-docs.html#authentication', '_blank')}
+                          sx={{ minWidth: 140 }}
+                        >
+                          签名验证工具
+                        </Button>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+
                 {/* 代收订单示例 */}
                 <Grid item xs={12} lg={6}>
                   <Card>
@@ -546,14 +603,22 @@ export default function MerchantKeyManagement() {
                         </pre>
                       </Paper>
                       
-                      <Button
-                        size="small"
-                        startIcon={<CopyIcon />}
-                        onClick={() => handleCopy(JSON.stringify(examples.paymentExample.body, null, 2), '代收示例代码')}
-                        sx={{ mt: 1 }}
-                      >
-                        复制代码
-                      </Button>
+                      <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                        <Button
+                          size="small"
+                          startIcon={<CopyIcon />}
+                          onClick={() => handleCopy(JSON.stringify(examples.paymentExample.body, null, 2), '代收示例代码')}
+                        >
+                          复制代码
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => window.open('/api-docs.html#payment', '_blank')}
+                        >
+                          详细文档
+                        </Button>
+                      </Box>
                     </CardContent>
                   </Card>
                 </Grid>
@@ -583,14 +648,22 @@ export default function MerchantKeyManagement() {
                         </pre>
                       </Paper>
                       
-                      <Button
-                        size="small"
-                        startIcon={<CopyIcon />}
-                        onClick={() => handleCopy(JSON.stringify(examples.balanceExample.body, null, 2), '余额查询示例代码')}
-                        sx={{ mt: 1 }}
-                      >
-                        复制代码
-                      </Button>
+                      <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                        <Button
+                          size="small"
+                          startIcon={<CopyIcon />}
+                          onClick={() => handleCopy(JSON.stringify(examples.balanceExample.body, null, 2), '余额查询示例代码')}
+                        >
+                          复制代码
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => window.open('/api-docs.html#balance', '_blank')}
+                        >
+                          详细文档
+                        </Button>
+                      </Box>
                     </CardContent>
                   </Card>
                 </Grid>
@@ -620,14 +693,22 @@ export default function MerchantKeyManagement() {
                         </pre>
                       </Paper>
                       
-                      <Button
-                        size="small"
-                        startIcon={<CopyIcon />}
-                        onClick={() => handleCopy(examples.signatureCode.javascript, '签名算法代码')}
-                        sx={{ mt: 1 }}
-                      >
-                        复制代码
-                      </Button>
+                      <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                        <Button
+                          size="small"
+                          startIcon={<CopyIcon />}
+                          onClick={() => handleCopy(examples.signatureCode.javascript, '签名算法代码')}
+                        >
+                          复制代码
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => window.open('/api-docs.html#signature', '_blank')}
+                        >
+                          详细文档
+                        </Button>
+                      </Box>
                     </CardContent>
                   </Card>
                 </Grid>
