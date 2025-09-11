@@ -64,18 +64,32 @@ class PassPayClient {
         timeout: 10000
       });
 
+      console.log('PassPay创建订单响应:', JSON.stringify(response.data, null, 2));
+      
+      // 检查HTTP状态码
       if (response.data.rCode === 200) {
-        return {
-          success: true,
-          data: {
-            orderId: orderData.orderId,
-            tradeNo: response.data.data.trade_no,
-            status: 'PENDING',
-            message: '订单创建成功'
-          }
-        };
+        // 检查业务状态 - data不为null，并且status=1时才是成功
+        if (response.data.data && response.data.data.status === 1) {
+          return {
+            success: true,
+            data: {
+              orderId: orderData.orderId,
+              tradeNo: response.data.data.trade_no,
+              status: 'PENDING',
+              message: response.data.data.msg || '订单创建成功',
+              payLink: response.data.data.pay_link || null
+            }
+          };
+        } else {
+          // 业务失败
+          const errorMsg = response.data.data ? 
+            (response.data.data.msg || '订单创建失败') : 
+            (response.data.rMsg || '订单创建失败');
+          throw new Error(errorMsg);
+        }
       } else {
-        throw new Error(response.data.message || '创建代收订单失败');
+        // HTTP状态失败
+        throw new Error(response.data.rMsg || response.data.message || '创建代收订单失败');
       }
     } catch (error) {
       console.error('PassPay创建代收订单失败:', error);
