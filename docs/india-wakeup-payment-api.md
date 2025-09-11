@@ -200,7 +200,7 @@ const sign = crypto.createHash('sha256').update(signString).digest('hex');
 
 #### 接口信息
 
-- **接口地址**: `/api/order/create`
+- **接口地址**: `/api/wakeup/create`
 - **请求方式**: POST
 - **Content-Type**: application/json
 
@@ -209,12 +209,16 @@ const sign = crypto.createHash('sha256').update(signString).digest('hex');
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
 | appid | string | ✅ | 商户号（与商户ID一致） |
-| mchOrderId | string | ✅ | 商户订单号(唯一不重复) |
+| orderid | string | ✅ | 商户订单号(唯一不重复，长度至少6位) |
 | timestamp | string | ✅ | 请求时间戳(unix时间戳毫秒) |
 | payType | integer | ✅ | 支付类型（固定为9111） |
 | amount | string | ✅ | 支付金额元(可接收小数点后2位) |
 | currency | string | ✅ | 币种（固定为INR） |
-| notifyUrl | string | ✅ | 支付结果通知地址 |
+| notify_url | string | ✅ | 支付结果通知地址 |
+| return_url | string | ✅ | 支付完成返回地址 |
+| customer_phone | string | ✅ | 客户手机号 |
+| desc | string | ❌ | 订单描述 |
+| useDhPay | boolean | ❌ | 是否使用DhPay作为上游支付通道 |
 | sign | string | ✅ | 签名（此字段不参与签名） |
 
 #### 请求示例
@@ -222,12 +226,16 @@ const sign = crypto.createHash('sha256').update(signString).digest('hex');
 ```json
 {
   "appid": "M171925157713",
-  "mchOrderId": "test",
+  "orderid": "test001",
   "timestamp": "1726228640694",
   "payType": 9111,
   "amount": "105",
   "currency": "INR",
-  "notifyUrl": "http://localhost:8080/test",
+  "notify_url": "http://localhost:8080/notify",
+  "return_url": "http://localhost:8080/return",
+  "customer_phone": "919876543210",
+  "desc": "Game deposit",
+  "useDhPay": false,
   "sign": "7c5642e9ec5455b5a09af5abc6543da10b4fbc835b16432802af96327ea0b880"
 }
 ```
@@ -242,18 +250,20 @@ const sign = crypto.createHash('sha256').update(signString).digest('hex');
 | data.orderid | string | 商户订单号 |
 | data.status | string | 订单状态 |
 | data.message | string | 响应消息 |
-| data.upi_transfer_info | object | UPI转账信息 |
+| data.upi_transfer_info | object | UPI转账信息（传统唤醒模式） |
+| data.payment_url | string | 支付链接（DhPay模式） |
+| data.dhpay_order_id | string | DhPay订单ID（DhPay模式） |
 | data.verification_required | boolean | 是否需要验证 |
 
-#### 响应示例
+#### 响应示例（传统唤醒模式）
 
 ```json
 {
   "code": 200,
   "message": "操作成功",
   "data": {
-    "orderid": "test",
-    "status": "PENDING_VERIFICATION",
+    "orderid": "test001",
+    "status": "PENDING",
     "message": "请通过UPI转账到指定账户，转账完成后系统将自动验证",
     "upi_transfer_info": {
       "beneficiaryName": "RAHUL KUMAR",
@@ -263,10 +273,27 @@ const sign = crypto.createHash('sha256').update(signString).digest('hex');
       "bankName": "HDFC Bank",
       "amount": 105,
       "currency": "INR",
-      "transferNote": "Order: test - Game payment",
+      "transferNote": "Order: test001 - Game deposit",
       "expectedCompletionTime": "5-10 minutes"
     },
     "verification_required": true
+  }
+}
+```
+
+#### 响应示例（DhPay模式）
+
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "data": {
+    "orderid": "test001",
+    "status": "PENDING",
+    "message": "DhPay订单创建成功",
+    "payment_url": "https://test-api.dhpay.com/payment/12345",
+    "dhpay_order_id": "DH20240101123456",
+    "verification_required": false
   }
 }
 ```
@@ -361,7 +388,7 @@ const sign = crypto.createHash('sha256').update(signString).digest('hex');
 
 #### 接口信息
 
-- **接口地址**: `/api/order/query`
+- **接口地址**: `/api/wakeup/query`
 - **请求方式**: POST
 - **Content-Type**: application/json
 
@@ -370,9 +397,20 @@ const sign = crypto.createHash('sha256').update(signString).digest('hex');
 | 参数名 | 类型 | 必填 | 说明 |
 |--------|------|------|------|
 | appid | string | ✅ | 商户号 |
-| mchOrderId | string | ✅ | 商户订单号 |
+| orderid | string | ✅ | 商户订单号 |
 | timestamp | string | ✅ | 请求时间戳 |
 | sign | string | ✅ | 签名 |
+
+#### 请求示例
+
+```json
+{
+  "appid": "M171925157713",
+  "orderid": "test001",
+  "timestamp": "1726228640694",
+  "sign": "calculated_signature_here"
+}
+```
 
 #### 响应参数
 
@@ -381,11 +419,29 @@ const sign = crypto.createHash('sha256').update(signString).digest('hex');
 | code | integer | 响应状态码，200表示成功 |
 | message | string | 响应消息 |
 | data | object | 订单数据 |
-| data.orderId | string | 商户订单号 |
+| data.orderid | string | 商户订单号 |
 | data.status | string | 订单状态 |
-| data.amount | number | 订单金额 |
-| data.currency | string | 币种 |
-| data.createdAt | string | 创建时间 |
+| data.message | string | 状态描述 |
+| data.transfer_info | object | 转账信息 |
+
+#### 响应示例
+
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "data": {
+    "orderid": "test001",
+    "status": "PENDING_VERIFICATION",
+    "message": "等待UPI转账完成",
+    "transfer_info": {
+      "beneficiaryName": "RAHUL KUMAR",
+      "beneficiaryUPI": "rahul.kumar@hdfc",
+      "amount": 105
+    }
+  }
+}
+```
 
 ---
 
@@ -430,19 +486,23 @@ function generateSign(params, secretKey) {
 async function createDepositOrder() {
   const params = {
     appid: 'M171925157713',
-    mchOrderId: 'test_' + Date.now(),
+    orderid: 'test_' + Date.now(),
     timestamp: Date.now().toString(),
     payType: 9111,
     amount: '100',
     currency: 'INR',
-    notifyUrl: 'http://localhost:8080/notify'
+    notify_url: 'http://localhost:8080/notify',
+    return_url: 'http://localhost:8080/return',
+    customer_phone: '919876543210',
+    desc: 'Game deposit',
+    useDhPay: false
   };
   
   // 生成签名
   params.sign = generateSign(params, 'your_secret_key');
   
   try {
-    const response = await fetch('https://cashgit.com/api/order/create', {
+    const response = await fetch('https://cashgit.com/api/wakeup/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -455,6 +515,12 @@ async function createDepositOrder() {
     // 检查响应格式
     if (result.code === 200) {
       console.log('✅ 订单创建成功:', result.data);
+      if (result.data.upi_transfer_info) {
+        console.log('💳 UPI转账信息:', result.data.upi_transfer_info);
+      }
+      if (result.data.payment_url) {
+        console.log('🔗 支付链接:', result.data.payment_url);
+      }
     } else {
       console.error('❌ 订单创建失败:', result.message);
     }
@@ -463,22 +529,97 @@ async function createDepositOrder() {
   }
 }
 
+// 查询订单状态
+async function queryOrderStatus(orderid) {
+  const params = {
+    appid: 'M171925157713',
+    orderid: orderid,
+    timestamp: Date.now().toString()
+  };
+  
+  params.sign = generateSign(params, 'your_secret_key');
+  
+  try {
+    const response = await fetch('https://cashgit.com/api/wakeup/query', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(params)
+    });
+    
+    const result = await response.json();
+    
+    if (result.code === 200) {
+      console.log('✅ 查询成功:', result.data);
+      return result.data;
+    } else {
+      console.error('❌ 查询失败:', result.message);
+      return null;
+    }
+  } catch (error) {
+    console.error('查询订单失败:', error);
+    return null;
+  }
+}
+
+// 手动验证转账
+async function verifyTransfer(orderid, utrNumber, transferAmount) {
+  const params = {
+    appid: 'M171925157713',
+    orderid: orderid,
+    utr_number: utrNumber,
+    transfer_amount: transferAmount.toString(),
+    transfer_date: new Date().toISOString(),
+    timestamp: Date.now().toString()
+  };
+  
+  params.sign = generateSign(params, 'your_secret_key');
+  
+  try {
+    const response = await fetch('https://cashgit.com/api/wakeup/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(params)
+    });
+    
+    const result = await response.json();
+    
+    if (result.code === 200) {
+      console.log('✅ 验证成功:', result.data);
+      return result.data;
+    } else {
+      console.error('❌ 验证失败:', result.message);
+      return null;
+    }
+  } catch (error) {
+    console.error('验证转账失败:', error);
+    return null;
+  }
+}
+
 // 完整的错误处理示例
 async function createOrderWithErrorHandling() {
   try {
     const params = {
       appid: 'M171925157713',
-      mchOrderId: 'test_' + Date.now(),
+      orderid: 'test_' + Date.now(),
       timestamp: Date.now().toString(),
       payType: 9111,
       amount: '100',
       currency: 'INR',
-      notifyUrl: 'http://localhost:8080/notify'
+      notify_url: 'http://localhost:8080/notify',
+      return_url: 'http://localhost:8080/return',
+      customer_phone: '919876543210',
+      desc: 'Game deposit',
+      useDhPay: false
     };
     
     params.sign = generateSign(params, 'your_secret_key');
     
-    const response = await fetch('https://cashgit.com/api/order/create', {
+    const response = await fetch('https://cashgit.com/api/wakeup/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -494,7 +635,10 @@ async function createOrderWithErrorHandling() {
         console.log('订单ID:', result.data.orderid);
         console.log('状态:', result.data.status);
         if (result.data.upi_transfer_info) {
-          console.log('UPI转账信息:', result.data.upi_transfer_info);
+          console.log('💳 UPI转账信息:', result.data.upi_transfer_info);
+        }
+        if (result.data.payment_url) {
+          console.log('🔗 支付链接:', result.data.payment_url);
         }
         break;
       case 400:
@@ -588,13 +732,51 @@ async function createTestMerchant() {
 1. **支付类型**: 当前系统仅支持支付类型 9111（印度一类唤醒）
 2. **币种**: 仅支持 INR 币种
 3. **订单ID**: 必须唯一，长度至少6位
-4. **金额**: 支持小数点后2位
-5. **验证流程**: 唤醒支付需要用户通过UPI转账，系统自动验证转账结果
+4. **金额**: 支持小数点后2位，最小金额1 INR
+5. **验证流程**: 
+   - **传统唤醒模式**: 用户通过UPI转账到指定账户，系统自动或手动验证
+   - **DhPay模式**: 通过DhPay提供的支付链接完成支付
 6. **响应格式**: 系统使用 `code` 字段表示状态码，200表示成功
 7. **认证要求**: 所有接口都需要商户认证和签名验证
 8. **签名算法**: 使用SHA-256算法，密钥为商户的secretKey
 9. **错误处理**: 系统返回统一的错误格式，包含code、message和data字段
-10. **测试环境**: 需要先创建测试商户并配置支付提供商
+10. **两种模式**:
+    - **传统唤醒**: 返回UPI转账信息，需要手动验证
+    - **DhPay集成**: 返回支付链接，自动处理支付流程
+11. **手动验证**: 支持通过UTR号码手动验证转账完成
+12. **账户管理**: 系统维护多个收款账户，自动选择可用账户
+13. **回调通知**: 支付完成后会向商户的notify_url发送异步通知
+14. **测试环境**: 需要先创建测试商户并配置wakeup支付提供商
+
+## 🔄 支付流程说明
+
+### 传统唤醒模式流程
+1. 商户调用创建订单接口
+2. 系统返回UPI转账信息
+3. 用户手动通过UPI应用转账
+4. 系统检测到转账或商户手动验证
+5. 系统发送回调通知给商户
+
+### DhPay模式流程  
+1. 商户调用创建订单接口（设置useDhPay=true）
+2. 系统返回DhPay支付链接
+3. 用户通过支付链接完成支付
+4. DhPay发送回调给系统
+5. 系统发送回调通知给商户
+
+## 🔧 额外接口
+
+### 手动验证转账
+- **接口地址**: `/api/wakeup/verify`
+- **用途**: 当自动验证失败时，可通过UTR号码手动验证转账
+
+### 获取收款账户
+- **接口地址**: `/api/wakeup/accounts`  
+- **用途**: 获取当前可用的收款账户信息
+
+### 状态检查
+- **接口地址**: `/api/wakeup/check-status`
+- **用途**: 定时任务调用，检查待验证订单的转账状态
 
 ---
 
