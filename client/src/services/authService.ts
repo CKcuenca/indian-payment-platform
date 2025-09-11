@@ -74,7 +74,7 @@ class AuthService {
         // 保存到本地存储（设置token 24小时后过期）
         const expiryTime = Date.now() + (24 * 60 * 60 * 1000);
         localStorage.setItem('auth_token', token);
-        localStorage.setItem('user_data', JSON.stringify(user));
+        localStorage.setItem('user_data', JSON.stringify(this.currentUser)); // 保存包含权限的完整用户对象
         localStorage.setItem('token_expiry', expiryTime.toString());
         
         // 初始化权限管理器
@@ -85,7 +85,7 @@ class AuthService {
         
         // 触发自定义事件，通知其他组件状态变化
         window.dispatchEvent(new CustomEvent('authStateChanged', { 
-          detail: { isAuthenticated: true, user } 
+          detail: { isAuthenticated: true, user: this.currentUser } 
         }));
         
         return response.data.data;
