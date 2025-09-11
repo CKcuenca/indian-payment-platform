@@ -30,11 +30,39 @@ POST /api/balance/query # 余额查询
 POST /api/utr/submit    # UTR补单
 ```
 
-## 🚀 部署
-- **生产**: `deploy-production.sh` → cashgit.com
+## 🚀 服务器架构 & 部署
+### 🌐 AWS服务器信息
+- **服务器IP**: `13.200.72.14`
+- **SSH密钥**: `/Users/kaka/AWS-Key/indian-payment-key-3.pem`
+- **连接命令**: `ssh -i /Users/kaka/AWS-Key/indian-payment-key-3.pem ubuntu@13.200.72.14`
+- **操作系统**: Ubuntu 22.04.5 LTS
+
+### 🔄 双环境部署架构
+#### 🧪 测试环境
+- **域名**: https://test.cashgit.com
+- **应用路径**: `/var/www/test.cashgit.com`
+- **PM2应用名**: `test-indian-payment-platform` (ID: 0)
+- **端口**: 3000
+- **用途**: 自动部署测试、新功能验证
+
+#### 🚀 生产环境  
+- **域名**: https://cashgit.com
+- **应用路径**: `/var/www/cashgit.com`
+- **PM2应用名**: `indian-payment-platform` (ID: 1)
+- **端口**: 3001
+- **用途**: 正式线上服务
+
+### 📋 部署流程
+1. **代码推送**: 本地 → GitHub → 自动部署到测试环境
+2. **测试验证**: 在test.cashgit.com验证功能
+3. **生产部署**: 手动执行 `deploy-production.sh` → cashgit.com
+4. **服务管理**: PM2管理两个环境同时运行
+
+### 🔧 关键文件
+- **PM2配置**: `ecosystem.config.js` (生产), `ecosystem.test.config.js` (测试)
+- **环境变量**: `env.production` (生产), 测试环境使用默认配置
+- **部署脚本**: `deploy-production.sh`, `deploy-to-cashgit.sh`
 - **GitHub Actions**: `.github/workflows/deploy-test.yml`
-- **PM2**: `ecosystem.config.js`
-- **测试脚本**: `test-production-comprehensive.js`
 
 ## ⚠️ 常见问题 (2025-01修复)
 1. **支付失败**: 检查签名、配置、网络
@@ -47,6 +75,7 @@ POST /api/utr/submit    # UTR补单
 8. ✅ **数据库金额单位不一致** - 已修复paisa/rupees转换
 9. ✅ **回调金额解析错误** - 已修复webhook金额处理
 10. ✅ **重复状态映射函数冲突** - 已统一所有状态映射
+11. ✅ **admin权限问题** - 已修复前端缺失SYSTEM_MONITORING权限 (2025-09-11)
 
 ## 📋 重要文档
 - `PASSPAY_INTEGRATION_README.md` - PassPay完整指南
@@ -75,6 +104,51 @@ pm2 restart all  # 重启服务
   - 存储时: `Math.round(rupees * 100)` → paisa
   - 显示时: `(paisa / 100).toFixed(2)` → rupees
 
+## 🎮 数据库用户管理
+### 👥 生产环境用户 (payment-platform数据库)
+- **管理员**: `admin` (系统管理员) - 完整权限
+- **商户**: `cgpay` - 商户权限 (merchantId: cgpay)
+- **查询方式**: 
+  ```bash
+  # SSH连接服务器
+  ssh -i /Users/kaka/AWS-Key/indian-payment-key-3.pem ubuntu@13.200.72.14
+  
+  # 进入MongoDB
+  mongosh
+  use payment-platform
+  db.users.find({})
+  ```
+
+## 🔧 服务器运维
+### PM2服务管理
+```bash
+# 查看所有服务
+pm2 list
+
+# 重启生产环境
+pm2 restart indian-payment-platform
+
+# 重启测试环境  
+pm2 restart test-indian-payment-platform
+
+# 查看日志
+pm2 logs indian-payment-platform --lines 20
+pm2 logs test-indian-payment-platform --lines 20
+
+# 停止/启动服务
+pm2 stop 1    # 停止生产环境
+pm2 start 1   # 启动生产环境
+```
+
+### 🔍 故障排查
+1. **502错误**: 检查PM2服务是否运行
+2. **服务停止**: 使用 `pm2 start ecosystem.config.js --env production`
+3. **数据库连接**: 确认MongoDB服务运行 `sudo systemctl status mongod`
+4. **端口冲突**: 检查端口占用 `netstat -tlnp | grep 3001`
+
 ---
-**⚡ 记住**: 所有API都需要签名验证，生产环境必须HTTPS
-- 我的线上服务器是aws的，已经部署了测试环境和生产环境。我推送到git仓库后，git会自动部署到线上测试环境，如果测试没问题，我就手动部署到生产环境。
+**⚡ 记住**: 
+- 两个环境同时运行，互不影响
+- 测试环境自动部署，生产环境手动部署
+- 所有API都需要签名验证，生产环境必须HTTPS
+- 服务器重启后需要手动启动PM2服务
