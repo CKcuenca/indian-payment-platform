@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const MerchantKeyManager = require('../services/merchant-key-manager');
-const authMiddleware = require('../middleware/auth'); // 商户认证中间件
+const { authMiddleware } = require('../middleware/auth'); // 商户认证中间件
 
 /**
  * 商户密钥管理路由
