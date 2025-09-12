@@ -7,6 +7,11 @@ const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/payment-platform';
 const ADMIN_USERS = (process.env.ADMIN_TELEGRAM_USERS || '').split(',').filter(id => id);
 
+// 频率限制配置
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1分钟 = 60000毫秒
+const MAX_QUERIES_PER_MINUTE = 1; // 每分钟最大查询次数
+const groupQueryHistory = new Map(); // 存储每个群组的查询历史
+
 if (!BOT_TOKEN) {
   console.error('❌ TELEGRAM_BOT_TOKEN 环境变量未设置');
   process.exit(1);
@@ -75,6 +80,49 @@ function isAdmin(userId) {
 
 function formatAmount(paisa) {
   return (paisa / 100).toFixed(2);
+}
+
+// 频率限制检查函数
+function checkRateLimit(chatId) {
+  const now = Date.now();
+  const chatIdStr = chatId.toString();
+  
+  // 如果群组没有查询历史，创建一个新的记录
+  if (!groupQueryHistory.has(chatIdStr)) {
+    groupQueryHistory.set(chatIdStr, []);
+  }
+  
+  const queryTimes = groupQueryHistory.get(chatIdStr);
+  
+  // 清理超过时间窗口的查询记录
+  const validQueries = queryTimes.filter(time => now - time < RATE_LIMIT_WINDOW);
+  groupQueryHistory.set(chatIdStr, validQueries);
+  
+  // 检查是否超过限制
+  if (validQueries.length >= MAX_QUERIES_PER_MINUTE) {
+    return false; // 超过限制
+  }
+  
+  // 添加当前查询时间
+  validQueries.push(now);
+  groupQueryHistory.set(chatIdStr, validQueries);
+  
+  return true; // 允许查询
+}
+
+// 获取剩余等待时间（秒）
+function getRateLimitWaitTime(chatId) {
+  const chatIdStr = chatId.toString();
+  const queryTimes = groupQueryHistory.get(chatIdStr);
+  
+  if (!queryTimes || queryTimes.length === 0) {
+    return 0;
+  }
+  
+  const oldestQuery = Math.min(...queryTimes);
+  const waitTime = Math.ceil((RATE_LIMIT_WINDOW - (Date.now() - oldestQuery)) / 1000);
+  
+  return Math.max(0, waitTime);
 }
 
 // 绑定命令处理
@@ -182,6 +230,13 @@ bot.onText(/^\/y(@\w+)?(\s|$)/, async (msg) => {
     return;
   }
 
+  // 检查频率限制
+  if (!checkRateLimit(msg.chat.id)) {
+    const waitTime = getRateLimitWaitTime(msg.chat.id);
+    bot.sendMessage(msg.chat.id, `⏱️ 查询过于频繁，请等待 ${waitTime} 秒后再试\n💡 每个群组每分钟只能查询1次`, { parse_mode: 'Markdown' });
+    return;
+  }
+
   try {
     const group = await mongoose.connection.db.collection('telegramgroups').findOne({
       chatId: msg.chat.id.toString(),
@@ -233,6 +288,13 @@ bot.onText(/^\/y(@\w+)?(\s|$)/, async (msg) => {
 bot.onText(/^\/t(@\w+)?(\s|$)/, async (msg) => {
   if (msg.chat.type === 'private') {
     bot.sendMessage(msg.chat.id, '❌ 此命令只能在已绑定的群组中使用');
+    return;
+  }
+
+  // 检查频率限制
+  if (!checkRateLimit(msg.chat.id)) {
+    const waitTime = getRateLimitWaitTime(msg.chat.id);
+    bot.sendMessage(msg.chat.id, `⏱️ 查询过于频繁，请等待 ${waitTime} 秒后再试\n💡 每个群组每分钟只能查询1次`, { parse_mode: 'Markdown' });
     return;
   }
 
@@ -314,6 +376,13 @@ bot.onText(/^\/s(@\w+)?\s+(.+)/, async (msg, match) => {
     return;
   }
 
+  // 检查频率限制
+  if (!checkRateLimit(msg.chat.id)) {
+    const waitTime = getRateLimitWaitTime(msg.chat.id);
+    bot.sendMessage(msg.chat.id, `⏱️ 查询过于频繁，请等待 ${waitTime} 秒后再试\n💡 每个群组每分钟只能查询1次`, { parse_mode: 'Markdown' });
+    return;
+  }
+
   try {
     const group = await mongoose.connection.db.collection('telegramgroups').findOne({
       chatId: msg.chat.id.toString(),
@@ -372,6 +441,13 @@ bot.onText(/^\/f(@\w+)?\s+(.+)/, async (msg, match) => {
     return;
   }
 
+  // 检查频率限制
+  if (!checkRateLimit(msg.chat.id)) {
+    const waitTime = getRateLimitWaitTime(msg.chat.id);
+    bot.sendMessage(msg.chat.id, `⏱️ 查询过于频繁，请等待 ${waitTime} 秒后再试\n💡 每个群组每分钟只能查询1次`, { parse_mode: 'Markdown' });
+    return;
+  }
+
   try {
     const group = await mongoose.connection.db.collection('telegramgroups').findOne({
       chatId: msg.chat.id.toString(),
@@ -425,6 +501,13 @@ bot.onText(/^\/p(@\w+)?\s+(.+)/, async (msg, match) => {
   
   if (msg.chat.type === 'private') {
     bot.sendMessage(msg.chat.id, '❌ 此命令只能在已绑定的群组中使用');
+    return;
+  }
+
+  // 检查频率限制
+  if (!checkRateLimit(msg.chat.id)) {
+    const waitTime = getRateLimitWaitTime(msg.chat.id);
+    bot.sendMessage(msg.chat.id, `⏱️ 查询过于频繁，请等待 ${waitTime} 秒后再试\n💡 每个群组每分钟只能查询1次`, { parse_mode: 'Markdown' });
     return;
   }
 
@@ -486,6 +569,13 @@ bot.onText(/^\/i(@\w+)?\s+(\S+)\s+(.+)/, async (msg, match) => {
     return;
   }
 
+  // 检查频率限制
+  if (!checkRateLimit(msg.chat.id)) {
+    const waitTime = getRateLimitWaitTime(msg.chat.id);
+    bot.sendMessage(msg.chat.id, `⏱️ 查询过于频繁，请等待 ${waitTime} 秒后再试\n💡 每个群组每分钟只能查询1次`, { parse_mode: 'Markdown' });
+    return;
+  }
+
   try {
     const group = await mongoose.connection.db.collection('telegramgroups').findOne({
       chatId: msg.chat.id.toString(),
@@ -524,6 +614,13 @@ bot.onText(/^\/u(@\w+)?\s+(\S+)\s+(.+)/, async (msg, match) => {
   
   if (msg.chat.type === 'private') {
     bot.sendMessage(msg.chat.id, '❌ 此命令只能在已绑定的群组中使用');
+    return;
+  }
+
+  // 检查频率限制
+  if (!checkRateLimit(msg.chat.id)) {
+    const waitTime = getRateLimitWaitTime(msg.chat.id);
+    bot.sendMessage(msg.chat.id, `⏱️ 查询过于频繁，请等待 ${waitTime} 秒后再试\n💡 每个群组每分钟只能查询1次`, { parse_mode: 'Markdown' });
     return;
   }
 
@@ -587,6 +684,13 @@ bot.onText(/^\/b(@\w+)?\s+(\S+)\s+(.+)/, async (msg, match) => {
   
   if (msg.chat.type === 'private') {
     bot.sendMessage(msg.chat.id, '❌ 此命令只能在已绑定的群组中使用');
+    return;
+  }
+
+  // 检查频率限制
+  if (!checkRateLimit(msg.chat.id)) {
+    const waitTime = getRateLimitWaitTime(msg.chat.id);
+    bot.sendMessage(msg.chat.id, `⏱️ 查询过于频繁，请等待 ${waitTime} 秒后再试\n💡 每个群组每分钟只能查询1次`, { parse_mode: 'Markdown' });
     return;
   }
 
