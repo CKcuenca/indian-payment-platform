@@ -405,22 +405,19 @@
             <div class="menu">
                 <div class="menu-section">
                     <a class="menu-item active" onclick="showSection('overview')" id="overview-menu">
-                        📋 前言概述
+                        📋 接口概述
                     </a>
                     <a class="menu-item" onclick="showSection('signature')" id="signature-menu">
-                        🔐 签名算法
+                        🔐 sign 加密
                     </a>
-                    <a class="menu-item" onclick="showSection('deposit')" id="deposit-menu">
-                        💳 统一支付接口
+                    <a class="menu-item" onclick="showSection('collection')" id="collection-menu">
+                        💰 代收
                     </a>
-                    <a class="menu-item" onclick="showSection('query')" id="query-menu">
-                        🔍 订单查询接口
+                    <a class="menu-item" onclick="showSection('payout')" id="payout-menu">
+                        💸 代付
                     </a>
-                    <a class="menu-item" onclick="showSection('verify')" id="verify-menu">
-                        ✅ 手动验证接口
-                    </a>
-                    <a class="menu-item" onclick="showSection('notify')" id="notify-menu">
-                        📢 异步通知
+                    <a class="menu-item" onclick="showSection('balance')" id="balance-menu">
+                        💳 余额查询
                     </a>
                     <a class="menu-item" onclick="showSection('errors')" id="errors-menu">
                         ⚠️ 错误码
@@ -446,7 +443,7 @@
                 <!-- 前言概述 -->
                 <div class="content-section active" id="overview">
                     <div class="section">
-                        <h2>1. 前言概述</h2>
+                        <h2>1. 接口概述</h2>
                         
                         <h3>概要</h3>
                         <p>本文档定义了接入CashGit印度支付系统的统一API接口规范，具体包括：</p>
@@ -557,34 +554,38 @@ function generateSign(params, secretKey) {
                     </div>
                 </div>
                 
-                <!-- 存款接口 -->
-                <div class="content-section" id="deposit">
+                <!-- 代收接口 -->
+                <div class="content-section" id="collection">
                     <div class="section">
-                        <h2>3. 统一支付接口</h2>
-                        <p>🔥 <strong>最新更新</strong>：现在支持统一支付接口！一个接口支持标准支付和唤醒支付两种模式。</p>
-                        
-                        <h3>🚀 推荐接口（统一支付接口）</h3>
-                        <div class="endpoint">
-                            <div class="method method-post">POST</div>
-                            <span class="endpoint-url">/api/pay</span>
-                        </div>
-                        <p>通过 <code class="code-inline">pay_id</code> 参数控制支付类型：<code class="code-inline">pay_id=2</code> 为唤醒支付，缺省或 <code class="code-inline">pay_id=1</code> 为标准支付。</p>
-                        
-                        <h3>🔄 兼容接口（唤醒专用）</h3>
-                        <div class="endpoint">
-                            <div class="method method-post">POST</div>
-                            <span class="endpoint-url">/api/wakeup/create</span>
-                        </div>
-                        <p>仅支持唤醒支付模式，向后兼容保留。新商户建议直接使用统一接口。</p>
-                        
-                        <h3>🎯 统一支付接口说明</h3>
-                        <p>统一支付接口根据 <code class="code-inline">pay_id</code> 参数自动路由到不同支付方式：</p>
+                        <h2>3. 代收</h2>
+                        <h3>📋 代收接口列表</h3>
                         <ul>
-                            <li><strong>标准支付方式</strong>：pay_id 缺省或等于 1</li>
-                            <li><strong>唤醒支付方式</strong>：pay_id 等于 2（需要 customer_phone 参数）</li>
+                            <li><strong>创建代收订单</strong>：/api/pay - 统一支付接口，支持标准支付和唤醒支付</li>
+                            <li><strong>查询代收订单状态</strong>：/api/query - 查询订单支付状态</li>
+                            <li><strong>代收回调</strong>：异步通知商户支付结果</li>
+                            <li><strong>UTR补单</strong>：/api/wakeup/verify - 手动验证交易凭证</li>
                         </ul>
                         
-                        <h3>📋 统一支付接口请求参数</h3>
+                        <h3>3.1 创建代收订单</h3>
+                        
+                        <h4><strong>接口说明：</strong></h4>
+                        <p>创建支付订单，支持标准支付和唤醒支付两种模式。通过 pay_id 参数区分支付类型。</p>
+                        
+                        <h4><strong>请求URL：</strong></h4>
+                        <div class="endpoint">
+                            <div class="method method-post">POST</div>
+                            <span class="endpoint-url">https://cashgit.com/api/pay</span>
+                        </div>
+                        
+                        <h4><strong>请求方式：</strong></h4>
+                        <ul><li>POST</li></ul>
+                        
+                        <h4><strong>Header：</strong></h4>
+                        <div class="code-block">
+<pre>Content-Type: application/json</pre>
+                        </div>
+                        
+                        <h4><strong>请求参数：</strong></h4>
                         <div class="table">
                             <table>
                                 <thead>
@@ -664,13 +665,9 @@ function generateSign(params, secretKey) {
                             </table>
                         </div>
                         
-                        <h3>📝 统一接口请求示例</h3>
-                        
-                        <h4>唤醒支付示例（推荐）</h4>
+                        <h4><strong>请求示例：</strong></h4>
                         <div class="code-block">
-<pre>// 调用统一支付接口 - 唤醒支付
-POST /api/pay
-{
+<pre>{
   "appid": "MERCHANT_MEWZV8HV",
   "orderid": "ORDER_20241201_001",
   "amount": "100.00",
@@ -683,22 +680,7 @@ POST /api/pay
 }</pre>
                         </div>
                         
-                        <h4>标准支付示例（兼容）</h4>
-                        <div class="code-block">
-<pre>// 调用统一支付接口 - 标准支付
-POST /api/pay
-{
-  "appid": "MERCHANT_MEWZV8HV",
-  "orderid": "ORDER_20241201_002",
-  "amount": "200.00",
-  "desc": "游戏充值订单",
-  "notify_url": "https://your-game.com/notify",
-  "return_url": "https://your-game.com/success",
-  "sign": "calculated_md5_signature"
-}</pre>
-                        </div>
-                        
-                        <h3>📄 唤醒支付响应示例</h3>
+                        <h4><strong>成功返回示例：</strong></h4>
                         <div class="code-block">
 <pre>{
   "code": 200,
@@ -719,36 +701,427 @@ POST /api/pay
 }</pre>
                         </div>
                         
-                        <h3>📄 标准支付响应示例</h3>
+                        <h4><strong>失败返回示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "code": 400,
+  "message": "参数错误",
+  "data": null,
+  "error": "订单号格式不正确，长度至少6位"
+}</pre>
+                        </div>
+                        
+                        <h4><strong>返回参数：</strong></h4>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>code</td>
+                                        <td>Integer</td>
+                                        <td>状态码，200=成功，其他=失败</td>
+                                    </tr>
+                                    <tr>
+                                        <td>message</td>
+                                        <td>String</td>
+                                        <td>返回信息</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data</td>
+                                        <td>Object</td>
+                                        <td>返回数据，失败时为null</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.orderid</td>
+                                        <td>String</td>
+                                        <td>商户订单号</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.status</td>
+                                        <td>String</td>
+                                        <td>订单状态：PENDING=待支付</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data.payment_info</td>
+                                        <td>Object</td>
+                                        <td>支付信息</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>3.2 查询代收订单状态</h3>
+                        
+                        <h4><strong>接口说明：</strong></h4>
+                        <p>查询代收订单的支付状态和详细信息。</p>
+                        
+                        <h4><strong>请求URL：</strong></h4>
+                        <div class="endpoint">
+                            <div class="method method-post">POST</div>
+                            <span class="endpoint-url">https://cashgit.com/api/query</span>
+                        </div>
+                        
+                        <h4><strong>请求方式：</strong></h4>
+                        <ul><li>POST</li></ul>
+                        
+                        <h4><strong>Header：</strong></h4>
+                        <div class="code-block">
+<pre>Content-Type: application/json</pre>
+                        </div>
+                        
+                        <h4><strong>请求参数：</strong></h4>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>必填</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>appid</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户号</td>
+                                        <td>MERCHANT_MEWZV8HV</td>
+                                    </tr>
+                                    <tr>
+                                        <td>orderid</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户订单号</td>
+                                        <td>ORDER_20241201_001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>sign</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>MD5签名</td>
+                                        <td>755b88f30aa739c214a8512c42d1e535</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4><strong>请求示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "appid": "MERCHANT_MEWZV8HV",
+  "orderid": "ORDER_20241201_001",
+  "sign": "755b88f30aa739c214a8512c42d1e535"
+}</pre>
+                        </div>
+                        
+                        <h4><strong>成功返回示例：</strong></h4>
                         <div class="code-block">
 <pre>{
   "code": 200,
-  "message": "订单创建成功", 
+  "message": "查询成功",
   "data": {
-    "orderid": "ORDER_20241201_002",
-    "status": "PENDING",
-    "payment_info": {
-      "payment_method": "standard",
-      "trade_no": "TXN_20241201_123456",
-      "amount": "200.00",
-      "currency": "INR"
-    },
-    "message": "订单创建成功，等待支付"
+    "orderid": "ORDER_20241201_001",
+    "amount": "100.00",
+    "currency": "INR",
+    "status": "SUCCESS",
+    "platformOrderId": "TXN_123456789",
+    "completedAt": "2024-12-01T10:30:15.000Z",
+    "fee": "0.00"
+  }
+}</pre>
+                        </div>
+                        
+                        <h4><strong>失败返回示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "code": 404,
+  "message": "订单不存在",
+  "data": null
+}</pre>
+                        </div>
+                        
+                        <h3>3.3 代收回调</h3>
+                        
+                        <h4><strong>接口说明：</strong></h4>
+                        <p>当订单状态发生变化时，系统会向商户指定的notify_url发送异步通知。</p>
+                        
+                        <h4><strong>通知方式：</strong></h4>
+                        <ul><li>POST</li></ul>
+                        
+                        <h4><strong>通知参数：</strong></h4>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>appid</td>
+                                        <td>String</td>
+                                        <td>商户号</td>
+                                    </tr>
+                                    <tr>
+                                        <td>orderid</td>
+                                        <td>String</td>
+                                        <td>商户订单号</td>
+                                    </tr>
+                                    <tr>
+                                        <td>amount</td>
+                                        <td>String</td>
+                                        <td>订单金额</td>
+                                    </tr>
+                                    <tr>
+                                        <td>currency</td>
+                                        <td>String</td>
+                                        <td>币种（固定INR）</td>
+                                    </tr>
+                                    <tr>
+                                        <td>status</td>
+                                        <td>String</td>
+                                        <td>订单状态</td>
+                                    </tr>
+                                    <tr>
+                                        <td>platformOrderId</td>
+                                        <td>String</td>
+                                        <td>平台交易号</td>
+                                    </tr>
+                                    <tr>
+                                        <td>completedAt</td>
+                                        <td>String</td>
+                                        <td>完成时间</td>
+                                    </tr>
+                                    <tr>
+                                        <td>sign</td>
+                                        <td>String</td>
+                                        <td>MD5签名</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4><strong>通知示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "appid": "MERCHANT_MEWZV8HV",
+  "orderid": "ORDER_20241201_001",
+  "amount": "100.00",
+  "currency": "INR",
+  "status": "SUCCESS",
+  "platformOrderId": "TXN_123456789",
+  "completedAt": "2024-12-01T10:30:15.000Z",
+  "sign": "calculated_md5_signature"
+}</pre>
+                        </div>
+                        
+                        <h4><strong>商户响应：</strong></h4>
+                        <p>商户接收到异步通知后，需要返回字符串 <code class="code-inline">"success"</code> 表示接收成功。</p>
+                        
+                        <h3>3.4 UTR补单</h3>
+                        
+                        <h4><strong>接口说明：</strong></h4>
+                        <p>用于部分唤醒支付场景下的手动验证功能，当用户完成转账后，可以提交交易凭证进行验证。</p>
+                        
+                        <h4><strong>请求URL：</strong></h4>
+                        <div class="endpoint">
+                            <div class="method method-post">POST</div>
+                            <span class="endpoint-url">https://cashgit.com/api/wakeup/verify</span>
+                        </div>
+                        
+                        <h4><strong>请求方式：</strong></h4>
+                        <ul><li>POST</li></ul>
+                        
+                        <h4><strong>Header：</strong></h4>
+                        <div class="code-block">
+<pre>Content-Type: application/json</pre>
+                        </div>
+                        
+                        <h4><strong>请求参数：</strong></h4>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>必填</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>appid</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户号</td>
+                                        <td>MERCHANT_MEWZV8HV</td>
+                                    </tr>
+                                    <tr>
+                                        <td>orderid</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户订单号</td>
+                                        <td>ORDER_20241201_001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>utr_number</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>交易参考号（UTR）</td>
+                                        <td>435912345678</td>
+                                    </tr>
+                                    <tr>
+                                        <td>transfer_amount</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>实际转账金额</td>
+                                        <td>100.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>sign</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>MD5签名</td>
+                                        <td>755b88f30aa739c214a8512c42d1e535</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4><strong>请求示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "appid": "MERCHANT_MEWZV8HV",
+  "orderid": "ORDER_20241201_001",
+  "utr_number": "435912345678",
+  "transfer_amount": "100.00",
+  "sign": "755b88f30aa739c214a8512c42d1e535"
+}</pre>
+                        </div>
+                        
+                        <h4><strong>成功返回示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "code": 200,
+  "message": "验证提交成功",
+  "data": {
+    "orderid": "ORDER_20241201_001",
+    "status": "UNDER_REVIEW", 
+    "verification_id": "VRF_20241201_001",
+    "message": "交易凭证验证已提交，系统正在处理中，请稍后查询订单状态"
   }
 }</pre>
                         </div>
                     </div>
                 </div>
                 
-                <!-- 查询接口 -->
-                <div class="content-section" id="query">
+                <!-- 代付接口 -->
+                <div class="content-section" id="payout">
                     <div class="section">
-                        <h2>4. 订单查询接口</h2>
-                        <p>🔥 <strong>统一查询接口</strong>：自动识别订单类型，支持所有支付方式的订单查询。</p>
+                        <h2>4. 代付</h2>
+                        <p>代付功能尚未开放，敬请期待。</p>
+                    </div>
+                </div>
+                
+                <!-- 余额查询 -->
+                <div class="content-section" id="balance">
+                    <div class="section">
+                        <h2>5. 余额查询</h2>
                         
-                        <h3>🚀 推荐接口（统一查询）</h3>
+                        <h4><strong>接口说明：</strong></h4>
+                        <p>查询商户账户余额信息。</p>
+                        
+                        <h4><strong>请求URL：</strong></h4>
                         <div class="endpoint">
                             <div class="method method-post">POST</div>
+                            <span class="endpoint-url">https://cashgit.com/api/balance/query</span>
+                        </div>
+                        
+                        <h4><strong>请求方式：</strong></h4>
+                        <ul><li>POST</li></ul>
+                        
+                        <h4><strong>Header：</strong></h4>
+                        <div class="code-block">
+<pre>Content-Type: application/json</pre>
+                        </div>
+                        
+                        <h4><strong>请求参数：</strong></h4>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>必填</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>appid</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户号</td>
+                                        <td>MERCHANT_MEWZV8HV</td>
+                                    </tr>
+                                    <tr>
+                                        <td>sign</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>MD5签名</td>
+                                        <td>755b88f30aa739c214a8512c42d1e535</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4><strong>请求示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "appid": "MERCHANT_MEWZV8HV",
+  "sign": "755b88f30aa739c214a8512c42d1e535"
+}</pre>
+                        </div>
+                        
+                        <h4><strong>成功返回示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "code": 200,
+  "message": "查询成功",
+  "data": {
+    "balance": "10000.00",
+    "currency": "INR",
+    "frozen": "0.00",
+    "available": "10000.00"
+  }
+}</pre>
+                        </div>
+                        
+                        <h4><strong>失败返回示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "code": 401,
+  "message": "签名验证失败",
+  "data": null
+}</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 错误码 -->
+                <div class="content-section" id="errors">
                             <span class="endpoint-url">/api/query</span>
                         </div>
                         <p>自动识别订单的支付类型，统一返回订单状态和详细信息。</p>
