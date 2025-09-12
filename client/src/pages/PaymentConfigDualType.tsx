@@ -309,7 +309,7 @@ export default function PaymentConfigDualType() {
                   
                   <Grid container spacing={2}>
                     {providerAccounts.map((account) => (
-                      <Grid item xs={12} md={6} key={account._id}>
+                      <Grid item xs={12} md={6} key={account._id} component="div">
                         <Card variant="outlined">
                           <CardContent>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -415,7 +415,7 @@ export default function PaymentConfigDualType() {
           <Box sx={{ pt: 1 }}>
             <Grid container spacing={2}>
               {/* 基础信息 */}
-              <Grid item xs={12}>
+              <Grid item xs={12} component="div">
                 <TextField
                   fullWidth
                   label="账户名称"
@@ -426,7 +426,7 @@ export default function PaymentConfigDualType() {
               </Grid>
 
               {/* 支付商选择 */}
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={6} component="div">
                 <FormControl fullWidth required>
                   <InputLabel>支付商</InputLabel>
                   <Select
@@ -445,7 +445,7 @@ export default function PaymentConfigDualType() {
 
               {/* 类型选择 */}
               {formData.providerName && (
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} component="div">
                   <FormControl fullWidth required>
                     <InputLabel>通道类型</InputLabel>
                     <Select
@@ -467,7 +467,7 @@ export default function PaymentConfigDualType() {
               {formData.providerName && formData.type && (
                 <>
                   {shouldShowDualTypeField(formData.providerName, formData.type, 'accountId') && (
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} component="div">
                       <TextField
                         fullWidth
                         label={getDualTypeFieldLabel(formData.providerName, formData.type, 'accountId')}
@@ -480,7 +480,7 @@ export default function PaymentConfigDualType() {
                   )}
 
                   {shouldShowDualTypeField(formData.providerName, formData.type, 'payId') && (
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} component="div">
                       <TextField
                         fullWidth
                         label={getDualTypeFieldLabel(formData.providerName, formData.type, 'payId')}
@@ -496,7 +496,7 @@ export default function PaymentConfigDualType() {
                   )}
 
                   {shouldShowDualTypeField(formData.providerName, formData.type, 'mchNo') && (
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} component="div">
                       <TextField
                         fullWidth
                         label={getDualTypeFieldLabel(formData.providerName, formData.type, 'mchNo')}
@@ -508,7 +508,7 @@ export default function PaymentConfigDualType() {
                     </Grid>
                   )}
 
-                  <Grid item xs={12}>
+                  <Grid item xs={12} component="div">
                     <TextField
                       fullWidth
                       label={getDualTypeFieldLabel(formData.providerName, formData.type, 'secretKey')}
@@ -520,7 +520,7 @@ export default function PaymentConfigDualType() {
                     />
                   </Grid>
 
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={6} component="div">
                     <FormControl fullWidth>
                       <InputLabel>环境</InputLabel>
                       <Select
@@ -534,7 +534,7 @@ export default function PaymentConfigDualType() {
                     </FormControl>
                   </Grid>
 
-                  <Grid item xs={12} sm={6}>
+                  <Grid item xs={12} sm={6} component="div">
                     <TextField
                       fullWidth
                       label="优先级"
@@ -545,7 +545,7 @@ export default function PaymentConfigDualType() {
                     />
                   </Grid>
 
-                  <Grid item xs={12}>
+                  <Grid item xs={12} component="div">
                     <FormControlLabel
                       control={
                         <Switch
@@ -560,7 +560,7 @@ export default function PaymentConfigDualType() {
                     />
                   </Grid>
 
-                  <Grid item xs={12}>
+                  <Grid item xs={12} component="div">
                     <TextField
                       fullWidth
                       label="描述"
@@ -574,7 +574,7 @@ export default function PaymentConfigDualType() {
 
                   {/* 显示配置说明 */}
                   {getProviderTypeConfig(formData.providerName, formData.type)?.specialNotes && (
-                    <Grid item xs={12}>
+                    <Grid item xs={12} component="div">
                       <Alert severity="info">
                         <Typography variant="subtitle2" sx={{ mb: 1 }}>
                           {formData.type === 'native' ? '原生通道' : '唤醒通道'}配置说明：
