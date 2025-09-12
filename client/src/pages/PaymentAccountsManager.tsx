@@ -47,7 +47,7 @@ interface PaymentAccount {
     secretKey?: string;
     mchNo?: string;
   };
-  status: 'active' | 'inactive';
+  status: 'ACTIVE' | 'INACTIVE';
   environment: string;
   description?: string;
   priority: number;
@@ -134,7 +134,7 @@ export default function PaymentAccountsManager() {
     environment: 'production',
     description: '',
     priority: 1,
-    status: 'active' as 'active' | 'inactive'
+    status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE'
   });
 
   // 加载支付账户列表
@@ -171,7 +171,7 @@ export default function PaymentAccountsManager() {
       environment: 'production',
       description: '',
       priority: 1,
-      status: 'active'
+      status: 'ACTIVE'
     });
     setDialogOpen(true);
   };
@@ -377,8 +377,8 @@ export default function PaymentAccountsManager() {
                   </TableCell>
                   <TableCell>
                     <Chip 
-                      label={account.status === 'active' ? '启用' : '禁用'}
-                      color={account.status === 'active' ? 'success' : 'default'}
+                      label={account.status === 'ACTIVE' ? '启用' : '禁用'}
+                      color={account.status === 'ACTIVE' ? 'success' : 'default'}
                       size="small"
                     />
                   </TableCell>
@@ -535,10 +535,10 @@ export default function PaymentAccountsManager() {
             <FormControlLabel
               control={
                 <Switch
-                  checked={formData.status === 'active'}
+                  checked={formData.status === 'ACTIVE'}
                   onChange={(e) => setFormData(prev => ({ 
                     ...prev, 
-                    status: e.target.checked ? 'active' : 'inactive' 
+                    status: e.target.checked ? 'ACTIVE' : 'INACTIVE' 
                   }))}
                 />
               }

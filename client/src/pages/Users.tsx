@@ -58,7 +58,7 @@ export default function Users() {
     role: UserRole.OPERATOR,
     password: '',
     confirmPassword: '',
-    status: 'active' as 'active' | 'inactive' | 'suspended' | 'pending',
+    status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'PENDING',
     merchantId: '',
   });
 
@@ -96,7 +96,7 @@ export default function Users() {
       role: UserRole.OPERATOR,
       password: '',
       confirmPassword: '',
-      status: 'active',
+      status: 'ACTIVE',
       merchantId: '',
     });
     setDialogOpen(true);
@@ -165,7 +165,7 @@ export default function Users() {
       setLoading(true);
       
       // 调用后端API更新用户状态
-      const newStatus = user.status === 'active' ? 'inactive' : 'active';
+      const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
       const response = await api.put(`/api/users/${id}`, { status: newStatus });
       
       if (response.data.success) {
@@ -383,8 +383,8 @@ export default function Users() {
                 </TableCell>
                 <TableCell>
                   <Chip
-                    label={user.status === 'active' ? '启用' : '禁用'}
-                    color={user.status === 'active' ? 'success' : 'error'}
+                    label={user.status === 'ACTIVE' ? '启用' : '禁用'}
+                    color={user.status === 'ACTIVE' ? 'success' : 'error'}
                     size="small"
                   />
                 </TableCell>
@@ -401,14 +401,14 @@ export default function Users() {
                 <TableCell>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <PermissionGuard permissions={[Permission.MANAGE_USERS]}>
-                      <Tooltip title={user.status === 'active' ? '禁用用户' : '启用用户'}>
+                      <Tooltip title={user.status === 'ACTIVE' ? '禁用用户' : '启用用户'}>
                         <IconButton
                           size="small"
-                          color={user.status === 'active' ? 'warning' : 'success'}
+                          color={user.status === 'ACTIVE' ? 'warning' : 'success'}
                           onClick={() => handleToggleStatus(user.id)}
                           disabled={user.username === 'admin'}
                         >
-                          {user.status === 'active' ? <LockIcon /> : <LockOpenIcon />}
+                          {user.status === 'ACTIVE' ? <LockIcon /> : <LockOpenIcon />}
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="编辑用户">
@@ -567,8 +567,8 @@ export default function Users() {
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={formData.status === 'active'}
-                      onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.checked ? 'active' : 'inactive' }))}
+                      checked={formData.status === 'ACTIVE'}
+                      onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.checked ? 'ACTIVE' : 'INACTIVE' }))}
                     />
                   }
                   label="启用用户"

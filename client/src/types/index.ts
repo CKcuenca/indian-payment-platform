@@ -29,7 +29,7 @@ export interface User {
   role: UserRole;
   permissions: Permission[];
   merchantId?: string; // 如果是商户角色，关联的商户ID
-  status: 'active' | 'inactive' | 'suspended' | 'pending';
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'PENDING';
   createdAt: string;
   updatedAt: string;
   lastLoginAt?: string;
