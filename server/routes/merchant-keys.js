@@ -1,7 +1,45 @@
 const express = require('express');
 const router = express.Router();
 const MerchantKeyManager = require('../services/merchant-key-manager');
-const { authMiddleware } = require('../middleware/auth'); // 商户认证中间件
+const { authenticateToken } = require('../middleware/auth'); // JWT认证中间件
+
+/**
+ * 商户角色检查中间件
+ */
+const requireMerchantRole = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      code: 401,
+      message: '未认证',
+      data: null
+    });
+  }
+
+  if (req.user.role !== 'merchant') {
+    return res.status(403).json({
+      code: 403,
+      message: '只有商户角色可以访问密钥管理功能',
+      data: null
+    });
+  }
+
+  // 设置merchantId - 从用户信息中获取关联的商户ID
+  if (!req.user.merchantId) {
+    return res.status(400).json({
+      code: 400,
+      message: '商户用户未关联商户信息',
+      data: null
+    });
+  }
+
+  // 为了兼容现有代码，设置req.merchant对象
+  req.merchant = {
+    merchantId: req.user.merchantId,
+    userId: req.user.id
+  };
+
+  next();
+};
 
 /**
  * 商户密钥管理路由
@@ -12,7 +50,7 @@ const { authMiddleware } = require('../middleware/auth'); // 商户认证中间�
  * 获取商户密钥信息
  * GET /api/merchant/keys
  */
-router.get('/keys', authMiddleware, async (req, res) => {
+router.get('/keys', authenticateToken, requireMerchantRole, async (req, res) => {
   try {
     const merchantId = req.merchant.merchantId; // 从认证中间件获取
     
@@ -37,7 +75,7 @@ router.get('/keys', authMiddleware, async (req, res) => {
  * 重新生成商户密钥
  * POST /api/merchant/keys/regenerate
  */
-router.post('/keys/regenerate', authMiddleware, async (req, res) => {
+router.post('/keys/regenerate', authenticateToken, requireMerchantRole, async (req, res) => {
   try {
     const merchantId = req.merchant.merchantId;
     const operatorId = req.merchant.userId || merchantId;
@@ -87,7 +125,7 @@ router.post('/keys/regenerate', authMiddleware, async (req, res) => {
  * 下载密钥配置文件
  * GET /api/merchant/keys/download
  */
-router.get('/keys/download', authMiddleware, async (req, res) => {
+router.get('/keys/download', authenticateToken, requireMerchantRole, async (req, res) => {
   try {
     const merchantId = req.merchant.merchantId;
     
@@ -112,10 +150,13 @@ router.get('/keys/download', authMiddleware, async (req, res) => {
  * 获取API使用示例
  * GET /api/merchant/keys/examples
  */
-router.get('/keys/examples', authMiddleware, async (req, res) => {
+router.get('/keys/examples', authenticateToken, requireMerchantRole, async (req, res) => {
   try {
     const merchantId = req.merchant.merchantId;
-    const apiKey = req.merchant.apiKey;
+    
+    // 获取商户密钥信息
+    const keyInfo = await MerchantKeyManager.getMerchantKeyInfo(merchantId);
+    const apiKey = keyInfo.apiKey;
     
     const examples = {
       merchantId,
