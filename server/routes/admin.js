@@ -1,7 +1,12 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
+
+// 添加认证中间件 - 所有admin路由都需要认证和admin权限
+router.use(authenticateToken);
+router.use(requireAdmin);
 
 // 验证中间件
 const validateRequest = (req, res, next) => {
