@@ -371,19 +371,34 @@ export default function MerchantKeyManagement() {
                     <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', mb: 2 }}>
                       🔑 API凭据
                     </Typography>
+                    
+                    {/* 说明卡片 */}
+                    <Paper sx={{ p: 2, mb: 3, bgcolor: alpha(theme.palette.info.main, 0.05), border: `1px solid ${alpha(theme.palette.info.main, 0.2)}` }}>
+                      <Typography variant="body2" color="info.main" sx={{ fontWeight: 'medium', mb: 1 }}>
+                        💡 为什么需要两个密钥？
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        • <strong>商户标识</strong>：类似用户名，用于识别您的商户身份，可以在请求参数、日志中显示<br/>
+                        • <strong>签名密钥</strong>：类似密码，用于生成MD5签名验证请求真实性，绝对不能泄露<br/>
+                        • 这种设计确保了安全性：即使商户标识泄露，没有签名密钥也无法伪造请求
+                      </Typography>
+                    </Paper>
 
                     {/* API Key */}
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" color="text.secondary" gutterBottom>
-                        API Key (公钥)
+                        商户标识 (Merchant ID)
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                        用于标识您的商户身份，可在请求参数中使用，无需保密
                       </Typography>
                       <Paper sx={{ p: 2, bgcolor: alpha(theme.palette.primary.main, 0.05) }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Typography variant="body1" fontFamily="monospace" sx={{ flex: 1, wordBreak: 'break-all' }}>
                             {keyInfo.apiKey}
                           </Typography>
-                          <Tooltip title="复制API Key">
-                            <IconButton size="small" onClick={() => handleCopy(keyInfo.apiKey, 'API Key')}>
+                          <Tooltip title="复制商户标识">
+                            <IconButton size="small" onClick={() => handleCopy(keyInfo.apiKey, '商户标识')}>
                               <CopyIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
@@ -399,7 +414,10 @@ export default function MerchantKeyManagement() {
                     {/* Secret Key */}
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="body2" color="text.secondary" gutterBottom>
-                        Secret Key (私钥)
+                        签名密钥 (Secret Key)
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                        用于生成请求签名，验证身份和数据完整性，必须严格保密
                       </Typography>
                       <Paper sx={{ p: 2, bgcolor: alpha(theme.palette.error.main, 0.05) }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -411,15 +429,15 @@ export default function MerchantKeyManagement() {
                               {showSecretKey ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="复制Secret Key">
-                            <IconButton size="small" onClick={() => handleCopy(keyInfo.secretKey, 'Secret Key')}>
+                          <Tooltip title="复制签名密钥">
+                            <IconButton size="small" onClick={() => handleCopy(keyInfo.secretKey, '签名密钥')}>
                               <CopyIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
                         </Box>
                       </Paper>
                       <Typography variant="caption" color="error.main" sx={{ mt: 1, display: 'block' }}>
-                        ⚠️ 请妥善保管您的私钥，不要泄露给任何第三方！
+                        ⚠️ 签名密钥极其重要，请妥善保管，不要泄露给任何第三方！用于MD5签名验证身份。
                       </Typography>
                     </Box>
                   </CardContent>
