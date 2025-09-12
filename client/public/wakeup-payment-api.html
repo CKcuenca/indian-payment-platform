@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>印度唤醒支付API对接文档 - CashGit</title>
+    <title>CashGit统一支付API对接文档</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; line-height: 1.6; color: #333; background-color: #f5f5f5; }
@@ -398,8 +398,8 @@
         <!-- 侧边栏 -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <h1>🇮🇳 唤醒支付</h1>
-                <p>India Wake-up Payment API</p>
+                <h1>💳 CashGit支付</h1>
+                <p>CashGit Unified Payment API</p>
             </div>
             
             <div class="menu">
@@ -411,13 +411,13 @@
                         🔐 签名算法
                     </a>
                     <a class="menu-item" onclick="showSection('deposit')" id="deposit-menu">
-                        💳 存款接口
+                        💳 统一支付接口
                     </a>
                     <a class="menu-item" onclick="showSection('query')" id="query-menu">
-                        🔍 查询接口
+                        🔍 订单查询接口
                     </a>
                     <a class="menu-item" onclick="showSection('verify')" id="verify-menu">
-                        ✅ 手动验证
+                        ✅ 手动验证接口
                     </a>
                     <a class="menu-item" onclick="showSection('notify')" id="notify-menu">
                         📢 异步通知
@@ -435,8 +435,11 @@
         <!-- 主要内容 -->
         <div class="main-content">
             <div class="content-header">
-                <h1>🇮🇳 印度唤醒支付API对接文档</h1>
-                <p>India Wake-up Payment API Integration Documentation - CashGit</p>
+                <h1>💳 CashGit统一支付API对接文档</h1>
+                <p>CashGit Unified Payment API Integration Documentation</p>
+                <div class="highlight" style="margin-top: 20px;">
+                    <strong>🚀 最新更新</strong>：现已支持统一支付接口！一个API支持多种支付方式，简化集成流程。
+                </div>
             </div>
             
             <div class="content-body">
@@ -446,10 +449,11 @@
                         <h2>1. 前言概述</h2>
                         
                         <h3>概要</h3>
-                        <p>本文档定义了接入CashGit印度唤醒支付系统的报文接口规范，具体包括：</p>
+                        <p>本文档定义了接入CashGit印度支付系统的统一API接口规范，具体包括：</p>
                         <ul>
+                            <li><strong>统一支付接口</strong>：一个API支持标准支付和唤醒支付两种方式</li>
                             <li><strong>接口通信方式</strong>：涵盖网络通讯方式及接口加解密方式</li>
-                            <li><strong>业务处理流程</strong>：涉及代收、手动验证及财务管理等模块</li>
+                            <li><strong>业务处理流程</strong>：涉及订单创建、状态查询、手动验证等功能</li>
                             <li><strong>交易报文格式说明</strong>：包含入参、出参规范及JSON格式标准</li>
                         </ul>
                         
@@ -462,10 +466,11 @@
                         
                         <h3>相关术语</h3>
                         <ul>
-                            <li><strong>平台或系统</strong>：指提供印度唤醒支付功能的CashGit系统，用于支持商户完成各类交易。</li>
+                            <li><strong>平台或系统</strong>：指提供印度支付功能的CashGit系统，支持多种支付方式为商户提供完整的支付解决方案。</li>
                             <li><strong>商户号(appid)</strong>：这是商户在平台上的唯一标识，用于验证其在平台的合法性。</li>
                             <li><strong>商户订单号(orderid)</strong>：商户系统为每笔订单生成的唯一编号，需确保其唯一性。</li>
                             <li><strong>加密密钥(secretKey)</strong>：商户用于交易请求前对数据进行加密和验签的关键工具。</li>
+                            <li><strong>支付类型标识(pay_id)</strong>：用于区分不同支付方式的参数，"1"表示标准支付，"2"表示唤醒支付。</li>
                             <li><strong>币种(currency)</strong>：固定为INR（印度卢比）。</li>
                             <li><strong>后台异步回调(notify_url)</strong>：当交易处理完成后，系统会主动通知商户网站并携带相关结果信息。</li>
                         </ul>
@@ -555,18 +560,31 @@ function generateSign(params, secretKey) {
                 <!-- 存款接口 -->
                 <div class="content-section" id="deposit">
                     <div class="section">
-                        <h2>3. 存款接口</h2>
-                        <p>唤醒支付存款接口用于创建充值订单，支持传统唤醒模式和DhPay模式两种支付方式。</p>
+                        <h2>3. 统一支付接口</h2>
+                        <p>🔥 <strong>最新更新</strong>：现在支持统一支付接口！一个接口支持标准支付和唤醒支付两种模式。</p>
                         
+                        <h3>🚀 推荐接口（统一支付接口）</h3>
+                        <div class="endpoint">
+                            <div class="method method-post">POST</div>
+                            <span class="endpoint-url">/api/pay</span>
+                        </div>
+                        <p>通过 <code class="code-inline">pay_id</code> 参数控制支付类型：<code class="code-inline">pay_id=2</code> 为唤醒支付，缺省或 <code class="code-inline">pay_id=1</code> 为标准支付。</p>
+                        
+                        <h3>🔄 兼容接口（唤醒专用）</h3>
                         <div class="endpoint">
                             <div class="method method-post">POST</div>
                             <span class="endpoint-url">/api/wakeup/create</span>
                         </div>
+                        <p>仅支持唤醒支付模式，向后兼容保留。新商户建议直接使用统一接口。</p>
                         
-                        <h3>接口说明</h3>
-                        <p>该接口用于创建唤醒支付存款订单。传统模式返回UPI转账信息，DhPay模式返回支付链接。</p>
+                        <h3>🎯 统一支付接口说明</h3>
+                        <p>统一支付接口根据 <code class="code-inline">pay_id</code> 参数自动路由到不同支付方式：</p>
+                        <ul>
+                            <li><strong>标准支付方式</strong>：pay_id 缺省或等于 1</li>
+                            <li><strong>唤醒支付方式</strong>：pay_id 等于 2（需要 customer_phone 参数）</li>
+                        </ul>
                         
-                        <h3>请求参数</h3>
+                        <h3>📋 统一支付接口请求参数</h3>
                         <div class="table">
                             <table>
                                 <thead>
@@ -629,11 +647,11 @@ function generateSign(params, secretKey) {
                                         <td>9876543210</td>
                                     </tr>
                                     <tr>
-                                        <td>useDhPay</td>
-                                        <td>Boolean</td>
+                                        <td>pay_id</td>
+                                        <td>String</td>
                                         <td><span class="badge badge-optional">可选</span></td>
-                                        <td>是否使用DhPay模式</td>
-                                        <td>false</td>
+                                        <td>支付类型：1=标准支付(默认)，2=唤醒支付</td>
+                                        <td>"2"</td>
                                     </tr>
                                     <tr>
                                         <td>sign</td>
@@ -646,22 +664,41 @@ function generateSign(params, secretKey) {
                             </table>
                         </div>
                         
-                        <h3>请求示例</h3>
+                        <h3>📝 统一接口请求示例</h3>
+                        
+                        <h4>唤醒支付示例（推荐）</h4>
                         <div class="code-block">
-<pre>{
+<pre>// 调用统一支付接口 - 唤醒支付
+POST /api/pay
+{
   "appid": "MERCHANT_MEWZV8HV",
   "orderid": "ORDER_20241201_001",
   "amount": "100.00",
   "desc": "游戏充值订单",
+  "pay_id": "2",
+  "customer_phone": "9876543210",
   "notify_url": "https://your-game.com/notify",
   "return_url": "https://your-game.com/success",
-  "customer_phone": "9876543210",
-  "useDhPay": false,
   "sign": "755b88f30aa739c214a8512c42d1e535"
 }</pre>
                         </div>
                         
-                        <h3>响应示例（传统唤醒模式）</h3>
+                        <h4>标准支付示例（兼容）</h4>
+                        <div class="code-block">
+<pre>// 调用统一支付接口 - 标准支付
+POST /api/pay
+{
+  "appid": "MERCHANT_MEWZV8HV",
+  "orderid": "ORDER_20241201_002",
+  "amount": "200.00",
+  "desc": "游戏充值订单",
+  "notify_url": "https://your-game.com/notify",
+  "return_url": "https://your-game.com/success",
+  "sign": "calculated_md5_signature"
+}</pre>
+                        </div>
+                        
+                        <h3>📄 唤醒支付响应示例</h3>
                         <div class="code-block">
 <pre>{
   "code": 200,
@@ -669,34 +706,34 @@ function generateSign(params, secretKey) {
   "data": {
     "orderid": "ORDER_20241201_001",
     "status": "PENDING",
-    "upi_transfer_info": {
-      "beneficiaryName": "Rajesh Kumar",
-      "beneficiaryUPI": "rajesh@paytm",
-      "beneficiaryAccount": "1234567890",
-      "ifscCode": "SBIN0001234",
-      "bankName": "State Bank of India",
+    "payment_info": {
+      "payment_method": "wakeup",
+      "payment_url": "https://cashgit.com/pay?token=abc123...",
+      "qr_code": "data:image/png;base64,iVBORw0KGgoAAAANS...",
       "amount": "100.00",
       "currency": "INR",
-      "transferNote": "Order: ORDER_20241201_001 - 游戏充值订单",
-      "expectedCompletionTime": "5-10 minutes"
+      "expires_in": 1800
     },
-    "verification_required": true,
-    "message": "请通过UPI转账到指定账户，转账完成后系统将自动验证"
+    "message": "请使用支付链接或扫描二维码完成支付"
   }
 }</pre>
                         </div>
                         
-                        <h3>响应示例（DhPay模式）</h3>
+                        <h3>📄 标准支付响应示例</h3>
                         <div class="code-block">
 <pre>{
   "code": 200,
-  "message": "订单创建成功",
+  "message": "订单创建成功", 
   "data": {
-    "orderid": "ORDER_20241201_001",
+    "orderid": "ORDER_20241201_002",
     "status": "PENDING",
-    "payment_url": "https://dhpay.com/pay?token=abc123...",
-    "qrCode": "data:image/png;base64,iVBORw0KGgoAAAANS...",
-    "message": "请使用支付链接或扫描二维码完成支付"
+    "payment_info": {
+      "payment_method": "standard",
+      "trade_no": "TXN_20241201_123456",
+      "amount": "200.00",
+      "currency": "INR"
+    },
+    "message": "订单创建成功，等待支付"
   }
 }</pre>
                         </div>
@@ -706,13 +743,22 @@ function generateSign(params, secretKey) {
                 <!-- 查询接口 -->
                 <div class="content-section" id="query">
                     <div class="section">
-                        <h2>4. 查询接口</h2>
-                        <p>用于查询订单的支付状态和详细信息。</p>
+                        <h2>4. 订单查询接口</h2>
+                        <p>🔥 <strong>统一查询接口</strong>：自动识别订单类型，支持所有支付方式的订单查询。</p>
                         
+                        <h3>🚀 推荐接口（统一查询）</h3>
+                        <div class="endpoint">
+                            <div class="method method-post">POST</div>
+                            <span class="endpoint-url">/api/query</span>
+                        </div>
+                        <p>自动识别订单的支付类型，统一返回订单状态和详细信息。</p>
+                        
+                        <h3>🔄 兼容接口（唤醒专用）</h3>
                         <div class="endpoint">
                             <div class="method method-post">POST</div>
                             <span class="endpoint-url">/api/wakeup/query</span>
                         </div>
+                        <p>仅查询唤醒支付订单，向后兼容保留。</p>
                         
                         <h3>请求参数</h3>
                         <div class="table">
@@ -809,7 +855,7 @@ function generateSign(params, secretKey) {
                 <div class="content-section" id="verify">
                     <div class="section">
                         <h2>5. 手动验证接口</h2>
-                        <p>用于传统唤醒模式下的手动验证功能，当用户完成UPI转账后，可以提交UTR号进行验证。</p>
+                        <p>用于部分唤醒支付场景下的手动验证功能，当用户完成转账后，可以提交交易凭证进行验证。</p>
                         
                         <div class="endpoint">
                             <div class="method method-post">POST</div>
@@ -847,7 +893,7 @@ function generateSign(params, secretKey) {
                                         <td>utr_number</td>
                                         <td>String</td>
                                         <td><span class="badge badge-required">必填</span></td>
-                                        <td>UPI交易参考号</td>
+                                        <td>交易参考号（UTR）</td>
                                         <td>435912345678</td>
                                     </tr>
                                     <tr>
@@ -875,8 +921,9 @@ function generateSign(params, secretKey) {
   "message": "验证提交成功",
   "data": {
     "orderid": "ORDER_20241201_001",
-    "status": "UNDER_REVIEW",
-    "message": "UTR验证已提交，系统正在处理中，请稍后查询订单状态"
+    "status": "UNDER_REVIEW", 
+    "verification_id": "VRF_20241201_001",
+    "message": "交易凭证验证已提交，系统正在处理中，请稍后查询订单状态"
   }
 }</pre>
                         </div>
@@ -1046,19 +1093,22 @@ function generateSign($params, $secretKey) {
     return strtolower(md5($signString));
 }
 
-// 创建订单示例
+// 唤醒支付订单创建示例
 $params = array(
     'appid' => 'MERCHANT_MEWZV8HV',
     'orderid' => 'ORDER_' . time(),
     'amount' => '100.00',
     'desc' => '游戏充值',
+    'pay_id' => '2',                        // 唤醒支付
+    'customer_phone' => '9876543210',
     'notify_url' => 'https://your-game.com/notify'
 );
 
 $params['sign'] = generateSign($params, 'your_secret_key');
 
+// 调用统一支付接口
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, 'https://cashgit.com/api/wakeup/create');
+curl_setopt($ch, CURLOPT_URL, 'https://cashgit.com/api/pay');
 curl_setopt($ch, CURLOPT_POST, 1);
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
 curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
@@ -1076,7 +1126,7 @@ echo $response;
 <pre>import hashlib
 import requests
 import json
-from urllib.parse import urlencode
+import time
 
 def generate_sign(params, secret_key):
     # 排除sign参数并过滤空值
@@ -1092,19 +1142,22 @@ def generate_sign(params, secret_key):
     # MD5加密
     return hashlib.md5(sign_string.encode('utf-8')).hexdigest().lower()
 
-# 创建订单示例
+# 唤醒支付订单创建示例
 params = {
     'appid': 'MERCHANT_MEWZV8HV',
     'orderid': 'ORDER_' + str(int(time.time())),
     'amount': '100.00',
     'desc': '游戏充值',
+    'pay_id': '2',                    # 唤醒支付
+    'customer_phone': '9876543210',
     'notify_url': 'https://your-game.com/notify'
 }
 
 params['sign'] = generate_sign(params, 'your_secret_key')
 
+# 调用统一支付接口
 response = requests.post(
-    'https://cashgit.com/api/wakeup/create',
+    'https://cashgit.com/api/pay',
     headers={'Content-Type': 'application/json'},
     data=json.dumps(params)
 )
@@ -1157,19 +1210,22 @@ public class WakeupPaymentExample {
         }
     }
     
-    // 使用示例
+    // 使用示例 - 唤醒支付订单创建
     public static void main(String[] args) {
         Map<String, Object> params = new HashMap<>();
         params.put("appid", "MERCHANT_MEWZV8HV");
         params.put("orderid", "ORDER_" + System.currentTimeMillis());
         params.put("amount", "100.00");
         params.put("desc", "游戏充值");
+        params.put("pay_id", "2");                      // 唤醒支付
+        params.put("customer_phone", "9876543210");
         params.put("notify_url", "https://your-game.com/notify");
         
         String sign = generateSign(params, "your_secret_key");
         params.put("sign", sign);
         
-        // 发送HTTP请求...
+        // 发送HTTP请求到统一支付接口 /api/pay
+        // 实现HTTP POST请求逻辑...
     }
 }
 </pre>
