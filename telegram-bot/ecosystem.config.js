@@ -2,14 +2,14 @@ module.exports = {
   apps: [
     {
       name: 'telegram-bot',
-      script: './bot.js',
+      script: './group-bot.js',
       instances: 1,
       exec_mode: 'fork',
       env: {
         NODE_ENV: 'production',
         TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
         MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/payment-platform',
-        AUTHORIZED_TELEGRAM_USERS: process.env.AUTHORIZED_TELEGRAM_USERS || ''
+        ADMIN_TELEGRAM_USERS: process.env.ADMIN_TELEGRAM_USERS || ''
       },
       env_production: {
         NODE_ENV: 'production'
