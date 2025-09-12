@@ -952,7 +952,34 @@ export default function PaymentManagementNew() {
                   </Box>
                 )}
                 
-                {/* PassPay专用字段 - payId */}
+                {/* PassPay专用字段 - 通道类型选择 */}
+                {formData.providerName === 'passpay' && (
+                  <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                    <FormControl fullWidth required>
+                      <InputLabel>PassPay通道类型</InputLabel>
+                      <Select
+                        value={formData.type || 'native'}
+                        onChange={(e) => {
+                          const channelType = e.target.value;
+                          const payId = channelType === 'native' ? '12' : '10';
+                          setFormData({
+                            ...formData, 
+                            type: channelType,
+                            payId: payId
+                          });
+                        }}
+                      >
+                        <MenuItem value="native">原生通道 (PayID: 12)</MenuItem>
+                        <MenuItem value="wakeup">唤醒通道 (PayID: 10)</MenuItem>
+                      </Select>
+                      <Box component="span" sx={{ fontSize: '0.75rem', color: 'text.secondary', mt: 0.5 }}>
+                        不同通道需要配置不同的商户号和密钥
+                      </Box>
+                    </FormControl>
+                  </Box>
+                )}
+
+                {/* PassPay专用字段 - payId (自动设置，只读显示) */}
                 {shouldShowField(formData.providerName, 'payId') && (
                   <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                     <TextField
@@ -962,6 +989,9 @@ export default function PaymentManagementNew() {
                       onChange={(e) => setFormData({...formData, payId: e.target.value})}
                       helperText={getFieldHelper(formData.providerName, 'payId')}
                       required={isFieldRequired(formData.providerName, 'payId')}
+                      InputProps={{
+                        readOnly: formData.providerName === 'passpay' // PassPay的PayID自动设置
+                      }}
                     />
                   </Box>
                 )}

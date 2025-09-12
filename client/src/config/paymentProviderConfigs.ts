@@ -114,35 +114,39 @@ export const PAYMENT_PROVIDER_CONFIGS: Record<string, PaymentProviderConfig> = {
     ]
   },
 
-  // PassPay（唤醒支付）配置
+  // PassPay（通用配置）- 支持原生和唤醒双通道
   passpay: {
     name: 'passpay',
     displayName: 'PassPay',
-    type: 'wakeup',
-    subType: 'wakeup',
-    requiredFields: ['accountName', 'accountId', 'payId', 'secretKey', 'environment'],
+    type: 'native', // 默认为原生，可在创建时修改
+    subType: 'third_party',
+    requiredFields: ['accountName', 'accountId', 'payId', 'secretKey', 'environment', 'type'],
     optionalFields: ['description'],
     hiddenFields: ['apiKey', 'mchNo'],
     defaultValues: {
-      type: 'wakeup',
-      subType: 'wakeup',
+      type: 'native',
+      subType: 'third_party',
       environment: 'production',
-      accountId: ''
+      accountId: '',
+      payId: '12' // 默认原生通道
     },
     fieldLabels: {
       secretKey: '商户密钥',
-      accountId: '商户号 (merchantNo)',
-      payId: '支付通道ID (payId)'
+      accountId: '商户号 (MCHID)',
+      payId: '支付通道ID (PayID)',
+      type: '通道类型'
     },
     fieldHelpers: {
-      secretKey: 'PassPay提供的商户密钥，用于签名验证',
-      accountId: 'PassPay提供的商户号 (merchantNo)',
-      payId: 'PassPay 提供的支付通道ID，用于区分通道'
+      secretKey: 'PassPay提供的商户密钥，用于API签名验证',
+      accountId: 'PassPay提供的商户号 (MCHID)',
+      payId: '支付通道ID - 原生通道使用12，唤醒通道使用10',
+      type: '选择原生通道(native)或唤醒通道(wakeup)'
     },
     specialNotes: [
-      'PassPay配置说明：',
-      '• 属于唤醒支付类型',
-      '• 需要配置商户ID与商户密钥'
+      'PassPay双通道配置说明：',
+      '• 原生通道：PayID=12，需要原生通道的MCHID和密钥',
+      '• 唤醒通道：PayID=10，需要唤醒通道的MCHID和密钥',
+      '• 两个通道使用不同的商户参数，请分别配置'
     ]
   }
 };
