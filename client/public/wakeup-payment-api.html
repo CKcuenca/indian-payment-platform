@@ -31,9 +31,54 @@
         .sidebar-header h1 { font-size: 1.8em; margin-bottom: 8px; font-weight: 300; }
         .sidebar-header p { font-size: 0.9em; opacity: 0.9; }
         
+        /* 搜索框样式 */
+        .search-container { 
+            padding: 15px 20px; 
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .search-input { 
+            flex: 1;
+            padding: 8px 12px; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 6px; 
+            background: rgba(255,255,255,0.1); 
+            color: white; 
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .search-input::placeholder { 
+            color: rgba(255,255,255,0.6); 
+        }
+        
+        .search-input:focus { 
+            border-color: #667eea; 
+            background: rgba(255,255,255,0.15); 
+        }
+        
+        .search-button { 
+            padding: 8px 12px; 
+            border: none; 
+            border-radius: 6px; 
+            background: #667eea; 
+            color: white; 
+            cursor: pointer; 
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-button:hover { 
+            background: #5a6fd8; 
+        }
+        
         .menu { padding: 20px 0; }
         .menu-section { margin-bottom: 15px; }
         
+        /* 主菜单项样式 */
         .menu-item { 
             display: block; 
             padding: 12px 20px 12px 35px; 
@@ -46,6 +91,67 @@
         
         .menu-item:hover { background: rgba(255,255,255,0.1); color: white; }
         .menu-item.active { background: rgba(102, 126, 234, 0.2); color: #667eea; border-left-color: #667eea; }
+        
+        /* 父级菜单标题样式 */
+        .menu-title {
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            padding: 12px 20px 12px 35px; 
+            color: #ecf0f1; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            font-weight: 500;
+        }
+        
+        .menu-title:hover { 
+            background: rgba(255,255,255,0.1); 
+            color: white; 
+        }
+        
+        .menu-arrow { 
+            font-size: 12px; 
+            transition: transform 0.3s ease; 
+        }
+        
+        .menu-arrow.collapsed { 
+            transform: rotate(-90deg); 
+        }
+        
+        /* 子菜单样式 */
+        .submenu { 
+            max-height: 500px;
+            overflow: hidden; 
+            transition: max-height 0.3s ease; 
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .submenu.collapsed { 
+            max-height: 0; 
+        }
+        
+        .submenu-item { 
+            display: block; 
+            padding: 10px 20px 10px 55px; 
+            color: rgba(236, 240, 241, 0.8); 
+            text-decoration: none; 
+            transition: all 0.3s ease; 
+            cursor: pointer;
+            font-size: 0.95em;
+        }
+        
+        .submenu-item:hover { 
+            background: rgba(255,255,255,0.1); 
+            color: white; 
+            padding-left: 60px;
+        }
+        
+        .submenu-item.active { 
+            background: rgba(102, 126, 234, 0.15); 
+            color: #667eea; 
+            border-left: 2px solid #667eea;
+        }
         
         /* 主内容区域 */
         .main-content { 
@@ -402,20 +508,86 @@
                 <p>CashGit Unified Payment API</p>
             </div>
             
+            <!-- 搜索框 -->
+            <div class="search-container">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="输入关键字后按回车以搜索"
+                >
+                <button class="search-button" onclick="performSearch()">
+                    🔍
+                </button>
+            </div>
+            
             <div class="menu">
+                <!-- 接口概述 -->
                 <div class="menu-section">
                     <a class="menu-item active" onclick="showSection('overview')" id="overview-menu">
                         📋 接口概述
                     </a>
+                </div>
+                
+                <!-- sign 加密 -->
+                <div class="menu-section">
                     <a class="menu-item" onclick="showSection('signature')" id="signature-menu">
                         🔐 sign 加密
                     </a>
-                    <a class="menu-item" onclick="showSection('collection')" id="collection-menu">
+                </div>
+                
+                <!-- 代收菜单 -->
+                <div class="menu-section">
+                    <div class="menu-title" onclick="toggleSubmenu('collection-submenu')">
                         📥 代收
-                    </a>
-                    <a class="menu-item" onclick="showSection('payout')" id="payout-menu">
+                        <span class="menu-arrow" id="collection-arrow">▼</span>
+                    </div>
+                    <div class="submenu expanded" id="collection-submenu">
+                        <a class="submenu-item" onclick="showSection('collection-create')" id="collection-create-menu">
+                            📄 创建代收订单
+                        </a>
+                        <a class="submenu-item" onclick="showSection('collection-callback')" id="collection-callback-menu">
+                            📞 代收回调
+                        </a>
+                        <a class="submenu-item" onclick="showSection('collection-query')" id="collection-query-menu">
+                            🔍 查询代收订单状态
+                        </a>
+                        <a class="submenu-item" onclick="showSection('utr-submit')" id="utr-submit-menu">
+                            📋 UTR补单
+                        </a>
+                        <a class="submenu-item" onclick="showSection('utr-query')" id="utr-query-menu">
+                            📊 UTR状态查询
+                        </a>
+                        <a class="submenu-item" onclick="showSection('upi-query')" id="upi-query-menu">
+                            💳 查询我方UPI
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 代付菜单 -->
+                <div class="menu-section">
+                    <div class="menu-title" onclick="toggleSubmenu('payout-submenu')">
                         📤 代付
-                    </a>
+                        <span class="menu-arrow" id="payout-arrow">▼</span>
+                    </div>
+                    <div class="submenu expanded" id="payout-submenu">
+                        <a class="submenu-item" onclick="showSection('payout-create')" id="payout-create-menu">
+                            📄 创建代付订单
+                        </a>
+                        <a class="submenu-item" onclick="showSection('payout-callback')" id="payout-callback-menu">
+                            📞 代付回调
+                        </a>
+                        <a class="submenu-item" onclick="showSection('payout-query')" id="payout-query-menu">
+                            🔍 查询代付订单状态
+                        </a>
+                        <a class="submenu-item" onclick="showSection('balance-query')" id="balance-query-menu">
+                            💰 余额查询
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 其他功能 -->
+                <div class="menu-section">
                     <a class="menu-item" onclick="showSection('errors')" id="errors-menu">
                         ⚠️ 错误码
                     </a>
@@ -570,8 +742,13 @@ function generateSign(params, secretKey) {
                             <li><strong>UTR状态查询</strong>：查询UTR补单处理状态</li>
                             <li><strong>查询我方UPI</strong>：/api/upi/query - 获取收款UPI信息</li>
                         </ul>
-                        
-                        <h3>3.1 创建代收订单</h3>
+                    </div>
+                </div>
+                
+                <!-- 创建代收订单 -->
+                <div class="content-section" id="collection-create">
+                    <div class="section">
+                        <h2>3.1 创建代收订单</h2>
                         
                         <h4><strong>接口说明：</strong></h4>
                         <p>创建支付订单，支持标准支付和唤醒支付两种模式。通过 pay_id 参数区分支付类型。</p>
@@ -760,8 +937,98 @@ function generateSign(params, secretKey) {
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+                
+                <!-- 代收回调 -->
+                <div class="content-section" id="collection-callback">
+                    <div class="section">
+                        <h2>3.2 代收回调</h2>
                         
-                        <h3>3.2 查询代收订单状态</h3>
+                        <h4><strong>接口说明：</strong></h4>
+                        <p>当订单状态发生变化时，系统会向商户指定的notify_url发送异步通知。</p>
+                        
+                        <h4><strong>通知方式：</strong></h4>
+                        <ul><li>POST</li></ul>
+                        
+                        <h4><strong>通知参数：</strong></h4>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>appid</td>
+                                        <td>String</td>
+                                        <td>商户号</td>
+                                    </tr>
+                                    <tr>
+                                        <td>orderid</td>
+                                        <td>String</td>
+                                        <td>商户订单号</td>
+                                    </tr>
+                                    <tr>
+                                        <td>amount</td>
+                                        <td>String</td>
+                                        <td>订单金额</td>
+                                    </tr>
+                                    <tr>
+                                        <td>currency</td>
+                                        <td>String</td>
+                                        <td>币种（固定INR）</td>
+                                    </tr>
+                                    <tr>
+                                        <td>status</td>
+                                        <td>String</td>
+                                        <td>订单状态</td>
+                                    </tr>
+                                    <tr>
+                                        <td>platformOrderId</td>
+                                        <td>String</td>
+                                        <td>平台交易号</td>
+                                    </tr>
+                                    <tr>
+                                        <td>completedAt</td>
+                                        <td>String</td>
+                                        <td>完成时间</td>
+                                    </tr>
+                                    <tr>
+                                        <td>sign</td>
+                                        <td>String</td>
+                                        <td>MD5签名</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4><strong>通知示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "appid": "MERCHANT_MEWZV8HV",
+  "orderid": "ORDER_20241201_001",
+  "amount": "100.00",
+  "currency": "INR",
+  "status": "SUCCESS",
+  "platformOrderId": "TXN_123456789",
+  "completedAt": "2024-12-01T10:30:15.000Z",
+  "sign": "calculated_md5_signature"
+}</pre>
+                        </div>
+                        
+                        <h4><strong>商户响应：</strong></h4>
+                        <p>商户接收到异步通知后，需要返回字符串 <code class="code-inline">"success"</code> 表示接收成功。</p>
+                    </div>
+                </div>
+                
+                <!-- 查询代收订单状态 -->
+                <div class="content-section" id="collection-query">
+                    <div class="section">
+                        <h2>3.3 查询代收订单状态</h2>
                         
                         <h4><strong>接口说明：</strong></h4>
                         <p>查询代收订单的支付状态和详细信息。</p>
@@ -852,88 +1119,13 @@ function generateSign(params, secretKey) {
   "data": null
 }</pre>
                         </div>
-                        
-                        <h3>3.3 代收回调</h3>
-                        
-                        <h4><strong>接口说明：</strong></h4>
-                        <p>当订单状态发生变化时，系统会向商户指定的notify_url发送异步通知。</p>
-                        
-                        <h4><strong>通知方式：</strong></h4>
-                        <ul><li>POST</li></ul>
-                        
-                        <h4><strong>通知参数：</strong></h4>
-                        <div class="table">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>参数名</th>
-                                        <th>类型</th>
-                                        <th>说明</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>appid</td>
-                                        <td>String</td>
-                                        <td>商户号</td>
-                                    </tr>
-                                    <tr>
-                                        <td>orderid</td>
-                                        <td>String</td>
-                                        <td>商户订单号</td>
-                                    </tr>
-                                    <tr>
-                                        <td>amount</td>
-                                        <td>String</td>
-                                        <td>订单金额</td>
-                                    </tr>
-                                    <tr>
-                                        <td>currency</td>
-                                        <td>String</td>
-                                        <td>币种（固定INR）</td>
-                                    </tr>
-                                    <tr>
-                                        <td>status</td>
-                                        <td>String</td>
-                                        <td>订单状态</td>
-                                    </tr>
-                                    <tr>
-                                        <td>platformOrderId</td>
-                                        <td>String</td>
-                                        <td>平台交易号</td>
-                                    </tr>
-                                    <tr>
-                                        <td>completedAt</td>
-                                        <td>String</td>
-                                        <td>完成时间</td>
-                                    </tr>
-                                    <tr>
-                                        <td>sign</td>
-                                        <td>String</td>
-                                        <td>MD5签名</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <h4><strong>通知示例：</strong></h4>
-                        <div class="code-block">
-<pre>{
-  "appid": "MERCHANT_MEWZV8HV",
-  "orderid": "ORDER_20241201_001",
-  "amount": "100.00",
-  "currency": "INR",
-  "status": "SUCCESS",
-  "platformOrderId": "TXN_123456789",
-  "completedAt": "2024-12-01T10:30:15.000Z",
-  "sign": "calculated_md5_signature"
-}</pre>
-                        </div>
-                        
-                        <h4><strong>商户响应：</strong></h4>
-                        <p>商户接收到异步通知后，需要返回字符串 <code class="code-inline">"success"</code> 表示接收成功。</p>
-                        
-                        <h3>3.4 UTR补单</h3>
+                    </div>
+                </div>
+                
+                <!-- UTR补单 -->
+                <div class="content-section" id="utr-submit">
+                    <div class="section">
+                        <h2>3.4 UTR补单</h2>
                         
                         <h4><strong>接口说明：</strong></h4>
                         <p>当支付成功但系统未及时收到回调时，可通过UTR交易号手动补单，确保订单状态准确。</p>
@@ -1029,8 +1221,13 @@ function generateSign(params, secretKey) {
   }
 }</pre>
                         </div>
-                        
-                        <h3>3.5 UTR状态查询</h3>
+                    </div>
+                </div>
+                
+                <!-- UTR状态查询 -->
+                <div class="content-section" id="utr-query">
+                    <div class="section">
+                        <h2>3.5 UTR状态查询</h2>
                         
                         <h4><strong>接口说明：</strong></h4>
                         <p>查询UTR补单的处理状态和验证结果。</p>
@@ -1094,8 +1291,13 @@ function generateSign(params, secretKey) {
   }
 }</pre>
                         </div>
-                        
-                        <h3>3.6 查询我方UPI</h3>
+                    </div>
+                </div>
+                
+                <!-- 查询我方UPI -->
+                <div class="content-section" id="upi-query">
+                    <div class="section">
+                        <h2>3.6 查询我方UPI</h2>
                         
                         <h4><strong>接口说明：</strong></h4>
                         <p>获取平台当前可用的UPI收款账户信息，用于支付时的收款账户选择。</p>
@@ -1186,8 +1388,13 @@ function generateSign(params, secretKey) {
                             <li><strong>查询代付订单状态</strong>：/api/payout/query - 查询代付处理状态</li>
                             <li><strong>余额查询</strong>：/api/balance/query - 查询商户账户余额</li>
                         </ul>
-                        
-                        <h3>4.1 创建代付订单</h3>
+                    </div>
+                </div>
+                
+                <!-- 创建代付订单 -->
+                <div class="content-section" id="payout-create">
+                    <div class="section">
+                        <h2>4.1 创建代付订单</h2>
                         
                         <h4><strong>接口说明：</strong></h4>
                         <p>发起代付转账请求，支持银行卡转账和UPI转账两种方式。</p>
@@ -1311,8 +1518,13 @@ function generateSign(params, secretKey) {
   }
 }</pre>
                         </div>
-                        
-                        <h3>4.2 代付回调</h3>
+                    </div>
+                </div>
+                
+                <!-- 代付回调 -->
+                <div class="content-section" id="payout-callback">
+                    <div class="section">
+                        <h2>4.2 代付回调</h2>
                         
                         <h4><strong>接口说明：</strong></h4>
                         <p>当代付订单状态发生变化时，系统会向商户指定的notify_url发送异步通知。</p>
@@ -1400,8 +1612,13 @@ function generateSign(params, secretKey) {
                         
                         <h4><strong>商户响应：</strong></h4>
                         <p>商户接收到异步通知后，需要返回字符串 <code class="code-inline">"success"</code> 表示接收成功。</p>
-                        
-                        <h3>4.3 查询代付订单状态</h3>
+                    </div>
+                </div>
+                
+                <!-- 查询代付订单状态 -->
+                <div class="content-section" id="payout-query">
+                    <div class="section">
+                        <h2>4.3 查询代付订单状态</h2>
                         
                         <h4><strong>接口说明：</strong></h4>
                         <p>查询代付订单的处理状态和详细信息。</p>
@@ -1472,8 +1689,13 @@ function generateSign(params, secretKey) {
   }
 }</pre>
                         </div>
-                        
-                        <h3>4.4 余额查询</h3>
+                    </div>
+                </div>
+                
+                <!-- 余额查询 -->
+                <div class="content-section" id="balance-query">
+                    <div class="section">
+                        <h2>4.4 余额查询</h2>
                         
                         <h4><strong>接口说明：</strong></h4>
                         <p>查询商户账户余额信息，包括总余额、冻结余额和可用余额。</p>
@@ -2160,9 +2382,136 @@ public class WakeupPaymentExample {
             }
         }
         
-        // 回车键提交密码
+        // 搜索功能
+        function performSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const query = searchInput.value.trim().toLowerCase();
+            
+            if (!query) return;
+            
+            // 搜索映射
+            const searchMappings = {
+                '签名': 'signature',
+                '加密': 'signature',
+                'sign': 'signature',
+                'md5': 'signature',
+                
+                '代收': 'collection',
+                '收款': 'collection',
+                '支付': 'collection-create',
+                '创建订单': 'collection-create',
+                '支付订单': 'collection-create',
+                '回调': 'collection-callback',
+                '通知': 'collection-callback',
+                '查询订单': 'collection-query',
+                '订单状态': 'collection-query',
+                'utr': 'utr-submit',
+                '补单': 'utr-submit',
+                'utr查询': 'utr-query',
+                'utr状态': 'utr-query',
+                'upi': 'upi-query',
+                '收款账户': 'upi-query',
+                
+                '代付': 'payout',
+                '转账': 'payout-create',
+                '代付订单': 'payout-create',
+                '代付回调': 'payout-callback',
+                '代付通知': 'payout-callback',
+                '代付查询': 'payout-query',
+                '代付状态': 'payout-query',
+                '余额': 'balance-query',
+                '余额查询': 'balance-query',
+                
+                '错误': 'errors',
+                '错误码': 'errors',
+                '状态码': 'errors',
+                '示例': 'examples',
+                '代码': 'examples',
+                'php': 'examples',
+                'python': 'examples',
+                'java': 'examples'
+            };
+            
+            // 查找匹配项
+            let targetSection = null;
+            for (const [keyword, section] of Object.entries(searchMappings)) {
+                if (keyword.includes(query) || query.includes(keyword)) {
+                    targetSection = section;
+                    break;
+                }
+            }
+            
+            if (targetSection) {
+                showSection(targetSection);
+                searchInput.value = '';
+                
+                // 高亮显示搜索结果
+                setTimeout(() => {
+                    const targetElement = document.getElementById(targetSection);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }, 100);
+            } else {
+                alert('未找到相关内容，请尝试其他关键词');
+            }
+        }
+        
+        // 子菜单切换功能
+        function toggleSubmenu(submenuId) {
+            const submenu = document.getElementById(submenuId);
+            const arrow = document.getElementById(submenuId.replace('-submenu', '-arrow'));
+            
+            if (submenu.classList.contains('collapsed')) {
+                submenu.classList.remove('collapsed');
+                arrow.classList.remove('collapsed');
+            } else {
+                submenu.classList.add('collapsed');
+                arrow.classList.add('collapsed');
+            }
+        }
+        
+        // 显示指定内容区域
+        function showSection(sectionId) {
+            // 隐藏所有内容区域
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // 移除所有菜单项的激活状态
+            const menuItems = document.querySelectorAll('.menu-item, .submenu-item');
+            menuItems.forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 显示指定的内容区域
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // 激活对应的菜单项
+            const menuItem = document.getElementById(sectionId + '-menu');
+            if (menuItem) {
+                menuItem.classList.add('active');
+                
+                // 如果是子菜单项，确保父菜单是展开的
+                const parentSubmenu = menuItem.closest('.submenu');
+                if (parentSubmenu) {
+                    parentSubmenu.classList.remove('collapsed');
+                    const parentArrow = parentSubmenu.previousElementSibling.querySelector('.menu-arrow');
+                    if (parentArrow) {
+                        parentArrow.classList.remove('collapsed');
+                    }
+                }
+            }
+        }
+        
+        // 回车键提交密码和搜索
         document.addEventListener('DOMContentLoaded', function() {
             const passwordInput = document.getElementById('passwordInput');
+            const searchInput = document.getElementById('searchInput');
             
             // 检查是否已经验证过密码
             const hasAccess = sessionStorage.getItem('wakeup_doc_access');
@@ -2176,35 +2525,21 @@ public class WakeupPaymentExample {
                 }, 100);
             }
             
+            // 密码输入框回车事件
             passwordInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     checkPassword();
                 }
             });
-        });
-        
-        function showSection(sectionId) {
-            // 隐藏所有内容区域
-            const sections = document.querySelectorAll('.content-section');
-            sections.forEach(section => {
-                section.classList.remove('active');
+            
+            // 搜索输入框回车事件
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
             });
             
-            // 移除所有菜单项的激活状态
-            const menuItems = document.querySelectorAll('.menu-item');
-            menuItems.forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // 显示指定的内容区域
-            document.getElementById(sectionId).classList.add('active');
-            
-            // 激活对应的菜单项
-            document.getElementById(sectionId + '-menu').classList.add('active');
-        }
-        
-        // 页面加载完成后默认显示概述
-        document.addEventListener('DOMContentLoaded', function() {
+            // 默认显示概述
             showSection('overview');
         });
     </script>
