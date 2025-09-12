@@ -55,6 +55,15 @@ interface PaymentAccount {
   updatedAt: string;
 }
 
+// 字段配置接口
+interface FieldConfig {
+  label: string;
+  required: boolean;
+  type?: string;
+  defaultValue?: string;
+  readOnly?: boolean;
+}
+
 // 支持双类型的支付商配置
 const DUAL_TYPE_PROVIDERS = {
   passpay: {
@@ -66,12 +75,12 @@ const DUAL_TYPE_PROVIDERS = {
         accountId: { label: '原生商户号', required: true },
         payId: { label: 'PayID', required: true, defaultValue: '12', readOnly: true },
         secretKey: { label: '原生密钥', required: true, type: 'password' }
-      },
+      } as Record<string, FieldConfig>,
       wakeup: {
         accountId: { label: '唤醒商户号', required: true },
         payId: { label: 'PayID', required: true, defaultValue: '10', readOnly: true },
         secretKey: { label: '唤醒密钥', required: true, type: 'password' }
-      }
+      } as Record<string, FieldConfig>
     }
   },
   dhpay: {
@@ -82,11 +91,11 @@ const DUAL_TYPE_PROVIDERS = {
       native: {
         accountId: { label: '原生商户ID', required: true },
         secretKey: { label: '原生密钥', required: true, type: 'password' }
-      },
+      } as Record<string, FieldConfig>,
       wakeup: {
         accountId: { label: '唤醒商户ID', required: true },
         secretKey: { label: '唤醒密钥', required: true, type: 'password' }
-      }
+      } as Record<string, FieldConfig>
     }
   },
   unispay: {
@@ -97,11 +106,11 @@ const DUAL_TYPE_PROVIDERS = {
       native: {
         mchNo: { label: '原生商户号', required: true },
         secretKey: { label: '原生密钥', required: true, type: 'password' }
-      },
+      } as Record<string, FieldConfig>,
       wakeup: {
         mchNo: { label: '唤醒商户号', required: true },
         secretKey: { label: '唤醒密钥', required: true, type: 'password' }
-      }
+      } as Record<string, FieldConfig>
     }
   }
 };
@@ -250,7 +259,7 @@ export default function PaymentAccountsManager() {
         ...prev,
         providerName: provider,
         type: defaultType,
-        payId: typeFields.payId?.defaultValue || '',
+        payId: 'payId' in typeFields ? (typeFields as any).payId?.defaultValue || '' : '',
         accountId: '',
         secretKey: '',
         mchNo: ''
@@ -267,7 +276,7 @@ export default function PaymentAccountsManager() {
       setFormData(prev => ({
         ...prev,
         type,
-        payId: typeFields.payId?.defaultValue || prev.payId,
+        payId: 'payId' in typeFields ? (typeFields as any).payId?.defaultValue || '' : prev.payId,
         accountId: '',
         secretKey: '',
         mchNo: ''
@@ -287,7 +296,7 @@ export default function PaymentAccountsManager() {
     return DUAL_TYPE_PROVIDERS[formData.providerName as keyof typeof DUAL_TYPE_PROVIDERS];
   };
 
-  const getCurrentTypeFields = () => {
+  const getCurrentTypeFields = (): Record<string, FieldConfig> | undefined => {
     const providerConfig = getCurrentProviderConfig();
     return providerConfig?.fields[formData.type];
   };
