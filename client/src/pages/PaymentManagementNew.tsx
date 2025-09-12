@@ -213,23 +213,16 @@ export default function PaymentManagementNew() {
     type: 'wakeup',
     subType: 'wakeup', // 仅唤醒支付
     enabledTypes: [] as ('native' | 'wakeup')[],
-    // 原生通道配置
-    native: {
-      accountId: '',
-      payId: '',
-      secretKey: '',
-      mchNo: ''
-    },
-    // 唤醒通道配置
-    wakeup: {
-      accountId: '',
-      payId: '',
-      secretKey: '',
-      mchNo: ''
-    },
+    accountId: '',
+    apiKey: '',
+    secretKey: '',
     environment: 'production',
+    // UniSpay专用字段
+    mchNo: '',
+    // PassPay专用字段
+    payId: '',
     description: '',
-    // 回调URL配置（保持不变）
+    // 回调URL配置
     collectionNotifyUrl: '',
     collectionReturnUrl: '',
     payoutNotifyUrl: '',
@@ -346,23 +339,15 @@ export default function PaymentManagementNew() {
   const handleProviderChange = (providerName: string) => {
     const config = getPaymentProviderConfig(providerName);
     if (config) {
-      // 重置表单数据，保留基本信息
+      // 使用第一个支持的类型的默认值
+      const firstType = config.supportedTypes[0];
+      const typeConfig = config.typeConfigs[firstType];
+      const defaultValues = typeConfig?.defaultValues || {};
+      
       setFormData(prev => ({
         ...prev,
         providerName,
-        enabledTypes: [],
-        native: {
-          accountId: '',
-          payId: '',
-          secretKey: '',
-          mchNo: ''
-        },
-        wakeup: {
-          accountId: '',
-          payId: '',
-          secretKey: '',
-          mchNo: ''
-        }
+        ...defaultValues
       }));
     }
   };
@@ -804,6 +789,9 @@ export default function PaymentManagementNew() {
                   <Typography variant="h6" gutterBottom>
                     支付类型
                   </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    可以同时启用原生和唤醒通道，每种类型需要独立的配置参数
+                  </Typography>
                   <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                     <FormControlLabel
                       control={
@@ -842,9 +830,9 @@ export default function PaymentManagementNew() {
                   </Box>
                 </Box>
               )}
-
-                {/* 不再需要的子类型选择 */}
-                {false && (
+                
+                {/* 原生支付商的子类型选择 */}
+                {false && formData.type === 'native' && (
                   <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
                     <FormControl fullWidth required>
                       <InputLabel>分支类型</InputLabel>
@@ -928,117 +916,140 @@ export default function PaymentManagementNew() {
                 </Box>
               </Box>
 
-              {/* 动态配置信息 */}
-              {formData.enabledTypes && formData.enabledTypes.length > 0 && (
-                formData.enabledTypes.map((type) => {
-                  const config = getPaymentProviderConfig(formData.providerName);
-                  const typeConfig = config?.typeConfigs[type];
-                  if (!typeConfig) return null;
-
-                  return (
-                    <Box key={type} sx={{ mt: 3 }}>
-                      <Divider sx={{ my: 2 }} />
-                      <Typography variant="h6" gutterBottom>
-                        {type === 'native' ? '原生通道配置' : '唤醒通道配置'}
-                      </Typography>
-                      
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-                        {Object.entries(typeConfig.fieldLabels || {}).map(([fieldName, fieldLabel]) => {
-                          const isRequired = typeConfig.requiredFields.includes(fieldName);
-                          const isHidden = typeConfig.hiddenFields.includes(fieldName);
-                          const helperText = typeConfig.fieldHelpers?.[fieldName] || '';
-                          const fieldType = fieldName === 'secretKey' ? 'password' : 'text';
-                          
-                          if (isHidden) return null;
-                          
-                          // 对于PassPay的payId字段，显示为只读
-                          const isReadOnly = formData.providerName === 'passpay' && fieldName === 'payId';
-                          
-                          return (
-                            <Box key={fieldName} sx={{ flex: '1 1 300px', minWidth: 0 }}>
-                              <TextField
-                                fullWidth
-                                label={fieldLabel}
-                                type={fieldType}
-                                value={formData[type][fieldName] || (isReadOnly ? (type === 'native' ? '12' : '10') : '')}
-                                onChange={(e) => setFormData(prev => ({
-                                  ...prev,
-                                  [type]: {
-                                    ...prev[type],
-                                    [fieldName]: e.target.value
-                                  }
-                                }))}
-                                helperText={helperText}
-                                required={isRequired}
-                                InputProps={{
-                                  readOnly: isReadOnly
-                                }}
-                                sx={{
-                                  '& .MuiInputBase-input': {
-                                    backgroundColor: isReadOnly ? 'action.hover' : 'transparent'
-                                  }
-                                }}
-                              />
-                            </Box>
-                          );
-                        })}
-                        
-                        {/* 显示类型特殊说明 */}
-                        {typeConfig.specialNotes && typeConfig.specialNotes.length > 0 && (
-                          <Box sx={{ flex: '1 1 100%', minWidth: 0 }}>
-                            <Alert severity="info">
-                              <Typography variant="body2">
-                                {typeConfig.specialNotes.map((note, index) => (
-                                  <React.Fragment key={index}>
-                                    {note}
-                                    {index < typeConfig.specialNotes!.length - 1 && <br/>}
-                                  </React.Fragment>
-                                ))}
-                              </Typography>
-                            </Alert>
-                          </Box>
-                        )}
-                      </Box>
-                    </Box>
-                  );
-                })
-              )}
-
-              {/* 优先级配置 */}
-              {formData.enabledTypes && formData.enabledTypes.length > 0 && (
-                <Box sx={{ mt: 3 }}>
-                  <Divider sx={{ my: 2 }} />
-                  <Typography variant="h6" gutterBottom>
-                    其他配置
-                  </Typography>
-                  
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
-                    <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
-                      <TextField
-                        fullWidth
-                        label="优先级"
-                        type="number"
-                        value={formData.priority}
-                        onChange={(e) => setFormData({...formData, priority: parseInt(e.target.value)})}
-                        inputProps={{ min: 1, max: 10 }}
-                        helperText="设置支付账户的优先级 (1-10)"
-                      />
-                    </Box>
-                    
-                    <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
-                      <TextField
-                        fullWidth
-                        label="备注"
-                        value={formData.description}
-                        onChange={(e) => setFormData({...formData, description: e.target.value})}
-                        multiline
-                        rows={2}
-                        helperText="可选的配置备注信息"
-                      />
-                    </Box>
+              {/* 配置信息 */}
+              <Box>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h6" gutterBottom>
+                  配置信息
+                </Typography>
+              </Box>
+              
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                {/* 账户ID - 根据支付商类型动态显示 */}
+                {shouldShowField(formData.providerName, 'accountId') && (
+                  <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                    <TextField
+                      fullWidth
+                      label={getFieldLabel(formData.providerName, 'accountId')}
+                      value={formData.accountId}
+                      onChange={(e) => setFormData({...formData, accountId: e.target.value})}
+                      helperText={getFieldHelper(formData.providerName, 'accountId')}
+                      required={isFieldRequired(formData.providerName, 'accountId')}
+                    />
                   </Box>
+                )}
+                
+                {/* API密钥 - 根据支付商类型动态显示 */}
+                {shouldShowField(formData.providerName, 'apiKey') && (
+                  <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                    <TextField
+                      fullWidth
+                      label={getFieldLabel(formData.providerName, 'apiKey')}
+                      value={formData.apiKey}
+                      onChange={(e) => setFormData({...formData, apiKey: e.target.value})}
+                      helperText={getFieldHelper(formData.providerName, 'apiKey')}
+                      required={isFieldRequired(formData.providerName, 'apiKey')}
+                    />
+                  </Box>
+                )}
+                
+                <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                  <TextField
+                    fullWidth
+                    label={getFieldLabel(formData.providerName, 'secretKey')}
+                    type="password"
+                    value={formData.secretKey}
+                    onChange={(e) => setFormData({...formData, secretKey: e.target.value})}
+                    helperText={getFieldHelper(formData.providerName, 'secretKey')}
+                    required={isFieldRequired(formData.providerName, 'secretKey')}
+                  />
                 </Box>
-              )}
+                
+                {/* 支付商特殊说明 - 根据选择的支付商动态显示 */}
+                {false && formData.providerName && getProviderNotes(formData.providerName).length > 0 && (
+                  <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                    <Alert severity="info" sx={{ mt: 1 }}>
+                      <Typography variant="body2">
+                        {getProviderNotes(formData.providerName).map((note, index) => (
+                          <React.Fragment key={index}>
+                            {note}
+                            {index < getProviderNotes(formData.providerName).length - 1 && <br/>}
+                          </React.Fragment>
+                        ))}
+                      </Typography>
+                    </Alert>
+                  </Box>
+                )}
+                
+                {/* mchNo字段 - 根据支付商类型动态显示 */}
+                {shouldShowField(formData.providerName, 'mchNo') && (
+                  <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                    <TextField
+                      fullWidth
+                      label={getFieldLabel(formData.providerName, 'mchNo')}
+                      value={formData.mchNo}
+                      onChange={(e) => setFormData({...formData, mchNo: e.target.value})}
+                      helperText={getFieldHelper(formData.providerName, 'mchNo')}
+                      required={isFieldRequired(formData.providerName, 'mchNo')}
+                    />
+                  </Box>
+                )}
+                
+                {/* PassPay专用字段 - 通道类型选择 */}
+                {formData.providerName === 'passpay' && (
+                  <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                    <FormControl fullWidth required>
+                      <InputLabel>PassPay通道类型</InputLabel>
+                      <Select
+                        value={formData.type || 'native'}
+                        onChange={(e) => {
+                          const channelType = e.target.value;
+                          const payId = channelType === 'native' ? '12' : '10';
+                          setFormData({
+                            ...formData, 
+                            type: channelType,
+                            payId: payId
+                          });
+                        }}
+                      >
+                        <MenuItem value="native">原生通道 (PayID: 12)</MenuItem>
+                        <MenuItem value="wakeup">唤醒通道 (PayID: 10)</MenuItem>
+                      </Select>
+                      <Box component="span" sx={{ fontSize: '0.75rem', color: 'text.secondary', mt: 0.5 }}>
+                        不同通道需要配置不同的商户号和密钥
+                      </Box>
+                    </FormControl>
+                  </Box>
+                )}
+
+                {/* PassPay专用字段 - payId (自动设置，只读显示) */}
+                {shouldShowField(formData.providerName, 'payId') && (
+                  <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                    <TextField
+                      fullWidth
+                      label={getFieldLabel(formData.providerName, 'payId')}
+                      value={formData.payId}
+                      onChange={(e) => setFormData({...formData, payId: e.target.value})}
+                      helperText={getFieldHelper(formData.providerName, 'payId')}
+                      required={isFieldRequired(formData.providerName, 'payId')}
+                      InputProps={{
+                        readOnly: formData.providerName === 'passpay' // PassPay的PayID自动设置
+                      }}
+                    />
+                  </Box>
+                )}
+                
+                <Box sx={{ flex: '1 1 300px', minWidth: 0 }}>
+                  <TextField
+                    fullWidth
+                    label="优先级"
+                    type="number"
+                    value={formData.priority}
+                    onChange={(e) => setFormData({...formData, priority: parseInt(e.target.value)})}
+                    inputProps={{ min: 1, max: 10 }}
+                  />
+                </Box>
+              </Box>
 
               {/* 代收限额配置 */}
               <Box>
