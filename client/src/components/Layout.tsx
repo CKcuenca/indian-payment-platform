@@ -58,7 +58,7 @@ const menuItems = [
     text: '商户管理',
     icon: <Business />,
     path: '/merchants',
-    permissions: [Permission.VIEW_ALL_MERCHANTS, Permission.VIEW_OWN_MERCHANT_DATA]
+    permissions: [Permission.VIEW_ALL_MERCHANTS]
   },
   {
     text: '密钥管理',

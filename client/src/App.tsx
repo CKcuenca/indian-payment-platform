@@ -154,7 +154,7 @@ function App() {
           <Route
             path="/merchants"
             element={
-              <ProtectedRoute anyPermission={[Permission.VIEW_ALL_MERCHANTS, Permission.VIEW_OWN_MERCHANT_DATA]}>
+              <ProtectedRoute permissions={[Permission.VIEW_ALL_MERCHANTS]}>
                 <Layout>
                   <Merchants />
                 </Layout>
