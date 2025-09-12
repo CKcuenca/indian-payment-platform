@@ -8,7 +8,8 @@ import Dashboard from './pages/Dashboard';
 
 import Transactions from './pages/Transactions';
 import Merchants from './pages/Merchants';
-import PaymentManagementNew from './pages/PaymentManagementNew';
+// import PaymentManagementNew from './pages/PaymentManagementNew'; // 临时注释掉有语法错误的组件
+import PaymentAccountsManager from './pages/PaymentAccountsManager';
 import Users from './pages/Users';
 import MerchantKeyManagement from './pages/MerchantKeyManagement';
 
@@ -167,11 +168,24 @@ function App() {
             element={
               <ProtectedRoute permissions={[Permission.VIEW_PAYMENT_CONFIG]}>
                 <Layout>
+                  <PaymentAccountsManager />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 暂时注释掉有语法错误的旧版支付管理
+          <Route
+            path="/payment-management-legacy"
+            element={
+              <ProtectedRoute permissions={[Permission.VIEW_PAYMENT_CONFIG]}>
+                <Layout>
                   <PaymentManagementNew />
                 </Layout>
               </ProtectedRoute>
             }
           />
+          */}
 
 
 

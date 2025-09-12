@@ -237,7 +237,7 @@ export default function PaymentAccountsManager() {
 
   // 删除配置
   const handleDelete = async (account: PaymentAccount) => {
-    if (!confirm('确认删除此支付配置吗？')) return;
+    if (!window.confirm('确认删除此支付配置吗？')) return;
     
     try {
       await api.delete(`/api/payment-config/${account._id}`);
