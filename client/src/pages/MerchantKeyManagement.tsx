@@ -557,7 +557,7 @@ export default function MerchantKeyManagement() {
                         <Button
                           variant="contained"
                           startIcon={<CodeIcon />}
-                          onClick={() => window.open('/wakeup-payment-api.html', '_blank')}
+                          onClick={() => window.open('/unified-payment-api.html', '_blank')}
                           sx={{ minWidth: 140 }}
                         >
                           API接口文档
@@ -573,7 +573,7 @@ export default function MerchantKeyManagement() {
                         <Button
                           variant="outlined"
                           startIcon={<SecurityIcon />}
-                          onClick={() => window.open('/wakeup-payment-api.html#signature', '_blank')}
+                          onClick={() => window.open('/unified-payment-api.html#signature', '_blank')}
                           sx={{ minWidth: 140 }}
                         >
                           签名验证工具
@@ -621,7 +621,7 @@ export default function MerchantKeyManagement() {
                         <Button
                           size="small"
                           variant="outlined"
-                          onClick={() => window.open('/wakeup-payment-api.html#deposit', '_blank')}
+                          onClick={() => window.open('/unified-payment-api.html#collection-create', '_blank')}
                         >
                           详细文档
                         </Button>
@@ -666,7 +666,7 @@ export default function MerchantKeyManagement() {
                         <Button
                           size="small"
                           variant="outlined"
-                          onClick={() => window.open('/wakeup-payment-api.html#query', '_blank')}
+                          onClick={() => window.open('/unified-payment-api.html#balance-query', '_blank')}
                         >
                           详细文档
                         </Button>
@@ -712,7 +712,7 @@ export default function MerchantKeyManagement() {
                         <Button
                           size="small"
                           variant="outlined"
-                          onClick={() => window.open('/wakeup-payment-api.html#signature', '_blank')}
+                          onClick={() => window.open('/unified-payment-api.html#signature', '_blank')}
                         >
                           详细文档
                         </Button>
