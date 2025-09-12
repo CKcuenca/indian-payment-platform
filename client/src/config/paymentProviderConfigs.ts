@@ -3,9 +3,7 @@
  * 定义不同支付商的字段要求和显示逻辑
  */
 
-export interface PaymentProviderConfig {
-  name: string;
-  displayName: string;
+export interface PaymentTypeConfig {
   type: 'native' | 'wakeup';
   subType: 'third_party' | 'fourth_party' | 'wakeup';
   requiredFields: string[];
@@ -15,6 +13,18 @@ export interface PaymentProviderConfig {
   fieldLabels: Record<string, string>;
   fieldHelpers: Record<string, string>;
   specialNotes?: string[];
+}
+
+export interface PaymentProviderConfig {
+  name: string;
+  displayName: string;
+  description: string;
+  supportedTypes: ('native' | 'wakeup')[];
+  typeConfigs: {
+    native?: PaymentTypeConfig;
+    wakeup?: PaymentTypeConfig;
+  };
+  globalNotes?: string[];
 }
 
 export const PAYMENT_PROVIDER_CONFIGS: Record<string, PaymentProviderConfig> = {
