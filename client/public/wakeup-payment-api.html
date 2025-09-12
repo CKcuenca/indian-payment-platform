@@ -525,41 +525,41 @@
                 <!-- 接口概述 -->
                 <div class="menu-section">
                     <a class="menu-item active" onclick="showSection('overview')" id="overview-menu">
-                        📋 接口概述
+                        接口概述
                     </a>
                 </div>
                 
                 <!-- sign 加密 -->
                 <div class="menu-section">
                     <a class="menu-item" onclick="showSection('signature')" id="signature-menu">
-                        🔐 sign 加密
+                        sign 加密
                     </a>
                 </div>
                 
                 <!-- 代收菜单 -->
                 <div class="menu-section">
                     <div class="menu-title" onclick="toggleSubmenu('collection-submenu')">
-                        📥 代收
+                        代收
                         <span class="menu-arrow" id="collection-arrow">▼</span>
                     </div>
                     <div class="submenu expanded" id="collection-submenu">
                         <a class="submenu-item" onclick="showSection('collection-create')" id="collection-create-menu">
-                            📄 创建代收订单
+                            创建代收订单
                         </a>
                         <a class="submenu-item" onclick="showSection('collection-callback')" id="collection-callback-menu">
-                            📞 代收回调
+                            代收回调
                         </a>
                         <a class="submenu-item" onclick="showSection('collection-query')" id="collection-query-menu">
-                            🔍 查询代收订单状态
+                            查询代收订单状态
                         </a>
                         <a class="submenu-item" onclick="showSection('utr-submit')" id="utr-submit-menu">
-                            📋 UTR补单
+                            UTR补单
                         </a>
                         <a class="submenu-item" onclick="showSection('utr-query')" id="utr-query-menu">
-                            📊 UTR状态查询
+                            UTR状态查询
                         </a>
                         <a class="submenu-item" onclick="showSection('upi-query')" id="upi-query-menu">
-                            💳 查询我方UPI
+                            查询我方UPI
                         </a>
                     </div>
                 </div>
@@ -567,21 +567,21 @@
                 <!-- 代付菜单 -->
                 <div class="menu-section">
                     <div class="menu-title" onclick="toggleSubmenu('payout-submenu')">
-                        📤 代付
+                        代付
                         <span class="menu-arrow" id="payout-arrow">▼</span>
                     </div>
                     <div class="submenu expanded" id="payout-submenu">
                         <a class="submenu-item" onclick="showSection('payout-create')" id="payout-create-menu">
-                            📄 创建代付订单
+                            创建代付订单
                         </a>
                         <a class="submenu-item" onclick="showSection('payout-callback')" id="payout-callback-menu">
-                            📞 代付回调
+                            代付回调
                         </a>
                         <a class="submenu-item" onclick="showSection('payout-query')" id="payout-query-menu">
-                            🔍 查询代付订单状态
+                            查询代付订单状态
                         </a>
                         <a class="submenu-item" onclick="showSection('balance-query')" id="balance-query-menu">
-                            💰 余额查询
+                            余额查询
                         </a>
                     </div>
                 </div>
@@ -589,10 +589,10 @@
                 <!-- 其他功能 -->
                 <div class="menu-section">
                     <a class="menu-item" onclick="showSection('errors')" id="errors-menu">
-                        ⚠️ 错误码
+                        错误码
                     </a>
                     <a class="menu-item" onclick="showSection('examples')" id="examples-menu">
-                        📖 示例代码
+                        示例代码
                     </a>
                 </div>
             </div>
@@ -726,14 +726,14 @@ function generateSign(params, secretKey) {
                 <!-- 代收接口 -->
                 <div class="content-section" id="collection">
                     <div class="section">
-                        <h2>📥 代收</h2>
+                        <h2>代收</h2>
                         <p>代收功能提供完整的收款解决方案，支持多种支付方式和智能路由。</p>
                         
                         <div class="highlight">
                             <strong>🚀 统一支付接口</strong>：一个API支持多种支付方式，通过pay_id参数智能路由
                         </div>
                         
-                        <h3>📋 代收接口列表</h3>
+                        <h3>代收接口列表</h3>
                         <ul>
                             <li><strong>创建代收订单</strong>：/api/pay - 统一支付接口，支持标准支付和唤醒支付</li>
                             <li><strong>代收回调</strong>：异步通知商户支付结果</li>
@@ -1374,14 +1374,14 @@ function generateSign(params, secretKey) {
                 <!-- 代付接口 -->
                 <div class="content-section" id="payout">
                     <div class="section">
-                        <h2>📤 代付</h2>
+                        <h2>代付</h2>
                         <p>代付功能提供安全可靠的批量付款解决方案，支持银行转账和UPI转账。</p>
                         
                         <div class="note">
                             <strong>⚠️ 注意</strong>：代付功能需要商户账户有足够余额，系统会实时验证账户状态和收款方信息。
                         </div>
                         
-                        <h3>📋 代付接口列表</h3>
+                        <h3>代付接口列表</h3>
                         <ul>
                             <li><strong>创建代付订单</strong>：/api/payout/create - 发起代付转账请求</li>
                             <li><strong>代付回调</strong>：异步通知商户代付结果</li>
@@ -1758,7 +1758,7 @@ function generateSign(params, secretKey) {
                 <!-- 错误码 -->
                 <div class="content-section" id="errors">
                     <div class="section">
-                        <h2>⚠️ 错误码说明</h2>
+                        <h2>错误码说明</h2>
                         
                         <p>当API调用出现错误时，系统会返回相应的错误码和错误信息，帮助开发者快速定位和解决问题。</p>
                         
