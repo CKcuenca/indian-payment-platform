@@ -45,7 +45,7 @@ router.post('/', authenticateToken, requireAdmin, [
   body('username').notEmpty().withMessage('Username is required'),
   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
   body('role').isIn(['admin', 'operator', 'merchant']).withMessage('Invalid role'),
-  body('status').optional().isIn(['active', 'inactive', 'suspended', 'pending']).withMessage('Invalid status'),
+  body('status').optional().isIn(['ACTIVE', 'INACTIVE', 'SUSPENDED', 'PENDING']).withMessage('Invalid status'),
   body('merchantId').optional().isString().withMessage('Merchant ID must be a string'),
   body('fullName').optional().isString().withMessage('Full name must be a string'),
   // 邮箱字段已移除
@@ -106,7 +106,7 @@ router.post('/', authenticateToken, requireAdmin, [
 router.put('/:id', authenticateToken, requireAdmin, [
   body('username').optional().isString().withMessage('Username must be a string'),
   body('role').optional().isIn(['admin', 'operator', 'merchant']).withMessage('Invalid role'),
-  body('status').optional().isIn(['active', 'inactive', 'suspended', 'pending']).withMessage('Invalid status'),
+  body('status').optional().isIn(['ACTIVE', 'INACTIVE', 'SUSPENDED', 'PENDING']).withMessage('Invalid status'),
   body('merchantId').optional().isString().withMessage('Merchant ID must be a string'),
   validateRequest
 ], async (req, res) => {
