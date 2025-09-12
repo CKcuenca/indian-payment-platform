@@ -1,0 +1,32 @@
+{
+  "name": "indian-payment-telegram-bot",
+  "version": "1.0.0",
+  "description": "Telegram机器人用于印度支付平台运营数据查询",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "nodemon bot.js",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop telegram-bot",
+    "pm2:restart": "pm2 restart telegram-bot",
+    "pm2:logs": "pm2 logs telegram-bot"
+  },
+  "dependencies": {
+    "node-telegram-bot-api": "^0.66.0",
+    "mongoose": "^8.0.0",
+    "dotenv": "^16.3.0",
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "payment",
+    "india",
+    "monitoring"
+  ],
+  "author": "Indian Payment Platform Team",
+  "license": "MIT"
+}
