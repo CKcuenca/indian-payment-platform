@@ -176,7 +176,7 @@ bot.onText(/^\/bind\s+(\w+)/, async (msg, match) => {
 });
 
 // 余额查询
-bot.onText(/^\/y$/, async (msg) => {
+bot.onText(/^\/y(@\w+)?(\s|$)/, async (msg) => {
   if (msg.chat.type === 'private') {
     bot.sendMessage(msg.chat.id, '❌ 此命令只能在已绑定的群组中使用');
     return;
@@ -230,7 +230,7 @@ bot.onText(/^\/y$/, async (msg) => {
 });
 
 // 统计查询
-bot.onText(/^\/t$/, async (msg) => {
+bot.onText(/^\/t(@\w+)?(\s|$)/, async (msg) => {
   if (msg.chat.type === 'private') {
     bot.sendMessage(msg.chat.id, '❌ 此命令只能在已绑定的群组中使用');
     return;
@@ -287,20 +287,14 @@ bot.onText(/^\/t$/, async (msg) => {
     const recentSuccessRate = recentDeposits.length > 0 ? ((recentSuccessDeposits.length / recentDeposits.length) * 100).toFixed(0) : '0';
 
     const responseText = `
-**订单统计报告**
+今日入款汇总:  ${successDeposits.length}/${todayDeposits.length}
+30分钟成功率:  ${recentSuccessRate}
+今日入款成功率:  ${depositSuccessRate}
+今日入款笔均:  ${avgDepositAmount}
 
-**商户ID:** \`${merchantId}\`
-
-**今日入款汇总:** ${successDeposits.length}/${todayDeposits.length}
-**30分钟成功率:** ${recentSuccessRate}
-**今日入款成功率:** ${depositSuccessRate}
-**今日入款笔均:** ₹${avgDepositAmount}
-
-**今日出款汇总:** ${successWithdrawals.length}/${todayWithdrawals.length}
-**今日出款成功率:** ${withdrawalSuccessRate}
-**今日出款笔均:** ₹${avgWithdrawalAmount}
-
-**统计时间:** ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Kolkata' })}
+今日出款汇总:  ${successWithdrawals.length}/${todayWithdrawals.length}
+今日出款成功率:  ${withdrawalSuccessRate}
+今日出款笔均:  ${avgWithdrawalAmount}
     `;
 
     bot.sendMessage(msg.chat.id, responseText, { parse_mode: 'Markdown' });
@@ -311,7 +305,481 @@ bot.onText(/^\/t$/, async (msg) => {
   }
 });
 
-// 帮助命令
+// 代收订单查询
+bot.onText(/^\/s(@\w+)?\s+(.+)/, async (msg, match) => {
+  const orderId = match[2] || match[1];
+  
+  if (msg.chat.type === 'private') {
+    bot.sendMessage(msg.chat.id, '❌ 此命令只能在已绑定的群组中使用');
+    return;
+  }
+
+  try {
+    const group = await mongoose.connection.db.collection('telegramgroups').findOne({
+      chatId: msg.chat.id.toString(),
+      status: 'ACTIVE'
+    });
+
+    if (!group) {
+      bot.sendMessage(msg.chat.id, '❌ 群组未绑定商户，请使用 /bind 命令绑定');
+      return;
+    }
+
+    const merchantId = group.merchantId;
+    const order = await mongoose.connection.db.collection('orders').findOne({
+      orderId: orderId.trim(),
+      merchantId: merchantId,
+      type: 'DEPOSIT'
+    });
+
+    if (!order) {
+      bot.sendMessage(msg.chat.id, `❌ 未找到代收订单: ${orderId}`);
+      return;
+    }
+
+    const statusEmoji = order.status === 'SUCCESS' ? '✅' : 
+                       order.status === 'PENDING' ? '⏳' : 
+                       order.status === 'PROCESSING' ? '🔄' : '❌';
+
+    const responseText = `
+**代收订单查询**
+
+**订单号:** \`${order.orderId}\`
+**商户号:** ${order.merchantId}
+**订单状态:** ${order.status}
+**订单金额:** ₹${formatAmount(order.amount)}
+**支付提供商:** ${order.provider?.name || 'N/A'}
+**创建时间:** ${order.createdAt ? new Date(order.createdAt).toLocaleString('zh-CN', { timeZone: 'Asia/Kolkata' }) : 'N/A'}
+
+${order.provider?.transactionId ? `**交易ID:** \`${order.provider.transactionId}\`` : ''}
+${order.provider?.utrNumber ? `**UTR号码:** \`${order.provider.utrNumber}\`` : ''}
+    `;
+
+    bot.sendMessage(msg.chat.id, responseText, { parse_mode: 'Markdown' });
+
+  } catch (error) {
+    console.error('查询代收订单失败:', error);
+    bot.sendMessage(msg.chat.id, '❌ 查询代收订单失败，请稍后重试');
+  }
+});
+
+// 代付订单查询
+bot.onText(/^\/f(@\w+)?\s+(.+)/, async (msg, match) => {
+  const orderId = match[2] || match[1];
+  
+  if (msg.chat.type === 'private') {
+    bot.sendMessage(msg.chat.id, '❌ 此命令只能在已绑定的群组中使用');
+    return;
+  }
+
+  try {
+    const group = await mongoose.connection.db.collection('telegramgroups').findOne({
+      chatId: msg.chat.id.toString(),
+      status: 'ACTIVE'
+    });
+
+    if (!group) {
+      bot.sendMessage(msg.chat.id, '❌ 群组未绑定商户，请使用 /bind 命令绑定');
+      return;
+    }
+
+    const merchantId = group.merchantId;
+    const order = await mongoose.connection.db.collection('orders').findOne({
+      orderId: orderId.trim(),
+      merchantId: merchantId,
+      type: 'WITHDRAWAL'
+    });
+
+    if (!order) {
+      bot.sendMessage(msg.chat.id, `❌ 未找到代付订单: ${orderId}`);
+      return;
+    }
+
+    const responseText = `
+**代付订单查询**
+
+**订单号:** \`${order.orderId}\`
+**商户号:** ${order.merchantId}
+**订单状态:** ${order.status}
+**代付金额:** ₹${formatAmount(order.amount)}
+**收款账户:** ${order.bankAccount?.accountNumber || 'N/A'}
+**收款人:** ${order.bankAccount?.accountHolderName || 'N/A'}
+**支付提供商:** ${order.provider?.name || 'N/A'}
+**创建时间:** ${order.createdAt ? new Date(order.createdAt).toLocaleString('zh-CN', { timeZone: 'Asia/Kolkata' }) : 'N/A'}
+
+${order.provider?.transactionId ? `**交易ID:** \`${order.provider.transactionId}\`` : ''}
+${order.provider?.utrNumber ? `**UTR号码:** \`${order.provider.utrNumber}\`` : ''}
+    `;
+
+    bot.sendMessage(msg.chat.id, responseText, { parse_mode: 'Markdown' });
+
+  } catch (error) {
+    console.error('查询代付订单失败:', error);
+    bot.sendMessage(msg.chat.id, '❌ 查询代付订单失败，请稍后重试');
+  }
+});
+
+// 代付凭证查询
+bot.onText(/^\/p(@\w+)?\s+(.+)/, async (msg, match) => {
+  const orderId = match[2] || match[1];
+  
+  if (msg.chat.type === 'private') {
+    bot.sendMessage(msg.chat.id, '❌ 此命令只能在已绑定的群组中使用');
+    return;
+  }
+
+  try {
+    const group = await mongoose.connection.db.collection('telegramgroups').findOne({
+      chatId: msg.chat.id.toString(),
+      status: 'ACTIVE'
+    });
+
+    if (!group) {
+      bot.sendMessage(msg.chat.id, '❌ 群组未绑定商户，请使用 /bind 命令绑定');
+      return;
+    }
+
+    const merchantId = group.merchantId;
+    const order = await mongoose.connection.db.collection('orders').findOne({
+      orderId: orderId.trim(),
+      merchantId: merchantId,
+      type: 'WITHDRAWAL',
+      status: 'SUCCESS'
+    });
+
+    if (!order) {
+      bot.sendMessage(msg.chat.id, `❌ 未找到已成功的代付订单: ${orderId}`);
+      return;
+    }
+
+    const responseText = `
+**代付凭证**
+
+**订单号:** \`${order.orderId}\`
+**商户号:** ${order.merchantId}
+**代付金额:** ₹${formatAmount(order.amount)}
+**收款账户:** ${order.bankAccount?.accountNumber || 'N/A'}
+**收款人:** ${order.bankAccount?.accountHolderName || 'N/A'}
+**银行名称:** ${order.bankAccount?.bankName || 'N/A'}
+**IFSC代码:** ${order.bankAccount?.ifscCode || 'N/A'}
+**UTR号码:** \`${order.provider?.utrNumber || 'N/A'}\`
+**交易时间:** ${order.completedAt ? new Date(order.completedAt).toLocaleString('zh-CN', { timeZone: 'Asia/Kolkata' }) : '未知'}
+
+**状态:** 代付成功
+    `;
+
+    bot.sendMessage(msg.chat.id, responseText, { parse_mode: 'Markdown' });
+
+  } catch (error) {
+    console.error('查询代付凭证失败:', error);
+    bot.sendMessage(msg.chat.id, '❌ 查询代付凭证失败，请稍后重试');
+  }
+});
+
+// UPI查询
+bot.onText(/^\/i(@\w+)?\s+(\S+)\s+(.+)/, async (msg, match) => {
+  const upiId = match[2] || match[1];
+  const orderId = match[3] || match[2];
+  
+  if (msg.chat.type === 'private') {
+    bot.sendMessage(msg.chat.id, '❌ 此命令只能在已绑定的群组中使用');
+    return;
+  }
+
+  try {
+    const group = await mongoose.connection.db.collection('telegramgroups').findOne({
+      chatId: msg.chat.id.toString(),
+      status: 'ACTIVE'
+    });
+
+    if (!group) {
+      bot.sendMessage(msg.chat.id, '❌ 群组未绑定商户，请使用 /bind 命令绑定');
+      return;
+    }
+
+    const responseText = `
+**UPI查询结果**
+
+**UPI ID:** ${upiId}
+**关联订单:** ${orderId}
+**商户:** ${group.merchantId}
+**查询时间:** ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Kolkata' })}
+
+**注意:** UPI查询功能需要对接实际的UPI服务提供商API
+**建议:** 请联系技术团队完善此功能
+    `;
+
+    bot.sendMessage(msg.chat.id, responseText, { parse_mode: 'Markdown' });
+
+  } catch (error) {
+    console.error('UPI查询失败:', error);
+    bot.sendMessage(msg.chat.id, '❌ UPI查询失败，请稍后重试');
+  }
+});
+
+// UTR查询
+bot.onText(/^\/u(@\w+)?\s+(\S+)\s+(.+)/, async (msg, match) => {
+  const utrNumber = match[2] || match[1];
+  const orderId = match[3] || match[2];
+  
+  if (msg.chat.type === 'private') {
+    bot.sendMessage(msg.chat.id, '❌ 此命令只能在已绑定的群组中使用');
+    return;
+  }
+
+  try {
+    const group = await mongoose.connection.db.collection('telegramgroups').findOne({
+      chatId: msg.chat.id.toString(),
+      status: 'ACTIVE'
+    });
+
+    if (!group) {
+      bot.sendMessage(msg.chat.id, '❌ 群组未绑定商户，请使用 /bind 命令绑定');
+      return;
+    }
+
+    const merchantId = group.merchantId;
+    const orders = await mongoose.connection.db.collection('orders').find({
+      merchantId: merchantId,
+      $or: [
+        { 'provider.utrNumber': utrNumber },
+        { orderId: orderId.trim() }
+      ]
+    }).toArray();
+
+    if (orders.length === 0) {
+      bot.sendMessage(msg.chat.id, `❌ 未找到UTR相关订单: ${utrNumber}`);
+      return;
+    }
+
+    let responseText = `
+**UTR查询结果**
+
+**UTR号码:** \`${utrNumber}\`
+**商户:** ${merchantId}
+**关联订单数量:** ${orders.length}
+
+`;
+
+    orders.forEach((order, index) => {
+      responseText += `
+**订单 ${index + 1}:**
+- **订单号:** \`${order.orderId}\`
+- **类型:** ${order.type === 'DEPOSIT' ? '代收' : '代付'}
+- **状态:** ${order.status}
+- **金额:** ₹${formatAmount(order.amount)}
+- **时间:** ${order.createdAt ? new Date(order.createdAt).toLocaleString('zh-CN', { timeZone: 'Asia/Kolkata' }) : 'N/A'}
+`;
+    });
+
+    bot.sendMessage(msg.chat.id, responseText, { parse_mode: 'Markdown' });
+
+  } catch (error) {
+    console.error('UTR查询失败:', error);
+    bot.sendMessage(msg.chat.id, '❌ UTR查询失败，请稍后重试');
+  }
+});
+
+// UTR补单
+bot.onText(/^\/b(@\w+)?\s+(\S+)\s+(.+)/, async (msg, match) => {
+  const utrNumber = match[2] || match[1];
+  const orderId = match[3] || match[2];
+  
+  if (msg.chat.type === 'private') {
+    bot.sendMessage(msg.chat.id, '❌ 此命令只能在已绑定的群组中使用');
+    return;
+  }
+
+  try {
+    const group = await mongoose.connection.db.collection('telegramgroups').findOne({
+      chatId: msg.chat.id.toString(),
+      status: 'ACTIVE'
+    });
+
+    if (!group) {
+      bot.sendMessage(msg.chat.id, '❌ 群组未绑定商户，请使用 /bind 命令绑定');
+      return;
+    }
+
+    const merchantId = group.merchantId;
+    const order = await mongoose.connection.db.collection('orders').findOne({
+      orderId: orderId.trim(),
+      merchantId: merchantId
+    });
+
+    if (!order) {
+      bot.sendMessage(msg.chat.id, `❌ 未找到订单: ${orderId}`);
+      return;
+    }
+
+    if (order.status === 'SUCCESS') {
+      bot.sendMessage(msg.chat.id, `✅ 订单 ${orderId} 已经是成功状态，无需补单`);
+      return;
+    }
+
+    // 更新订单状态和UTR信息
+    await mongoose.connection.db.collection('orders').updateOne(
+      { orderId: orderId.trim(), merchantId: merchantId },
+      {
+        $set: {
+          'provider.utrNumber': utrNumber,
+          status: 'SUCCESS',
+          completedAt: new Date()
+        },
+        $push: {
+          statusHistory: {
+            status: 'SUCCESS',
+            timestamp: new Date(),
+            reason: `UTR补单: ${utrNumber}`,
+            executedBy: `Telegram用户: ${msg.from.username || msg.from.id} (群组: ${msg.chat.title})`
+          }
+        }
+      }
+    );
+
+    const responseText = `
+**UTR补单成功**
+
+**订单号:** \`${orderId}\`
+**商户:** ${merchantId}
+**UTR号码:** \`${utrNumber}\`
+**订单状态:** SUCCESS
+**补单金额:** ₹${formatAmount(order.amount)}
+**补单时间:** ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Kolkata' })}
+**操作人员:** @${msg.from.username || msg.from.first_name}
+
+**补单完成，订单状态已更新**
+    `;
+
+    bot.sendMessage(msg.chat.id, responseText, { parse_mode: 'Markdown' });
+
+  } catch (error) {
+    console.error('UTR补单失败:', error);
+    bot.sendMessage(msg.chat.id, '❌ UTR补单失败，请稍后重试');
+  }
+});
+
+// 提币命令
+bot.onText(/^\/tu\s+(\d+(?:\.\d+)?)\s+(.+)/, async (msg, match) => {
+  const amount = match[1];
+  const address = match[2];
+  
+  if (msg.chat.type === 'private') {
+    bot.sendMessage(msg.chat.id, '❌ 此命令只能在已绑定的群组中使用');
+    return;
+  }
+
+  try {
+    const group = await mongoose.connection.db.collection('telegramgroups').findOne({
+      chatId: msg.chat.id.toString(),
+      status: 'ACTIVE'
+    });
+
+    if (!group) {
+      bot.sendMessage(msg.chat.id, '❌ 群组未绑定商户，请使用 /bind 命令绑定');
+      return;
+    }
+
+    const merchantId = group.merchantId;
+    const orderId = `TU${Date.now()}${Math.random().toString(36).substr(2, 6)}`.toUpperCase();
+
+    const responseText = `
+**提币申请**
+
+**申请单号:** \`${orderId}\`
+**商户:** ${merchantId}
+**提币金额:** ₹${amount}
+**提币地址:** ${address}
+**申请时间:** ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Kolkata' })}
+**申请人:** @${msg.from.username || msg.from.first_name}
+
+**状态:** 提币申请已提交，等待处理
+**注意:** 此功能需要后台人工审核处理
+    `;
+
+    bot.sendMessage(msg.chat.id, responseText, { parse_mode: 'Markdown' });
+
+    // 这里可以将提币申请记录到数据库
+    // await mongoose.connection.db.collection('withdrawal_requests').insertOne({...});
+
+  } catch (error) {
+    console.error('提币申请失败:', error);
+    bot.sendMessage(msg.chat.id, '❌ 提币申请失败，请稍后重试');
+  }
+});
+
+// /h 和 /help 帮助命令
+bot.onText(/^\/h(@\w+)?(\s|$)/, async (msg) => {
+  await handleHelpCommand(msg);
+});
+
+// 帮助命令处理函数
+async function handleHelpCommand(msg) {
+  if (msg.chat.type === 'private') {
+    const helpText = `
+**印度支付平台机器人**
+
+**管理员命令:**
+\`/bind 商户ID\` - 绑定群组到商户 (仅群组)
+
+**查询命令:** (需在已绑定的群组中使用)
+\`/h\` - 查看机器人可以帮助您做什么
+\`/y\` - 查询余额
+\`/t\` - 查看近半小时/今日订单统计
+\`/s 商户单号\` - 查询代收订单状态
+\`/f 商户单号\` - 查询代付订单状态
+\`/p 商户单号\` - 获取代付凭证
+\`/tu 提币金额 提币地址\` - 获取代付凭证
+\`/i UPI号码 商户单号\` - UPI查询收款户
+\`/u UTR号码 商户单号\` - 使用UTR查询相关订单
+\`/b UTR号码 商户单号\` - 使用UTR补单
+
+**使用说明:**
+- 查询功能需要在已绑定商户的群组中使用
+- 管理员可以使用 /bind 命令绑定群组到商户
+    `;
+
+    bot.sendMessage(msg.chat.id, helpText, { parse_mode: 'Markdown' });
+  } else {
+    const group = await mongoose.connection.db.collection('telegramgroups').findOne({
+      chatId: msg.chat.id.toString(),
+      status: 'ACTIVE'
+    });
+
+    if (!group) {
+      bot.sendMessage(msg.chat.id, '❌ 群组未绑定商户，请管理员使用 `/bind 商户ID` 命令绑定', { parse_mode: 'Markdown' });
+      return;
+    }
+
+    const helpText = `
+**机器人可以帮助您做什么**
+
+当前群组已绑定商户: \`${group.merchantId}\`
+
+**可用命令:**
+\`/h\` - 查看机器人可以帮助您做什么
+\`/y\` - 查询余额
+\`/t\` - 查看近半小时/今日订单统计
+\`/s 商户单号\` - 查询代收订单状态
+\`/f 商户单号\` - 查询代付订单状态
+\`/p 商户单号\` - 获取代付凭证
+\`/tu 提币金额 提币地址\` - 获取代付凭证
+
+**印度机器人额外功能:**
+\`/i UPI号码 商户单号\` - UPI查询收款户
+\`/u UTR号码 商户单号\` - 使用UTR查询相关订单
+\`/b UTR号码 商户单号\` - 使用UTR补单
+
+**使用示例:**
+\`/y\` - 查看余额
+\`/s ORDER123456\` - 查询订单
+\`/t\` - 查看统计
+    `;
+
+    bot.sendMessage(msg.chat.id, helpText, { parse_mode: 'Markdown' });
+  }
+}
+
 bot.onText(/^\/help$/, async (msg) => {
   if (msg.chat.type === 'private') {
     const helpText = `
