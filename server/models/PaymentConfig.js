@@ -61,7 +61,10 @@ const paymentConfigSchema = new mongoose.Schema({
     },
     secretKey: {
       type: String,
-      required: true
+      required: function() {
+        // 只有在账户状态为ACTIVE时才要求secretKey
+        return this.status === 'ACTIVE';
+      }
     },
     environment: {
       type: String,
