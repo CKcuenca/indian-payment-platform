@@ -37,10 +37,10 @@ import {
 import api from '../services/api';
 import { 
   getPaymentProviderConfig, 
-  shouldShowField, 
-  isFieldRequired, 
-  getFieldLabel, 
-  getFieldHelper, 
+  shouldShowFieldCompat as shouldShowField, 
+  isFieldRequiredCompat as isFieldRequired, 
+  getFieldLabelCompat as getFieldLabel, 
+  getFieldHelperCompat as getFieldHelper, 
   getProviderNotes 
 } from '../config/paymentProviderConfigs';
 
@@ -338,10 +338,15 @@ export default function PaymentManagementNew() {
   const handleProviderChange = (providerName: string) => {
     const config = getPaymentProviderConfig(providerName);
     if (config) {
+      // 使用第一个支持的类型的默认值
+      const firstType = config.supportedTypes[0];
+      const typeConfig = config.typeConfigs[firstType];
+      const defaultValues = typeConfig?.defaultValues || {};
+      
       setFormData(prev => ({
         ...prev,
         providerName,
-        ...config.defaultValues
+        ...defaultValues
       }));
     }
   };
