@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { authMiddleware } = require('../middleware/auth');
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 const Merchant = require('../models/merchant');
 const SecurityAudit = require('../services/security/security-audit');
 
@@ -8,11 +8,26 @@ const securityAudit = new SecurityAudit();
 
 /**
  * 获取商户IP白名单配置
- * GET /api/ip-whitelist
+ * GET /api/ip-whitelist?merchantId=xxx
  */
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', authenticateToken, async (req, res) => {
   try {
-    const merchantId = req.user.merchantId;
+    // 获取merchantId - 支持admin查询任意商户，普通用户只能查询自己的
+    let merchantId;
+    if (req.user.role === 'admin') {
+      // admin用户可以通过query参数查询任意商户
+      merchantId = req.query.merchantId;
+      if (!merchantId) {
+        return res.status(400).json({
+          success: false,
+          error: '管理员查询需要提供merchantId参数'
+        });
+      }
+    } else {
+      // 普通用户只能查询自己的
+      merchantId = req.user.merchantId;
+    }
+    
     const merchant = await Merchant.findOne({ merchantId });
     
     if (!merchant) {
@@ -70,7 +85,7 @@ router.get('/', authMiddleware, async (req, res) => {
  * 更新IP白名单总配置
  * PUT /api/ip-whitelist/config
  */
-router.put('/config', authMiddleware, async (req, res) => {
+router.put('/config', authenticateToken, async (req, res) => {
   try {
     const merchantId = req.user.merchantId;
     const { enabled, strictMode, accessRules } = req.body;
@@ -145,7 +160,7 @@ router.put('/config', authMiddleware, async (req, res) => {
  * 添加IP到白名单
  * POST /api/ip-whitelist/add
  */
-router.post('/add', authMiddleware, async (req, res) => {
+router.post('/add', authenticateToken, async (req, res) => {
   try {
     const merchantId = req.user.merchantId;
     const { ip, mask = 32, description = '' } = req.body;
@@ -222,7 +237,7 @@ router.post('/add', authMiddleware, async (req, res) => {
  * 从白名单删除IP
  * DELETE /api/ip-whitelist/:ipId
  */
-router.delete('/:ipId', authMiddleware, async (req, res) => {
+router.delete('/:ipId', authenticateToken, async (req, res) => {
   try {
     const merchantId = req.user.merchantId;
     const { ipId } = req.params;
@@ -277,7 +292,7 @@ router.delete('/:ipId', authMiddleware, async (req, res) => {
  * 更新IP状态
  * PUT /api/ip-whitelist/:ipId/status
  */
-router.put('/:ipId/status', authMiddleware, async (req, res) => {
+router.put('/:ipId/status', authenticateToken, async (req, res) => {
   try {
     const merchantId = req.user.merchantId;
     const { ipId } = req.params;
@@ -335,7 +350,7 @@ router.put('/:ipId/status', authMiddleware, async (req, res) => {
  * 测试IP是否在白名单中
  * POST /api/ip-whitelist/test
  */
-router.post('/test', authMiddleware, async (req, res) => {
+router.post('/test', authenticateToken, async (req, res) => {
   try {
     const merchantId = req.user.merchantId;
     const { testIP } = req.body;
@@ -384,7 +399,7 @@ router.post('/test', authMiddleware, async (req, res) => {
  * 获取IP访问统计
  * GET /api/ip-whitelist/stats
  */
-router.get('/stats', authMiddleware, async (req, res) => {
+router.get('/stats', authenticateToken, async (req, res) => {
   try {
     const merchantId = req.user.merchantId;
     const merchant = await Merchant.findOne({ merchantId });
