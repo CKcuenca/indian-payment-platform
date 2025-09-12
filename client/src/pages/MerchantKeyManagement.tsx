@@ -378,8 +378,8 @@ export default function MerchantKeyManagement() {
                         💡 为什么需要两个密钥？
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        • <strong>商户标识</strong>：类似用户名，用于识别您的商户身份，可以在请求参数、日志中显示<br/>
-                        • <strong>签名密钥</strong>：类似密码，用于生成MD5签名验证请求真实性，绝对不能泄露<br/>
+                        • <strong>商户标识</strong>：8位数字（如：12345678），类似用户名，用于识别您的商户身份<br/>
+                        • <strong>签名密钥</strong>：复杂字符串，类似密码，用于生成MD5签名验证请求真实性<br/>
                         • 这种设计确保了安全性：即使商户标识泄露，没有签名密钥也无法伪造请求
                       </Typography>
                     </Paper>
@@ -390,7 +390,7 @@ export default function MerchantKeyManagement() {
                         商户标识 (Merchant ID)
                       </Typography>
                       <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-                        用于标识您的商户身份，可在请求参数中使用，无需保密
+                        8位数字标识符，用于标识您的商户身份，可在请求参数中使用，无需保密
                       </Typography>
                       <Paper sx={{ p: 2, bgcolor: alpha(theme.palette.primary.main, 0.05) }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

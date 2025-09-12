@@ -12,15 +12,49 @@ class MerchantKeyManager {
    * @param {string} merchantId - 商户ID
    * @returns {Object} 密钥对
    */
+  static async generateUniqueApiKey() {
+    // 生成8位数字的商户标识 (10000000 - 99999999)
+    let apiKey;
+    let attempts = 0;
+    const maxAttempts = 100;
+
+    do {
+      apiKey = Math.floor(Math.random() * 90000000 + 10000000).toString();
+      attempts++;
+      
+      // 检查是否已存在
+      const existing = await Merchant.findOne({ apiKey });
+      if (!existing) {
+        break;
+      }
+      
+      if (attempts >= maxAttempts) {
+        throw new Error('无法生成唯一的商户标识，请重试');
+      }
+    } while (true);
+
+    return apiKey;
+  }
+
   static generateKeyPair(merchantId) {
-    // 生成随机字符串
-    const randomStr = crypto.randomBytes(16).toString('hex');
-    const timestamp = Date.now().toString(36);
+    // 注意：这个方法现在是同步的，用于向后兼容
+    // 新的异步方法 generateUniqueKeyPair 应该被使用
+    const apiKey = Math.floor(Math.random() * 90000000 + 10000000).toString();
+    const secretKey = `sk_${crypto.randomBytes(20).toString('hex')}`;
     
-    // API Key (公钥) - 可以在日志中显示
-    const apiKey = `pk_${randomStr.substring(0, 8)}${merchantId.substring(-4)}${timestamp.substring(-4)}`;
+    return {
+      apiKey,
+      secretKey,
+      createdAt: new Date(),
+      status: 'ACTIVE'
+    };
+  }
+
+  static async generateUniqueKeyPair(merchantId) {
+    // 生成唯一的8位数字商户标识
+    const apiKey = await this.generateUniqueApiKey();
     
-    // Secret Key (私钥) - 用于签名验证，绝对保密
+    // Secret Key - 用于签名验证，绝对保密
     const secretKey = `sk_${crypto.randomBytes(20).toString('hex')}`;
     
     return {
@@ -40,7 +74,7 @@ class MerchantKeyManager {
   static async regenerateKeys(merchantId, operatorId) {
     try {
       // 生成新密钥
-      const newKeys = this.generateKeyPair(merchantId);
+      const newKeys = await this.generateUniqueKeyPair(merchantId);
       
       // 备份旧密钥到历史记录
       const merchant = await Merchant.findOne({ merchantId });
@@ -141,7 +175,7 @@ class MerchantKeyManager {
         console.log(`🔍 商户不存在，为merchantId ${merchantId} 创建默认商户记录`);
         
         // 自动创建商户记录
-        const keyPair = this.generateKeyPair(merchantId);
+        const keyPair = await this.generateUniqueKeyPair(merchantId);
         merchant = new Merchant({
           merchantId: merchantId,
           name: `商户_${merchantId}`,
