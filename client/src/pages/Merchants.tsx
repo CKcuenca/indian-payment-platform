@@ -1477,7 +1477,17 @@ export default function Merchants() {
                   ) : (
                     paymentConfigs.map((config) => (
                       <MenuItem key={config._id} value={config._id}>
-                        {config.accountName} ({config.provider.name})
+                        {config.accountName}
+                        {config.provider.name === 'passpay' && config.provider.type && (
+                          <span style={{ color: '#666', fontSize: '0.85em', marginLeft: '8px' }}>
+                            ({config.provider.type === 'native' ? '原生' : '唤醒'})
+                          </span>
+                        )}
+                        {config.provider.name !== 'passpay' && (
+                          <span style={{ color: '#666', fontSize: '0.85em', marginLeft: '8px' }}>
+                            ({config.provider.name})
+                          </span>
+                        )}
                       </MenuItem>
                     ))
                   )}
@@ -1503,7 +1513,17 @@ export default function Merchants() {
                   ) : (
                     paymentConfigs.map((config) => (
                       <MenuItem key={config._id} value={config._id}>
-                        {config.accountName} ({config.provider.name})
+                        {config.accountName}
+                        {config.provider.name === 'passpay' && config.provider.type && (
+                          <span style={{ color: '#666', fontSize: '0.85em', marginLeft: '8px' }}>
+                            ({config.provider.type === 'native' ? '原生' : '唤醒'})
+                          </span>
+                        )}
+                        {config.provider.name !== 'passpay' && (
+                          <span style={{ color: '#666', fontSize: '0.85em', marginLeft: '8px' }}>
+                            ({config.provider.name})
+                          </span>
+                        )}
                       </MenuItem>
                     ))
                   )}

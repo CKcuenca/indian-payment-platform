@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 const PaymentConfig = require('../models/PaymentConfig');
-require('dotenv').config({ path: '../env.production' });
+const path = require('path');
+
+// 根据环境加载不同的配置文件
+const envFile = process.env.NODE_ENV === 'test' ? '../env.test' : '../env.production';
+require('dotenv').config({ path: path.join(__dirname, envFile) });
 
 async function initPassPayChannels() {
   try {
