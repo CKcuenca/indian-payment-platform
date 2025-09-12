@@ -136,9 +136,50 @@ class MerchantKeyManager {
    */
   static async getMerchantKeyInfo(merchantId) {
     try {
-      const merchant = await Merchant.findOne({ merchantId });
+      let merchant = await Merchant.findOne({ merchantId });
       if (!merchant) {
-        throw new Error('商户不存在');
+        console.log(`🔍 商户不存在，为merchantId ${merchantId} 创建默认商户记录`);
+        
+        // 自动创建商户记录
+        const keyPair = this.generateKeyPair(merchantId);
+        merchant = new Merchant({
+          merchantId: merchantId,
+          name: `商户_${merchantId}`,
+          email: `${merchantId}@example.com`,
+          status: 'ACTIVE',
+          apiKey: keyPair.apiKey,
+          secretKey: keyPair.secretKey,
+          balance: 0,
+          deposit: {
+            fee: { percentage: 2, fixedAmount: 0 },
+            limits: {
+              minAmount: 100,
+              maxAmount: 50000,
+              dailyLimit: 100000,
+              monthlyLimit: 1000000,
+              singleTransactionLimit: 50000
+            },
+            usage: { dailyUsed: 0, monthlyUsed: 0, lastResetDate: new Date() }
+          },
+          withdrawal: {
+            fee: { percentage: 3, fixedAmount: 5 },
+            limits: {
+              minAmount: 100,
+              maxAmount: 50000,
+              dailyLimit: 100000,
+              monthlyLimit: 1000000,
+              singleTransactionLimit: 50000
+            },
+            usage: { dailyUsed: 0, monthlyUsed: 0, lastResetDate: new Date() }
+          },
+          security: {
+            lastKeyUpdate: new Date(),
+            keyHistory: []
+          }
+        });
+        
+        await merchant.save();
+        console.log(`✅ 已创建商户记录: ${merchantId}`);
       }
       
       return {
@@ -152,6 +193,7 @@ class MerchantKeyManager {
       };
       
     } catch (error) {
+      console.error('获取密钥信息失败:', error);
       throw new Error(`获取密钥信息失败: ${error.message}`);
     }
   }
