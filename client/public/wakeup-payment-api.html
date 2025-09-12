@@ -411,13 +411,10 @@
                         🔐 sign 加密
                     </a>
                     <a class="menu-item" onclick="showSection('collection')" id="collection-menu">
-                        💰 代收
+                        📥 代收
                     </a>
                     <a class="menu-item" onclick="showSection('payout')" id="payout-menu">
-                        💸 代付
-                    </a>
-                    <a class="menu-item" onclick="showSection('balance')" id="balance-menu">
-                        💳 余额查询
+                        📤 代付
                     </a>
                     <a class="menu-item" onclick="showSection('errors')" id="errors-menu">
                         ⚠️ 错误码
@@ -557,13 +554,21 @@ function generateSign(params, secretKey) {
                 <!-- 代收接口 -->
                 <div class="content-section" id="collection">
                     <div class="section">
-                        <h2>3. 代收</h2>
+                        <h2>📥 代收</h2>
+                        <p>代收功能提供完整的收款解决方案，支持多种支付方式和智能路由。</p>
+                        
+                        <div class="highlight">
+                            <strong>🚀 统一支付接口</strong>：一个API支持多种支付方式，通过pay_id参数智能路由
+                        </div>
+                        
                         <h3>📋 代收接口列表</h3>
                         <ul>
                             <li><strong>创建代收订单</strong>：/api/pay - 统一支付接口，支持标准支付和唤醒支付</li>
-                            <li><strong>查询代收订单状态</strong>：/api/query - 查询订单支付状态</li>
                             <li><strong>代收回调</strong>：异步通知商户支付结果</li>
-                            <li><strong>UTR补单</strong>：/api/wakeup/verify - 手动验证交易凭证</li>
+                            <li><strong>查询代收订单状态</strong>：/api/query - 查询订单支付状态</li>
+                            <li><strong>UTR补单</strong>：/api/utr/submit - 手动提交交易凭证</li>
+                            <li><strong>UTR状态查询</strong>：查询UTR补单处理状态</li>
+                            <li><strong>查询我方UPI</strong>：/api/upi/query - 获取收款UPI信息</li>
                         </ul>
                         
                         <h3>3.1 创建代收订单</h3>
@@ -931,12 +936,12 @@ function generateSign(params, secretKey) {
                         <h3>3.4 UTR补单</h3>
                         
                         <h4><strong>接口说明：</strong></h4>
-                        <p>用于部分唤醒支付场景下的手动验证功能，当用户完成转账后，可以提交交易凭证进行验证。</p>
+                        <p>当支付成功但系统未及时收到回调时，可通过UTR交易号手动补单，确保订单状态准确。</p>
                         
                         <h4><strong>请求URL：</strong></h4>
                         <div class="endpoint">
                             <div class="method method-post">POST</div>
-                            <span class="endpoint-url">https://cashgit.com/api/wakeup/verify</span>
+                            <span class="endpoint-url">https://cashgit.com/api/utr/submit</span>
                         </div>
                         
                         <h4><strong>请求方式：</strong></h4>
@@ -1014,46 +1019,91 @@ function generateSign(params, secretKey) {
                         <div class="code-block">
 <pre>{
   "code": 200,
-  "message": "验证提交成功",
+  "message": "UTR补单提交成功",
   "data": {
     "orderid": "ORDER_20241201_001",
-    "status": "UNDER_REVIEW", 
-    "verification_id": "VRF_20241201_001",
-    "message": "交易凭证验证已提交，系统正在处理中，请稍后查询订单状态"
+    "utr": "435912345678",
+    "status": "PROCESSING", 
+    "submitted_at": "2024-12-01T10:30:15.000Z",
+    "message": "UTR补单已提交，系统正在验证中"
   }
 }</pre>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- 代付接口 -->
-                <div class="content-section" id="payout">
-                    <div class="section">
-                        <h2>4. 代付</h2>
-                        <p>代付功能尚未开放，敬请期待。</p>
-                    </div>
-                </div>
-                
-                <!-- 余额查询 -->
-                <div class="content-section" id="balance">
-                    <div class="section">
-                        <h2>5. 余额查询</h2>
+                        
+                        <h3>3.5 UTR状态查询</h3>
                         
                         <h4><strong>接口说明：</strong></h4>
-                        <p>查询商户账户余额信息。</p>
+                        <p>查询UTR补单的处理状态和验证结果。</p>
                         
                         <h4><strong>请求URL：</strong></h4>
                         <div class="endpoint">
                             <div class="method method-post">POST</div>
-                            <span class="endpoint-url">https://cashgit.com/api/balance/query</span>
+                            <span class="endpoint-url">https://cashgit.com/api/utr/query</span>
                         </div>
                         
-                        <h4><strong>请求方式：</strong></h4>
-                        <ul><li>POST</li></ul>
+                        <h4><strong>请求参数：</strong></h4>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>必填</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>appid</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户号</td>
+                                        <td>MERCHANT_MEWZV8HV</td>
+                                    </tr>
+                                    <tr>
+                                        <td>orderid</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户订单号</td>
+                                        <td>ORDER_20241201_001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>sign</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>MD5签名</td>
+                                        <td>755b88f30aa739c214a8512c42d1e535</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                         
-                        <h4><strong>Header：</strong></h4>
+                        <h4><strong>成功返回示例：</strong></h4>
                         <div class="code-block">
-<pre>Content-Type: application/json</pre>
+<pre>{
+  "code": 200,
+  "message": "查询成功",
+  "data": {
+    "orderid": "ORDER_20241201_001",
+    "utr": "435912345678",
+    "utr_status": "VERIFIED",
+    "verification_result": "SUCCESS",
+    "verified_at": "2024-12-01T10:35:20.000Z",
+    "message": "UTR验证成功，订单已更新为支付成功状态"
+  }
+}</pre>
+                        </div>
+                        
+                        <h3>3.6 查询我方UPI</h3>
+                        
+                        <h4><strong>接口说明：</strong></h4>
+                        <p>获取平台当前可用的UPI收款账户信息，用于支付时的收款账户选择。</p>
+                        
+                        <h4><strong>请求URL：</strong></h4>
+                        <div class="endpoint">
+                            <div class="method method-post">POST</div>
+                            <span class="endpoint-url">https://cashgit.com/api/upi/query</span>
                         </div>
                         
                         <h4><strong>请求参数：</strong></h4>
@@ -1087,12 +1137,317 @@ function generateSign(params, secretKey) {
                             </table>
                         </div>
                         
-                        <h4><strong>请求示例：</strong></h4>
+                        <h4><strong>成功返回示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "code": 200,
+  "message": "查询成功",
+  "data": {
+    "upi_accounts": [
+      {
+        "upi_id": "merchant@paytm",
+        "upi_name": "CashGit收款账户1",
+        "bank_name": "Paytm Payments Bank",
+        "status": "ACTIVE",
+        "daily_limit": "500000.00",
+        "available_limit": "450000.00"
+      },
+      {
+        "upi_id": "cashgit@okaxis",
+        "upi_name": "CashGit收款账户2", 
+        "bank_name": "Axis Bank",
+        "status": "ACTIVE",
+        "daily_limit": "1000000.00",
+        "available_limit": "980000.00"
+      }
+    ],
+    "total_accounts": 2,
+    "updated_at": "2024-12-01T10:00:00.000Z"
+  }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 代付接口 -->
+                <div class="content-section" id="payout">
+                    <div class="section">
+                        <h2>📤 代付</h2>
+                        <p>代付功能提供安全可靠的批量付款解决方案，支持银行转账和UPI转账。</p>
+                        
+                        <div class="note">
+                            <strong>⚠️ 注意</strong>：代付功能需要商户账户有足够余额，系统会实时验证账户状态和收款方信息。
+                        </div>
+                        
+                        <h3>📋 代付接口列表</h3>
+                        <ul>
+                            <li><strong>创建代付订单</strong>：/api/payout/create - 发起代付转账请求</li>
+                            <li><strong>代付回调</strong>：异步通知商户代付结果</li>
+                            <li><strong>查询代付订单状态</strong>：/api/payout/query - 查询代付处理状态</li>
+                            <li><strong>余额查询</strong>：/api/balance/query - 查询商户账户余额</li>
+                        </ul>
+                        
+                        <h3>4.1 创建代付订单</h3>
+                        
+                        <h4><strong>接口说明：</strong></h4>
+                        <p>发起代付转账请求，支持银行卡转账和UPI转账两种方式。</p>
+                        
+                        <h4><strong>请求URL：</strong></h4>
+                        <div class="endpoint">
+                            <div class="method method-post">POST</div>
+                            <span class="endpoint-url">https://cashgit.com/api/payout/create</span>
+                        </div>
+                        
+                        <h4><strong>请求参数：</strong></h4>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>必填</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>appid</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户号</td>
+                                        <td>MERCHANT_MEWZV8HV</td>
+                                    </tr>
+                                    <tr>
+                                        <td>orderid</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户订单号（≥6位）</td>
+                                        <td>PAYOUT_20241201_001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>amount</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>代付金额（卢比）</td>
+                                        <td>500.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>account_name</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>收款人姓名</td>
+                                        <td>Rajesh Kumar</td>
+                                    </tr>
+                                    <tr>
+                                        <td>account_number</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>收款账号或UPI ID</td>
+                                        <td>1234567890123456</td>
+                                    </tr>
+                                    <tr>
+                                        <td>ifsc</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-optional">可选</span></td>
+                                        <td>银行IFSC代码（银行转账必填）</td>
+                                        <td>SBIN0001234</td>
+                                    </tr>
+                                    <tr>
+                                        <td>mobile</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>收款人手机号</td>
+                                        <td>9876543210</td>
+                                    </tr>
+                                    <tr>
+                                        <td>email</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-optional">可选</span></td>
+                                        <td>收款人邮箱</td>
+                                        <td>rajesh@example.com</td>
+                                    </tr>
+                                    <tr>
+                                        <td>desc</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-optional">可选</span></td>
+                                        <td>代付描述</td>
+                                        <td>游戏提现</td>
+                                    </tr>
+                                    <tr>
+                                        <td>notify_url</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-optional">可选</span></td>
+                                        <td>异步通知地址</td>
+                                        <td>https://your-domain.com/payout-notify</td>
+                                    </tr>
+                                    <tr>
+                                        <td>sign</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>MD5签名</td>
+                                        <td>755b88f30aa739c214a8512c42d1e535</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4><strong>成功返回示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "code": 200,
+  "message": "代付订单创建成功",
+  "data": {
+    "orderid": "PAYOUT_20241201_001",
+    "platform_orderid": "PO202412010001",
+    "amount": "500.00",
+    "fee": "10.00",
+    "actual_amount": "490.00",
+    "status": "PROCESSING",
+    "account_name": "Rajesh Kumar",
+    "account_number": "1234567890123456",
+    "created_at": "2024-12-01T10:30:15.000Z",
+    "estimated_completion": "2024-12-01T11:00:00.000Z"
+  }
+}</pre>
+                        </div>
+                        
+                        <h3>4.2 代付回调</h3>
+                        
+                        <h4><strong>接口说明：</strong></h4>
+                        <p>当代付订单状态发生变化时，系统会向商户指定的notify_url发送异步通知。</p>
+                        
+                        <h4><strong>通知参数：</strong></h4>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>appid</td>
+                                        <td>String</td>
+                                        <td>商户号</td>
+                                    </tr>
+                                    <tr>
+                                        <td>orderid</td>
+                                        <td>String</td>
+                                        <td>商户订单号</td>
+                                    </tr>
+                                    <tr>
+                                        <td>platform_orderid</td>
+                                        <td>String</td>
+                                        <td>平台订单号</td>
+                                    </tr>
+                                    <tr>
+                                        <td>amount</td>
+                                        <td>String</td>
+                                        <td>代付金额</td>
+                                    </tr>
+                                    <tr>
+                                        <td>fee</td>
+                                        <td>String</td>
+                                        <td>手续费</td>
+                                    </tr>
+                                    <tr>
+                                        <td>actual_amount</td>
+                                        <td>String</td>
+                                        <td>实际到账金额</td>
+                                    </tr>
+                                    <tr>
+                                        <td>status</td>
+                                        <td>String</td>
+                                        <td>代付状态</td>
+                                    </tr>
+                                    <tr>
+                                        <td>utr</td>
+                                        <td>String</td>
+                                        <td>银行UTR交易号</td>
+                                    </tr>
+                                    <tr>
+                                        <td>completed_at</td>
+                                        <td>String</td>
+                                        <td>完成时间</td>
+                                    </tr>
+                                    <tr>
+                                        <td>sign</td>
+                                        <td>String</td>
+                                        <td>MD5签名</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4><strong>通知示例：</strong></h4>
                         <div class="code-block">
 <pre>{
   "appid": "MERCHANT_MEWZV8HV",
-  "sign": "755b88f30aa739c214a8512c42d1e535"
+  "orderid": "PAYOUT_20241201_001",
+  "platform_orderid": "PO202412010001",
+  "amount": "500.00",
+  "fee": "10.00",
+  "actual_amount": "490.00",
+  "status": "SUCCESS",
+  "utr": "435987654321",
+  "completed_at": "2024-12-01T10:45:30.000Z",
+  "sign": "calculated_md5_signature"
 }</pre>
+                        </div>
+                        
+                        <h4><strong>商户响应：</strong></h4>
+                        <p>商户接收到异步通知后，需要返回字符串 <code class="code-inline">"success"</code> 表示接收成功。</p>
+                        
+                        <h3>4.3 查询代付订单状态</h3>
+                        
+                        <h4><strong>接口说明：</strong></h4>
+                        <p>查询代付订单的处理状态和详细信息。</p>
+                        
+                        <h4><strong>请求URL：</strong></h4>
+                        <div class="endpoint">
+                            <div class="method method-post">POST</div>
+                            <span class="endpoint-url">https://cashgit.com/api/payout/query</span>
+                        </div>
+                        
+                        <h4><strong>请求参数：</strong></h4>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>必填</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>appid</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户号</td>
+                                        <td>MERCHANT_MEWZV8HV</td>
+                                    </tr>
+                                    <tr>
+                                        <td>orderid</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户订单号</td>
+                                        <td>PAYOUT_20241201_001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>sign</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>MD5签名</td>
+                                        <td>755b88f30aa739c214a8512c42d1e535</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                         
                         <h4><strong>成功返回示例：</strong></h4>
@@ -1101,20 +1456,78 @@ function generateSign(params, secretKey) {
   "code": 200,
   "message": "查询成功",
   "data": {
-    "balance": "10000.00",
-    "currency": "INR",
-    "frozen": "0.00",
-    "available": "10000.00"
+    "orderid": "PAYOUT_20241201_001",
+    "platform_orderid": "PO202412010001",
+    "amount": "500.00",
+    "fee": "10.00",
+    "actual_amount": "490.00",
+    "status": "SUCCESS",
+    "account_name": "Rajesh Kumar",
+    "account_number": "1234567890123456",
+    "ifsc": "SBIN0001234",
+    "utr": "435987654321",
+    "desc": "游戏提现",
+    "created_at": "2024-12-01T10:30:15.000Z",
+    "completed_at": "2024-12-01T10:45:30.000Z"
   }
 }</pre>
                         </div>
                         
-                        <h4><strong>失败返回示例：</strong></h4>
+                        <h3>4.4 余额查询</h3>
+                        
+                        <h4><strong>接口说明：</strong></h4>
+                        <p>查询商户账户余额信息，包括总余额、冻结余额和可用余额。</p>
+                        
+                        <h4><strong>请求URL：</strong></h4>
+                        <div class="endpoint">
+                            <div class="method method-post">POST</div>
+                            <span class="endpoint-url">https://cashgit.com/api/balance/query</span>
+                        </div>
+                        
+                        <h4><strong>请求参数：</strong></h4>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>必填</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>appid</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户号</td>
+                                        <td>MERCHANT_MEWZV8HV</td>
+                                    </tr>
+                                    <tr>
+                                        <td>sign</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>MD5签名</td>
+                                        <td>755b88f30aa739c214a8512c42d1e535</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4><strong>成功返回示例：</strong></h4>
                         <div class="code-block">
 <pre>{
-  "code": 401,
-  "message": "签名验证失败",
-  "data": null
+  "code": 200,
+  "message": "查询成功",
+  "data": {
+    "total_balance": "100000.00",
+    "frozen_balance": "5000.00",
+    "available_balance": "95000.00",
+    "currency": "INR",
+    "last_updated": "2024-12-01T10:00:00.000Z",
+    "account_status": "ACTIVE"
+  }
 }</pre>
                         </div>
                     </div>
@@ -1122,20 +1535,125 @@ function generateSign(params, secretKey) {
                 
                 <!-- 错误码 -->
                 <div class="content-section" id="errors">
-                            <span class="endpoint-url">/api/query</span>
-                        </div>
-                        <p>自动识别订单的支付类型，统一返回订单状态和详细信息。</p>
+                    <div class="section">
+                        <h2>⚠️ 错误码说明</h2>
                         
-                        <h3>🔄 兼容接口（唤醒专用）</h3>
-                        <div class="endpoint">
-                            <div class="method method-post">POST</div>
-                            <span class="endpoint-url">/api/wakeup/query</span>
-                        </div>
-                        <p>仅查询唤醒支付订单，向后兼容保留。</p>
+                        <p>当API调用出现错误时，系统会返回相应的错误码和错误信息，帮助开发者快速定位和解决问题。</p>
                         
-                        <h3>请求参数</h3>
+                        <h3>HTTP状态码</h3>
                         <div class="table">
                             <table>
+                                <thead>
+                                    <tr>
+                                        <th>错误码</th>
+                                        <th>说明</th>
+                                        <th>常见原因</th>
+                                        <th>解决方案</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><span class="badge badge-success">200</span></td>
+                                        <td>成功</td>
+                                        <td>请求处理成功</td>
+                                        <td>-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-required">400</span></td>
+                                        <td>参数错误</td>
+                                        <td>缺少必需参数或参数格式错误</td>
+                                        <td>检查请求参数格式和必填字段</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-required">401</span></td>
+                                        <td>认证失败</td>
+                                        <td>签名验证失败或商户不存在</td>
+                                        <td>检查签名算法、商户号和密钥</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-required">403</span></td>
+                                        <td>权限不足</td>
+                                        <td>商户账户被禁用或权限不够</td>
+                                        <td>联系客服确认账户状态</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-required">404</span></td>
+                                        <td>资源不存在</td>
+                                        <td>订单不存在或接口不存在</td>
+                                        <td>确认订单号和接口路径是否正确</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-required">409</span></td>
+                                        <td>订单冲突</td>
+                                        <td>订单号已存在</td>
+                                        <td>使用新的订单号重新提交</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-required">429</span></td>
+                                        <td>请求过频</td>
+                                        <td>超过频率限制</td>
+                                        <td>降低请求频率，实施退避策略</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-required">500</span></td>
+                                        <td>服务器错误</td>
+                                        <td>系统内部错误</td>
+                                        <td>稍后重试，如持续出现请联系技术支持</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h3>业务状态码</h3>
+                        <div class="table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>订单状态</th>
+                                        <th>代收含义</th>
+                                        <th>代付含义</th>
+                                        <th>后续操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code class="code-inline">PENDING</code></td>
+                                        <td>订单创建成功，等待支付</td>
+                                        <td>代付订单创建成功，等待处理</td>
+                                        <td>等待用户支付或系统处理</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code class="code-inline">PROCESSING</code></td>
+                                        <td>支付处理中</td>
+                                        <td>代付处理中</td>
+                                        <td>等待处理完成</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code class="code-inline">SUCCESS</code></td>
+                                        <td>支付成功</td>
+                                        <td>代付成功</td>
+                                        <td>交易完成，发货或到账</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code class="code-inline">FAILED</code></td>
+                                        <td>支付失败</td>
+                                        <td>代付失败</td>
+                                        <td>检查失败原因，考虑重新发起</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code class="code-inline">CANCELLED</code></td>
+                                        <td>订单已取消</td>
+                                        <td>代付已取消</td>
+                                        <td>订单终止</td>
+                                    </tr>
+                                    <tr>
+                                        <td><code class="code-inline">EXPIRED</code></td>
+                                        <td>订单已过期</td>
+                                        <td>-</td>
+                                        <td>订单自动取消</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                                 <thead>
                                     <tr>
                                         <th>参数名</th>
