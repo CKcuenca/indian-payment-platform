@@ -31,8 +31,8 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { authService } from '../services/authService';
-import { Permission } from '../types';
-import { PermissionGuard } from './PermissionGuard';
+import { Permission, UserRole } from '../types';
+import { PermissionGuard, RoleGuard } from './PermissionGuard';
 
 const drawerWidth = 240;
 
@@ -64,7 +64,8 @@ const menuItems = [
     text: '密钥管理',
     icon: <Key />,
     path: '/merchant-keys',
-    permissions: [Permission.VIEW_OWN_MERCHANT_DATA, Permission.MANAGE_MERCHANTS]
+    permissions: [Permission.VIEW_OWN_MERCHANT_DATA, Permission.MANAGE_MERCHANTS],
+    requiredRole: UserRole.MERCHANT
   },
   {
     text: '支付管理',
@@ -136,35 +137,41 @@ export default function Layout({ children }: LayoutProps) {
         </Typography>
       </Toolbar>
       <List>
-        {menuItems.map((item) => (
-          <PermissionGuard
-            key={item.text}
-            permissions={item.permissions}
-            anyPermission={item.permissions && item.permissions.length > 0 ? item.permissions : undefined}
-          >
-            <ListItem disablePadding>
-              <ListItemButton
-                selected={location.pathname === item.path}
-                onClick={() => {
-                  navigate(item.path);
-                  if (isMobile) {
-                    setMobileOpen(false);
-                  }
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
-                <ListItemText 
-                  primary={item.text} 
-                  sx={{ 
-                    '& .MuiListItemText-primary': {
-                      fontSize: '0.875rem'
+        {menuItems.map((item) => {
+          const GuardComponent = item.requiredRole ? RoleGuard : PermissionGuard;
+          const guardProps = item.requiredRole 
+            ? { roles: [item.requiredRole] }
+            : { 
+                permissions: item.permissions,
+                anyPermission: item.permissions && item.permissions.length > 0 ? item.permissions : undefined
+              };
+          
+          return (
+            <GuardComponent key={item.text} {...guardProps}>
+              <ListItem disablePadding>
+                <ListItemButton
+                  selected={location.pathname === item.path}
+                  onClick={() => {
+                    navigate(item.path);
+                    if (isMobile) {
+                      setMobileOpen(false);
                     }
                   }}
-                />
-              </ListItemButton>
-            </ListItem>
-          </PermissionGuard>
-        ))}
+                >
+                  <ListItemIcon sx={{ minWidth: 36 }}>{item.icon}</ListItemIcon>
+                  <ListItemText 
+                    primary={item.text} 
+                    sx={{ 
+                      '& .MuiListItemText-primary': {
+                        fontSize: '0.875rem'
+                      }
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            </GuardComponent>
+          );
+        })}
       </List>
     </div>
   );

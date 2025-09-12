@@ -22,7 +22,7 @@ import LimitManagement from './pages/LimitManagement';
 
 
 import { useAuth } from './hooks/useAuth';
-import { Permission } from './types';
+import { Permission, UserRole } from './types';
 
 // 创建主题
 const theme = createTheme({
@@ -40,12 +40,14 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   permissions?: Permission[];
   anyPermission?: Permission[];
+  requiredRole?: UserRole;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
   permissions = [], 
-  anyPermission = [] 
+  anyPermission = [],
+  requiredRole
 }) => {
   const { isAuthenticated, currentUser } = useAuth();
   
@@ -63,6 +65,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       console.log('❌ 用户未认证，重定向到登录页面');
     }
     return <Navigate to="/login" replace />;
+  }
+
+  // 检查角色要求
+  if (requiredRole && currentUser.role !== requiredRole) {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('❌ 用户角色不匹配，需要:', requiredRole, '实际:', currentUser.role);
+    }
+    return <Navigate to="/" replace />;
   }
 
   if (permissions.length > 0) {
@@ -229,7 +239,7 @@ function App() {
           <Route
             path="/merchant-keys"
             element={
-              <ProtectedRoute anyPermission={[Permission.VIEW_OWN_MERCHANT_DATA, Permission.MANAGE_MERCHANTS]}>
+              <ProtectedRoute requiredRole={UserRole.MERCHANT}>
                 <Layout>
                   <MerchantKeyManagement />
                 </Layout>
