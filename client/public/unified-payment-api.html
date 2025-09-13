@@ -555,6 +555,9 @@
                         <a class="submenu-item" onclick="showSection('utr-submit')" id="utr-submit-menu">
                             UTR补单
                         </a>
+                        <a class="submenu-item" onclick="showSection('collection-close')" id="collection-close-menu">
+                            关闭代收订单
+                        </a>
                         <a class="submenu-item" onclick="showSection('utr-query')" id="utr-query-menu">
                             UTR状态查询
                         </a>
@@ -617,7 +620,7 @@
                         <h3>概要</h3>
                         <p>本文档定义了接入CashGit印度支付系统的统一API接口规范，具体包括：</p>
                         <ul>
-                            <li><strong>统一支付接口</strong>：一个API支持标准支付和唤醒支付两种方式</li>
+                            <li><strong>统一支付接口</strong>：一个API支持原生支付和唤醒支付两种方式</li>
                             <li><strong>接口通信方式</strong>：涵盖网络通讯方式及接口加解密方式</li>
                             <li><strong>业务处理流程</strong>：涉及订单创建、状态查询、手动验证等功能</li>
                             <li><strong>交易报文格式说明</strong>：包含入参、出参规范及JSON格式标准</li>
@@ -636,7 +639,7 @@
                             <li><strong>商户号(appid)</strong>：这是商户在平台上的唯一标识，用于验证其在平台的合法性。</li>
                             <li><strong>商户订单号(orderid)</strong>：商户系统为每笔订单生成的唯一编号，需确保其唯一性。</li>
                             <li><strong>加密密钥(secretKey)</strong>：商户用于交易请求前对数据进行加密和验签的关键工具。</li>
-                            <li><strong>支付类型标识(pay_id)</strong>：用于区分不同支付方式的参数，"1"表示标准支付，"2"表示唤醒支付。</li>
+                            <li><strong>支付类型标识(pay_id)</strong>：用于区分不同支付方式的参数，"1"表示原生支付，"2"表示唤醒支付。</li>
                             <li><strong>币种(currency)</strong>：固定为INR（印度卢比）。</li>
                             <li><strong>后台异步回调(notify_url)</strong>：当交易处理完成后，系统会主动通知商户网站并携带相关结果信息。</li>
                         </ul>
@@ -735,7 +738,8 @@ function generateSign(params, secretKey) {
                         
                         <h3>代收接口列表</h3>
                         <ul>
-                            <li><strong>创建代收订单</strong>：/api/pay - 统一支付接口，支持标准支付和唤醒支付</li>
+                            <li><strong>创建代收订单</strong>：/api/pay - 统一支付接口，支持原生支付和唤醒支付</li>
+                            <li><strong>关闭代收订单</strong>：/api/close - 关闭未支付的订单</li>
                             <li><strong>代收回调</strong>：异步通知商户支付结果</li>
                             <li><strong>查询代收订单状态</strong>：/api/query - 查询订单支付状态</li>
                             <li><strong>UTR补单</strong>：/api/utr/submit - 手动提交交易凭证</li>
@@ -751,7 +755,7 @@ function generateSign(params, secretKey) {
                         <h2>3.1 创建代收订单</h2>
                         
                         <h4><strong>接口说明：</strong></h4>
-                        <p>创建支付订单，支持标准支付和唤醒支付两种模式。通过 pay_id 参数区分支付类型。</p>
+                        <p>创建支付订单，支持原生支付和唤醒支付两种模式。通过 pay_id 参数区分支付类型。</p>
                         
                         <h4><strong>请求URL：</strong></h4>
                         <div class="endpoint">
@@ -833,7 +837,7 @@ function generateSign(params, secretKey) {
                                         <td>pay_id</td>
                                         <td>String</td>
                                         <td><span class="badge badge-optional">可选</span></td>
-                                        <td>支付类型：1=标准支付(默认)，2=唤醒支付</td>
+                                        <td>支付类型：1=原生支付(默认)，2=唤醒支付</td>
                                         <td>"2"</td>
                                     </tr>
                                     <tr>
@@ -1367,6 +1371,169 @@ function generateSign(params, secretKey) {
     "updated_at": "2024-12-01T10:00:00.000Z"
   }
 }</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 关闭代收订单 -->
+                <div class="content-section" id="collection-close">
+                    <div class="section">
+                        <h2>3.4 关闭代收订单</h2>
+                        
+                        <h4><strong>接口说明：</strong></h4>
+                        <p>关闭未支付的代收订单，防止后续支付完成。适用于订单超时或需要取消的场景。</p>
+                        
+                        <h4><strong>请求URL：</strong></h4>
+                        <div class="endpoint">
+                            <div class="method method-post">POST</div>
+                            <span class="endpoint-url">https://cashgit.com/api/close</span>
+                        </div>
+                        
+                        <h4><strong>请求方式：</strong></h4>
+                        <ul><li>POST</li></ul>
+                        
+                        <h4><strong>Header：</strong></h4>
+                        <div class="code-block">
+<pre>Content-Type: application/json</pre>
+                        </div>
+                        
+                        <h4><strong>请求参数：</strong></h4>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>必填</th>
+                                        <th>说明</th>
+                                        <th>示例值</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>appid</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户号</td>
+                                        <td>MERCHANT_MEWZV8HV</td>
+                                    </tr>
+                                    <tr>
+                                        <td>orderid</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>商户订单号</td>
+                                        <td>ORDER_20241201_001</td>
+                                    </tr>
+                                    <tr>
+                                        <td>sign</td>
+                                        <td>String</td>
+                                        <td><span class="badge badge-required">必填</span></td>
+                                        <td>MD5签名</td>
+                                        <td>755b88f30aa739c214a8512c42d1e535</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4><strong>请求示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "appid": "MERCHANT_MEWZV8HV",
+  "orderid": "ORDER_20241201_001",
+  "sign": "755b88f30aa739c214a8512c42d1e535"
+}</pre>
+                        </div>
+                        
+                        <h4><strong>返回参数：</strong></h4>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>code</td>
+                                        <td>Integer</td>
+                                        <td>响应状态码，0表示成功</td>
+                                    </tr>
+                                    <tr>
+                                        <td>message</td>
+                                        <td>String</td>
+                                        <td>响应消息</td>
+                                    </tr>
+                                    <tr>
+                                        <td>data</td>
+                                        <td>Object</td>
+                                        <td>响应数据</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4><strong>data字段说明：</strong></h4>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>参数名</th>
+                                        <th>类型</th>
+                                        <th>说明</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>orderid</td>
+                                        <td>String</td>
+                                        <td>商户订单号</td>
+                                    </tr>
+                                    <tr>
+                                        <td>status</td>
+                                        <td>String</td>
+                                        <td>订单状态：CLOSED</td>
+                                    </tr>
+                                    <tr>
+                                        <td>closedAt</td>
+                                        <td>String</td>
+                                        <td>关闭时间</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <h4><strong>成功响应示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "orderid": "ORDER_20241201_001",
+    "status": "CLOSED",
+    "closedAt": "2024-12-01T10:30:15.000Z"
+  }
+}</pre>
+                        </div>
+                        
+                        <h4><strong>错误响应示例：</strong></h4>
+                        <div class="code-block">
+<pre>{
+  "code": 1001,
+  "message": "订单不存在或已支付，无法关闭",
+  "data": null
+}</pre>
+                        </div>
+                        
+                        <div class="note">
+                            <p><strong>注意事项：</strong></p>
+                            <ul>
+                                <li>只能关闭状态为 PENDING（待支付）的订单</li>
+                                <li>已支付、已关闭或已超时的订单无法再次关闭</li>
+                                <li>关闭操作不可逆，请谨慎使用</li>
+                                <li>关闭后如果用户仍然支付，需要进行退款处理</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
