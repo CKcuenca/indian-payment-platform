@@ -74,8 +74,8 @@ const userSchema = new mongoose.Schema({
   // 状态管理
   status: {
     type: String,
-    enum: ['active', 'inactive', 'suspended', 'pending'],
-    default: 'active'
+    enum: ['ACTIVE', 'INACTIVE', 'SUSPENDED', 'PENDING'],
+    default: 'ACTIVE'
   },
   lastLoginAt: Date,
   loginAttempts: {
@@ -105,7 +105,7 @@ userSchema.virtual('isLocked').get(function() {
 });
 
 userSchema.virtual('isActive').get(function() {
-  return this.status === 'active' && !this.isLocked;
+  return this.status === 'ACTIVE' && !this.isLocked;
 });
 
 // 密码加密中间件
