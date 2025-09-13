@@ -117,7 +117,10 @@ router.post('/', [
   body('maxWithdrawal').optional().isInt({ min: 1 }).withMessage('最大提现金额必须是正整数'),
   body('dailyLimit').optional().isInt({ min: 1 }).withMessage('日限额必须是正整数'),
   body('monthlyLimit').optional().isInt({ min: 1 }).withMessage('月限额必须是正整数'),
-  body('singleTransactionLimit').optional().isInt({ min: 1 }).withMessage('单笔交易限额必须是正整数')
+  body('singleTransactionLimit').optional().isInt({ min: 1 }).withMessage('单笔交易限额必须是正整数'),
+  body('userId').optional().isString().withMessage('用户ID必须是字符串'),
+  body('username').optional().isString().withMessage('用户名必须是字符串'),
+  body('userFullName').optional().isString().withMessage('用户全名必须是字符串')
 ], validateRequest, async (req, res) => {
   try {
     const {
@@ -126,16 +129,19 @@ router.post('/', [
       email,
       phone,
       status = 'ACTIVE',
-      defaultProvider = 'airpay',
-      depositFee = 0.5,
-      withdrawalFee = 1.0,
+      defaultProvider = 'AirPay',
+      depositFee = 5.0,
+      withdrawalFee = 3.0,
       minDeposit = 100,
       maxDeposit = 100000,
       minWithdrawal = 500,
       maxWithdrawal = 50000,
       dailyLimit = 100000000,
       monthlyLimit = 1000000000,
-      singleTransactionLimit = 10000000
+      singleTransactionLimit = 10000000,
+      userId,
+      username,
+      userFullName
     } = req.body;
 
     // 检查商户ID是否已存在
@@ -194,35 +200,74 @@ router.post('/', [
       merchantId,
       name,
       email,
-      phone,
-      status,
       apiKey,
       secretKey,
-      paymentConfig: {
-        defaultProvider,
-        providers: [
-          { name: 'airpay', enabled: true },
-          { name: 'cashfree', enabled: true },
-          { name: 'razorpay', enabled: true },
-          { name: 'paytm', enabled: true }
-        ],
-        fees: {
-          deposit: depositFee / 100, // 转换为小数
-          withdrawal: withdrawalFee / 100
-        },
-        limits: {
-          minDeposit,
-          maxDeposit,
-          minWithdrawal,
-          maxWithdrawal,
-          dailyLimit,
-          monthlyLimit,
-          singleTransactionLimit
-        }
-      },
+      status,
       balance: {
         available: 0,
         frozen: 0
+      },
+      defaultProvider,
+      userId,
+      username,
+      userFullName,
+      deposit: {
+        fee: {
+          percentage: depositFee,
+          fixedAmount: 0
+        },
+        limits: {
+          minAmount: minDeposit,
+          maxAmount: maxDeposit,
+          dailyLimit,
+          monthlyLimit,
+          singleTransactionLimit
+        },
+        usage: {
+          dailyUsed: 0,
+          monthlyUsed: 0,
+          lastResetDate: new Date()
+        }
+      },
+      withdrawal: {
+        fee: {
+          percentage: withdrawalFee,
+          fixedAmount: 6
+        },
+        limits: {
+          minAmount: minWithdrawal,
+          maxAmount: maxWithdrawal,
+          dailyLimit,
+          monthlyLimit,
+          singleTransactionLimit
+        },
+        usage: {
+          dailyUsed: 0,
+          monthlyUsed: 0,
+          lastResetDate: new Date()
+        }
+      },
+      paymentConfigs: [],
+      security: {
+        keyStatus: 'ACTIVE',
+        lastKeyUpdate: new Date(),
+        keyHistory: [],
+        ipWhitelist: {
+          enabled: false,
+          strictMode: false,
+          allowedIPs: [],
+          accessRules: {
+            blockUnknownIPs: true,
+            maxFailedAttempts: 5,
+            lockoutDuration: 300
+          }
+        },
+        usage: {
+          dailyCount: 0,
+          monthlyCount: 0,
+          lastUsed: new Date(),
+          lastResetDate: new Date()
+        }
       }
     });
 

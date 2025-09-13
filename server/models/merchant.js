@@ -475,4 +475,16 @@ merchantSchema.statics.generateMerchantId = function() {
   return 'MERCHANT_' + Date.now().toString(36).toUpperCase();
 };
 
+// 生成API密钥的静态方法
+merchantSchema.statics.generateApiKey = function() {
+  const crypto = require('crypto');
+  return 'API_' + crypto.randomBytes(16).toString('hex').toUpperCase();
+};
+
+// 生成Secret密钥的静态方法
+merchantSchema.statics.generateSecretKey = function() {
+  const crypto = require('crypto');
+  return crypto.randomBytes(32).toString('hex');
+};
+
 module.exports = mongoose.models.Merchant || mongoose.model('Merchant', merchantSchema);
