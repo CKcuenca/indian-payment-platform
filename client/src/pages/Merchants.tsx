@@ -445,6 +445,11 @@ export default function Merchants() {
           monthlyLimit: 1000000000,
           singleTransactionLimit: 10000000,
         },
+        usage: {
+          dailyUsed: 0,
+          monthlyUsed: 0,
+          lastResetDate: new Date().toISOString()
+        }
       },
       
       // 代付（提现）配置
@@ -460,6 +465,11 @@ export default function Merchants() {
           monthlyLimit: 1000000000,
           singleTransactionLimit: 10000000,
         },
+        usage: {
+          dailyUsed: 0,
+          monthlyUsed: 0,
+          lastResetDate: new Date().toISOString()
+        }
       },
       
       selectedPaymentConfigs: [],
