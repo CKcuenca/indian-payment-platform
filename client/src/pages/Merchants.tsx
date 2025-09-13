@@ -813,9 +813,33 @@ export default function Merchants() {
         const response = await api.post('/api/admin/merchants', newMerchantData);
         
         if (response.data.success) {
-          setMerchants([...merchants, response.data.data]);
+          // 重新获取商户列表以确保数据一致性
+          await fetchMerchants();
           setDialogOpen(false);
           setError(null);
+          // 重置表单
+          setFormData({
+            name: '',
+            email: '',
+            status: 'ACTIVE',
+            balance: 0,
+            defaultProvider: '',
+            selectedPaymentConfigs: [],
+            userId: '',
+            username: '',
+            userFullName: '',
+            deposit: {
+              fee: { percentage: 5, fixedAmount: 0 },
+              limits: { minAmount: 100, maxAmount: 100000, dailyLimit: 100000000, monthlyLimit: 1000000000, singleTransactionLimit: 10000000 },
+              usage: { dailyUsed: 0, monthlyUsed: 0, lastResetDate: new Date().toISOString() }
+            },
+            withdrawal: {
+              fee: { percentage: 3, fixedAmount: 6 },
+              limits: { minAmount: 500, maxAmount: 50000, dailyLimit: 100000000, monthlyLimit: 1000000000, singleTransactionLimit: 10000000 },
+              usage: { dailyUsed: 0, monthlyUsed: 0, lastResetDate: new Date().toISOString() }
+            },
+            ipWhitelist: { enabled: false, allowedIPs: [] }
+          });
         } else {
           throw new Error(response.data.error || '创建失败');
         }
