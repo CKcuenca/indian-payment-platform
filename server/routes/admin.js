@@ -59,8 +59,14 @@ router.post('/merchants', [
     const merchantId = Merchant.generateMerchantId ? Merchant.generateMerchantId() : 'MERCHANT_' + Date.now().toString(36).toUpperCase();
 
     // 生成API密钥
-    const apiKey = Merchant.generateApiKey();
-    const secretKey = Merchant.generateSecretKey();
+    console.log('🔧 Merchant.generateApiKey type:', typeof Merchant.generateApiKey);
+    console.log('🔧 Merchant.generateSecretKey type:', typeof Merchant.generateSecretKey);
+    
+    const apiKey = Merchant.generateApiKey ? Merchant.generateApiKey() : 'API_' + require('crypto').randomBytes(16).toString('hex').toUpperCase();
+    const secretKey = Merchant.generateSecretKey ? Merchant.generateSecretKey() : require('crypto').randomBytes(32).toString('hex');
+    
+    console.log('🔧 Generated apiKey:', apiKey);
+    console.log('🔧 Generated secretKey:', secretKey ? 'Generated' : 'Failed');
 
     // 创建商户 - 保存完整的前端数据结构
     const merchantData = {
