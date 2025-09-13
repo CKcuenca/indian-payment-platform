@@ -58,16 +58,42 @@ router.post('/merchants', [
     // 生成商户ID
     const merchantId = Merchant.generateMerchantId ? Merchant.generateMerchantId() : 'MERCHANT_' + Date.now().toString(36).toUpperCase();
 
+    // 生成API密钥
+    const apiKey = Merchant.generateApiKey();
+    const secretKey = Merchant.generateSecretKey();
+
     // 创建商户 - 保存完整的前端数据结构
     const merchantData = {
       merchantId,
       name,
+      apiKey,
+      secretKey,
       status: status || 'ACTIVE',
       defaultProvider: defaultProvider || 'AirPay',
       paymentConfigs: paymentConfigs || [],
-      deposit: deposit || {},
-      withdrawal: withdrawal || {},
-      balance: 0
+      deposit: deposit || {
+        fee: { percentage: 5.0, fixedAmount: 0 },
+        limits: { minAmount: 100, maxAmount: 100000, dailyLimit: 100000000, monthlyLimit: 1000000000, singleTransactionLimit: 10000000 },
+        usage: { dailyUsed: 0, monthlyUsed: 0, lastResetDate: new Date() }
+      },
+      withdrawal: withdrawal || {
+        fee: { percentage: 3.0, fixedAmount: 6 },
+        limits: { minAmount: 500, maxAmount: 50000, dailyLimit: 100000000, monthlyLimit: 1000000000, singleTransactionLimit: 10000000 },
+        usage: { dailyUsed: 0, monthlyUsed: 0, lastResetDate: new Date() }
+      },
+      balance: { available: 0, frozen: 0 },
+      security: {
+        keyStatus: 'ACTIVE',
+        lastKeyUpdate: new Date(),
+        keyHistory: [],
+        ipWhitelist: {
+          enabled: false,
+          strictMode: false,
+          allowedIPs: [],
+          accessRules: { blockUnknownIPs: true, maxFailedAttempts: 5, lockoutDuration: 300 }
+        },
+        usage: { dailyCount: 0, monthlyCount: 0, lastUsed: new Date(), lastResetDate: new Date() }
+      }
     };
     
     // 只有当字段有值时才添加
@@ -83,11 +109,14 @@ router.post('/merchants', [
     const responseData = {
       merchantId: merchant.merchantId,
       name: merchant.name,
+      apiKey: merchant.apiKey,
+      secretKey: merchant.secretKey,
       status: merchant.status,
       defaultProvider: merchant.defaultProvider,
       paymentConfigs: merchant.paymentConfigs,
       deposit: merchant.deposit,
-      withdrawal: merchant.withdrawal
+      withdrawal: merchant.withdrawal,
+      balance: merchant.balance
     };
     
     // 只有当字段有值时才添加到响应中
