@@ -71,7 +71,7 @@ router.post('/register', [
       phone,
       merchantId: role === 'merchant' ? merchantId : undefined,
       permissions: User.getDefaultPermissions(role),
-      status: 'pending'
+      status: 'PENDING'
     });
 
     await user.save();
@@ -137,7 +137,7 @@ router.post('/login', [
     }
 
     // 检查账户状态
-    if (user.status !== 'active') {
+    if (user.status !== 'ACTIVE') {
       return res.status(401).json({
         success: false,
         error: `账户状态: ${user.status}，请联系管理员`

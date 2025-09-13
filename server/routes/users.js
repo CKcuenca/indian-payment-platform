@@ -66,7 +66,7 @@ router.post('/', authenticateToken, requireAdmin, [
       username,
       password: password, // 不加密，让模型中间件处理
       role,
-      status: status || 'active',
+      status: status || 'ACTIVE',
       fullName: fullName || username,
       // 邮箱字段已移除
       permissions: getDefaultPermissions(role),
