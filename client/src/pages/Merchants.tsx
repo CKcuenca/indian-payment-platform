@@ -849,10 +849,10 @@ export default function Merchants() {
           setError(null);
           // 重置表单
           setFormData({
+            merchantId: '',
             name: '',
             email: '',
             status: 'ACTIVE',
-            balance: 0,
             defaultProvider: '',
             selectedPaymentConfigs: [],
             userId: '',
