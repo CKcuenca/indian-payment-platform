@@ -868,7 +868,16 @@ export default function Merchants() {
               limits: { minAmount: 500, maxAmount: 50000, dailyLimit: 100000000, monthlyLimit: 1000000000, singleTransactionLimit: 10000000 },
               usage: { dailyUsed: 0, monthlyUsed: 0, lastResetDate: new Date().toISOString() }
             },
-            ipWhitelist: { enabled: false, allowedIPs: [] }
+            ipWhitelist: { 
+              enabled: false, 
+              strictMode: false,
+              allowedIPs: [],
+              accessRules: {
+                blockUnknownIPs: true,
+                maxFailedAttempts: 5,
+                lockoutDuration: 300
+              }
+            }
           });
         } else {
           throw new Error(response.data.error || '创建失败');
