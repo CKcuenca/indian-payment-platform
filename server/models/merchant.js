@@ -470,9 +470,12 @@ merchantSchema.methods.ipToNumber = function(ip) {
   return ip.split('.').reduce((acc, octet) => (acc << 8) + parseInt(octet), 0) >>> 0;
 };
 
-// 生成商户ID的静态方法
+// 生成商户ID的静态方法 - 8位纯数字
 merchantSchema.statics.generateMerchantId = function() {
-  return 'MERCHANT_' + Date.now().toString(36).toUpperCase();
+  // 生成8位随机数字，确保不以0开头
+  const firstDigit = Math.floor(Math.random() * 9) + 1; // 1-9
+  const remainingDigits = Math.floor(Math.random() * 10000000).toString().padStart(7, '0');
+  return firstDigit + remainingDigits;
 };
 
 // 生成API密钥的静态方法

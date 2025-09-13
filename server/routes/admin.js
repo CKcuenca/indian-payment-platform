@@ -55,8 +55,12 @@ router.post('/merchants', [
       }
     }
 
-    // 生成商户ID
-    const merchantId = Merchant.generateMerchantId ? Merchant.generateMerchantId() : 'MERCHANT_' + Date.now().toString(36).toUpperCase();
+    // 生成商户ID - 8位纯数字
+    const merchantId = Merchant.generateMerchantId ? Merchant.generateMerchantId() : (() => {
+      const firstDigit = Math.floor(Math.random() * 9) + 1;
+      const remainingDigits = Math.floor(Math.random() * 10000000).toString().padStart(7, '0');
+      return firstDigit + remainingDigits;
+    })();
 
     // 生成API密钥
     const apiKey = Merchant.generateApiKey ? Merchant.generateApiKey() : 'API_' + require('crypto').randomBytes(16).toString('hex').toUpperCase();
