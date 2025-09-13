@@ -158,6 +158,11 @@ export default function Merchants() {
         monthlyLimit: 1000000000,
         singleTransactionLimit: 10000000,
       },
+      usage: {
+        dailyUsed: 0,
+        monthlyUsed: 0,
+        lastResetDate: new Date().toISOString()
+      }
     },
     
     // 代付（提现）配置
@@ -173,6 +178,11 @@ export default function Merchants() {
         monthlyLimit: 1000000000,
         singleTransactionLimit: 10000000,
       },
+      usage: {
+        dailyUsed: 0,
+        monthlyUsed: 0,
+        lastResetDate: new Date().toISOString()
+      }
     },
     
     selectedPaymentConfigs: [] as string[], // 用于存储支付配置的ID
@@ -496,6 +506,11 @@ export default function Merchants() {
           monthlyLimit: merchant.deposit?.limits?.monthlyLimit || 1000000000,
           singleTransactionLimit: merchant.deposit?.limits?.singleTransactionLimit || 10000000,
         },
+        usage: {
+          dailyUsed: merchant.deposit?.usage?.dailyUsed || 0,
+          monthlyUsed: merchant.deposit?.usage?.monthlyUsed || 0,
+          lastResetDate: merchant.deposit?.usage?.lastResetDate || new Date().toISOString()
+        }
       },
       
       // 代付（提现）配置
@@ -511,6 +526,11 @@ export default function Merchants() {
           monthlyLimit: merchant.withdrawal?.limits?.monthlyLimit || 1000000000,
           singleTransactionLimit: merchant.withdrawal?.limits?.singleTransactionLimit || 10000000,
         },
+        usage: {
+          dailyUsed: merchant.withdrawal?.usage?.dailyUsed || 0,
+          monthlyUsed: merchant.withdrawal?.usage?.monthlyUsed || 0,
+          lastResetDate: merchant.withdrawal?.usage?.lastResetDate || new Date().toISOString()
+        }
       },
       
       selectedPaymentConfigs: merchant.paymentConfigs || [],
